@@ -14,7 +14,8 @@ files_df = utils.return_dataframe_of_files()
 
 @app.route('/')
 def return_index():
-    return 'Hello World'
+    print(files_df)
+    return render_template('index.html')
 
 @app.route('/view/<report>')
 def view_most_recent_report(report):
@@ -31,10 +32,16 @@ def upload_files():
         f = form.file.data
         filename = secure_filename(f.filename)
         filename = filename.replace('_',"-")
+        report_name = filename.split('.')[0]
         download_date = form.download_date.data
         year_and_semester = form.year_and_semester.data
         filename = f"{year_and_semester}_{download_date}_{filename}"
-        f.save(os.path.join(app.root_path, "data", filename))
+
+        path = os.path.join(app.root_path, f"data/{year_and_semester}/{report_name}")
+        isExist = os.path.exists(path)
+        if not isExist:
+            os.makedirs(path)
+        f.save(os.path.join(path, filename))
         return redirect(url_for("return_index"))
 
     return render_template("upload.html", form=form)

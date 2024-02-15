@@ -4,12 +4,14 @@ import pandas as pd
 
 def return_dataframe_of_files():
     lst = []
-    for file in glob.glob("data/*.*"):
+    for filename in glob.glob("data/**/**/*.*"):
+        file = filename.split("/")[3]
+        print(file)
         year_and_semester, download_date, report = file.split('_')
         school_year, semester = year_and_semester.split('-')
         report = report.split('.')[0].replace('-','_')
         file_dict = {
-            "filename": file,
+            "filename": filename,
             "download_date": download_date,
             "report": report,
             "year_and_semester": year_and_semester,

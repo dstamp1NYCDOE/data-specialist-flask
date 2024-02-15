@@ -2,6 +2,8 @@
 
 
 {% block content %}
+<div class="container">
+
 
 <form action="" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
@@ -24,5 +26,5 @@
         <button type="submit" class="btn btn-primary">Upload File</button>
     </div>
 </form>
-
+</div>
 {% endblock %}
