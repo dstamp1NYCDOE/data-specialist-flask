@@ -29,6 +29,13 @@ def return_most_recent_report(files_df,report):
     filename = files_df.iloc[-1,:]['filename']
     return filename
 
+def return_most_recent_report_by_semester(files_df,report,year_and_semester):
+    files_df = files_df[files_df['year_and_semester']==year_and_semester]
+    files_df = files_df[files_df['report']==report]
+    files_df = files_df.sort_values(by=['download_date'])
+    filename = files_df.iloc[-1,:]['filename']
+    return filename
+
 def return_file_as_df(filename):
     if 'xlsx' in filename:
         return pd.read_excel(filename)

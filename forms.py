@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import DateField, SelectField
+from wtforms import DateField, SelectField, StringField
+from wtforms.validators import (DataRequired, Regexp)
 
 from werkzeug.utils import secure_filename
 
@@ -18,6 +19,7 @@ school_year_and_semester_choices = [
 
 reports_choices = [
     ('scripts.programming.class_lists','Class Lists'),
+    ('scripts.surveys.connect_google_survey_with_class_lists','Class Lists with Google Sheets Data'),
 ]
 
 class FileForm(FlaskForm):
@@ -36,3 +38,21 @@ class ReportForm(FlaskForm):
        "Report" ,
        choices = reports_choices
     )
+
+class ClassListsForm(ReportForm):
+    def __init__(self, *args, **kwargs):
+        super(ClassListWithGoogleFormResultsForm, self).__init__(*args, **kwargs)
+        self.report.data =  'scripts.programming.class_lists'
+    
+
+class ClassListWithGoogleFormResultsForm(ReportForm):
+    def __init__(self, *args, **kwargs):
+        super(ClassListWithGoogleFormResultsForm, self).__init__(*args, **kwargs)
+        self.report.data =  'scripts.surveys.connect_google_survey_with_class_lists'
+    
+    gsheet_url = StringField('Google Sheet', 
+                             validators=[
+                            DataRequired('URL is required'),
+                             ]
+               )
+    

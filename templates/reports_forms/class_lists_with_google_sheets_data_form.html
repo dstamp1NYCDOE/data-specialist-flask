@@ -1,23 +1,26 @@
-{% macro class_list_form_card(form) -%}
+{% macro class_list_with_google_sheet_data_form_card(form) -%}
   <div class="col">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">Generate Class Lists</h5>
-        <p class="card-text">Generate class lists as Excel Spreadsheet split by teacher</p>
+        <h5 class="card-title">Class Lists with Google Sheets Results</h5>
+        <p class="card-text">Generate class lists as Excel Spreadsheet split by teacher with live updating date from a Google Spreadsheet</p>
             <form action="{{url_for('run_script')}}" method="post">
                 {{ form.hidden_tag() }}
                 {{ form.report(class_="form-select", hidden=true) }}
+
                 <div class="form-group">
                     {{ form.year_and_semester.label }}
                     {{ form.year_and_semester(class_="form-select ") }}
                 </div>
 
                 <div class="form-group">
-                  <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Run Report</button>
-                  </div>
+                  {{ form.gsheet_url.label }}
+                  {{ form.gsheet_url(class_="form-select ") }}
                 </div>
 
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Run Report</button>
+                </div>
             </form>
       </div>
     </div>
