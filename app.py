@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, flash
 from forms import FileForm, ReportForm
 from werkzeug.utils import secure_filename
 
@@ -9,8 +9,7 @@ import utils
 
 app = Flask(__name__)
 
-app.debug = True
-app.secret_key = 'banana'
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 files_df = utils.return_dataframe_of_files()
 
@@ -18,6 +17,13 @@ files_df = utils.return_dataframe_of_files()
 def return_index():
     form = ReportForm()
     return render_template('index.html',form=form)
+
+
+@app.route("/view/")
+def view_all_reports():
+    reports_html = files_df.to_html(classes=["table", "table-sm"])
+    return render_template("viewReport.html", report_html=reports_html)
+
 
 @app.route('/view/<report>')
 def view_most_recent_report(report):
@@ -45,6 +51,11 @@ def upload_files():
         filename = secure_filename(f.filename)
         filename = filename.replace('_',"-")
         report_name = filename.split('.')[0]
+        extension = filename.split(".")[1]
+        if 'CustomReport' in report_name:
+            report_name = report_name[13:-5]
+            filename = f"{report_name}.{extension}"
+
         download_date = form.download_date.data
         year_and_semester = form.year_and_semester.data
         filename = f"{year_and_semester}_{download_date}_{filename}"
@@ -54,6 +65,7 @@ def upload_files():
         if not isExist:
             os.makedirs(path)
         f.save(os.path.join(path, filename))
-        return redirect(url_for("return_index"))
+        flash(f"{filename} successfully uploaded",category="success")
+        return redirect(url_for("upload_files"))
 
     return render_template("upload.html", form=form)
