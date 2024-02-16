@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 
+{% from 'reports_forms/class_lists_form.html' import class_list_form_card %}
 
 {% block content %}
 <div class="container">
 <h1>Home Page</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {{class_list_form_card(form)}}
+</div>
+
 </div>
 {% endblock %}

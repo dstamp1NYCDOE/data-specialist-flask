@@ -1,6 +1,8 @@
 from flask import Flask, request, redirect, url_for, render_template
-from forms import FileForm
+from forms import FileForm, ReportForm
 from werkzeug.utils import secure_filename
+
+from scripts.programming.class_lists import generate_class_list
 
 import os 
 import utils
@@ -14,8 +16,8 @@ files_df = utils.return_dataframe_of_files()
 
 @app.route('/')
 def return_index():
-    print(files_df)
-    return render_template('index.html')
+    form = ReportForm()
+    return render_template('index.html',form=form)
 
 @app.route('/view/<report>')
 def view_most_recent_report(report):
@@ -23,6 +25,16 @@ def view_most_recent_report(report):
     report_df = utils.return_file_as_df(report_path)
     report_html = report_df.to_html(classes=["table", "table-sm"])
     return render_template("viewReport.html", report_html=report_html)
+
+@app.route('/run', methods=['POST'])
+def run_script():
+    data = request.form
+    report = request.form['report']
+    reports_map = {"scripts.programming.class_lists": generate_class_list}
+
+    reports_map.get(report)(data)
+
+    return redirect(url_for("return_index"))
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_files():

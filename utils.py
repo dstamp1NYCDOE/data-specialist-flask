@@ -6,7 +6,6 @@ def return_dataframe_of_files():
     lst = []
     for filename in glob.glob("data/**/**/*.*"):
         file = filename.split("/")[3]
-        print(file)
         year_and_semester, download_date, report = file.split('_')
         school_year, semester = year_and_semester.split('-')
         report = report.split('.')[0].replace('-','_')
