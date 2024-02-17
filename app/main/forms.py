@@ -43,16 +43,26 @@ class ClassListsForm(ReportForm):
     def __init__(self, *args, **kwargs):
         super(ClassListWithGoogleFormResultsForm, self).__init__(*args, **kwargs)
         self.report.data =  'scripts.programming.class_lists'
-    
+
 
 class ClassListWithGoogleFormResultsForm(ReportForm):
     def __init__(self, *args, **kwargs):
         super(ClassListWithGoogleFormResultsForm, self).__init__(*args, **kwargs)
         self.report.data =  'scripts.surveys.connect_google_survey_with_class_lists'
-    
+
     gsheet_url = StringField('Google Sheet', 
                              validators=[
                             DataRequired('URL is required'),
                              ]
                )
-    
+
+    student_id_columns = SelectField(
+        "Which Column in the Google Sheet does 'StudentID' Appear?",
+        choices=[
+            ("A", "A"),
+            ("B", "B"),
+            ("C", "C"),
+            ("D", "D"),
+            ("E", "E"),
+        ],
+    )

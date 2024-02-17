@@ -4,21 +4,26 @@
       <div class="card-body">
         <h5 class="card-title">Class Lists with Google Sheets Results</h5>
         <p class="card-text">Generate class lists as Excel Spreadsheet split by teacher with live updating date from a Google Spreadsheet</p>
-            <form action="{{url_for('run_script')}}" method="post">
+            <form action="{{url_for('main.run_script')}}" class="grid gap-3" method="post">
                 {{ form.hidden_tag() }}
                 {{ form.report(class_="form-select", hidden=true) }}
 
-                <div class="form-group">
+                <div class="form-group p-1 g-col-12">
                     {{ form.year_and_semester.label }}
                     {{ form.year_and_semester(class_="form-select ") }}
                 </div>
 
-                <div class="form-group">
+                <div class="form-group p-1 g-col-12">
                   {{ form.gsheet_url.label }}
-                  {{ form.gsheet_url(class_="form-select ") }}
+                  {{ form.gsheet_url(class_="form-control") }}
                 </div>
 
-                <div class="col-12">
+                <div class="form-group p-1 g-col-12">
+                  {{ form.student_id_columns.label }}
+                  {{ form.student_id_columns(class_="form-select ") }}
+                </div>
+
+                <div class="form-group p-1 g-col-12 d-grid">
                     <button type="submit" class="btn btn-primary">Run Report</button>
                 </div>
             </form>

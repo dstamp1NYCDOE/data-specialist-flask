@@ -1,72 +1,69 @@
-from flask import Flask, request, redirect, url_for, render_template, flash
+import os
 
-import forms as report_forms
+from flask import render_template, request, Blueprint, redirect, url_for
 from werkzeug.utils import secure_filename
 
-from scripts.programming.class_lists import generate_class_list
-from scripts.surveys.connect_google_survey_with_class_lists import connect_google_survey_with_class_lists
+import app.main.forms as report_forms
+from app.scripts.programming.class_lists import generate_class_list
+from app.scripts.surveys.connect_google_survey_with_class_lists import connect_google_survey_with_class_lists
 
-
-import os 
-import utils
-
-app = Flask(__name__)
-
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
+import app.scripts.utils as utils
 files_df = utils.return_dataframe_of_files()
 
+main = Blueprint("main", __name__, template_folder="templates", static_folder="static")
 
 
-@app.route('/')
+@main.route("/")
 def return_index():
-    
+
     forms = {
-        'class_list_form':report_forms.ReportForm(),
-        'class_list_with_google_sheets_form':report_forms.ClassListWithGoogleFormResultsForm(),
+        "class_list_form": report_forms.ReportForm(),
+        "class_list_with_google_sheets_form": report_forms.ClassListWithGoogleFormResultsForm(),
     }
-    return render_template('index.html',forms=forms)
+    return render_template("index.html", forms=forms)
 
 
-@app.route("/view/")
+@main.route("/view/")
 def view_all_reports():
     reports_html = files_df.to_html(classes=["table", "table-sm"])
     return render_template("viewReport.html", report_html=reports_html)
 
 
-@app.route('/view/<report>')
+@main.route("/view/<report>")
 def view_most_recent_report(report):
     report_path = utils.return_most_recent_report(files_df, report)
     report_df = utils.return_file_as_df(report_path)
     report_html = report_df.to_html(classes=["table", "table-sm"])
     return render_template("viewReport.html", report_html=report_html)
 
-@app.route('/run', methods=["GET",'POST'])
+
+@main.route("/run", methods=["GET", "POST"])
 def run_script():
     if request.method == "GET":
-        return redirect(url_for("return_index"))
+        return redirect(url_for("main.return_index"))
     data = request.form
-    report = request.form['report']
+    report = request.form["report"]
     reports_map = {
         "scripts.programming.class_lists": generate_class_list,
-        "scripts.surveys.connect_google_survey_with_class_lists":connect_google_survey_with_class_lists,
-        }
+        "scripts.surveys.connect_google_survey_with_class_lists": connect_google_survey_with_class_lists,
+    }
 
     reports_map.get(report)(data)
 
-    return redirect(url_for("return_index"))
+    return redirect(url_for("main.return_index"))
 
-@app.route('/upload', methods=['GET', 'POST'])
+
+@main.route("/upload", methods=["GET", "POST"])
 def upload_files():
     form = report_forms.FileForm()
 
     if form.validate_on_submit():
         f = form.file.data
         filename = secure_filename(f.filename)
-        filename = filename.replace('_',"-")
-        report_name = filename.split('.')[0]
+        filename = filename.replace("_", "-")
+        report_name = filename.split(".")[0]
         extension = filename.split(".")[1]
-        if 'CustomReport' in report_name:
+        if "CustomReport" in report_name:
             report_name = report_name[13:-5]
             filename = f"{report_name}.{extension}"
 
@@ -79,7 +76,7 @@ def upload_files():
         if not isExist:
             os.makedirs(path)
         f.save(os.path.join(path, filename))
-        flash(f"{filename} successfully uploaded",category="success")
-        return redirect(url_for("upload_files"))
+        flash(f"{filename} successfully uploaded", category="success")
+        return redirect(url_for("main.upload_files"))
 
     return render_template("upload.html", form=form)
