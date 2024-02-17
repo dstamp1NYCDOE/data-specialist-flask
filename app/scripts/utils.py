@@ -4,8 +4,9 @@ import pandas as pd
 
 def return_dataframe_of_files():
     lst = []
-    for filename in glob.glob("data/**/**/*.*"):
-        file = filename.split("/")[3]
+    for filename in glob.glob("app/data/**/**/*.*"):
+        print(filename)
+        file = filename.split("/")[4]
         year_and_semester, download_date, report = file.split('_')
         school_year, semester = year_and_semester.split('-')
         report = report.split('.')[0].replace('-','_')
@@ -21,6 +22,7 @@ def return_dataframe_of_files():
         lst.append(file_dict)
 
     files_df = pd.DataFrame(lst)
+    print(files_df)
     return files_df
 
 def return_most_recent_report(files_df,report):

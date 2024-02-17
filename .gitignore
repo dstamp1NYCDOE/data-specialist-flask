@@ -1,8 +1,8 @@
 ## Data Folders
-data/*
-!data/.gitkeep
-output/*
-!output/.gitkeep
+app/data/*
+!app/data/.gitkeep
+
+
 
 .DS_store
 

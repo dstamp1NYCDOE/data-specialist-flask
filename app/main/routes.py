@@ -1,6 +1,6 @@
 import os
 
-from flask import render_template, request, Blueprint, redirect, url_for
+from flask import render_template, request, Blueprint, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename
 
 import app.main.forms as report_forms
@@ -48,9 +48,11 @@ def run_script():
         "scripts.surveys.connect_google_survey_with_class_lists": connect_google_survey_with_class_lists,
     }
 
-    reports_map.get(report)(data)
-
-    return redirect(url_for("main.return_index"))
+    response = reports_map.get(report)(data)
+    if response:
+        return response
+    else:
+        return redirect(url_for("main.return_index"))
 
 
 @main.route("/upload", methods=["GET", "POST"])
@@ -71,7 +73,9 @@ def upload_files():
         year_and_semester = form.year_and_semester.data
         filename = f"{year_and_semester}_{download_date}_{filename}"
 
-        path = os.path.join(app.root_path, f"data/{year_and_semester}/{report_name}")
+        path = os.path.join(
+            current_app.root_path, f"data/{year_and_semester}/{report_name}"
+        )
         isExist = os.path.exists(path)
         if not isExist:
             os.makedirs(path)
