@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% from 'commutes/templates/commutes/commutes_by_class_form.html' import commutes_by_class_form %}
+
+{% block content %}
+<div class="container">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_commute_reports')}}">Commutes</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Commute Report By Class Form</li>
+  </ol>
+</nav>
+<h1>Commute Report By Class Form</h1>
+
+{{commutes_by_class_form(data.form)}}
+</div>
+<script>
+    // Get the select element.
+var select = document.getElementById("course_and_section");
+
+// Make an API call to get the data for the dropdown menu.
+fetch("{{url_for('api.return_classes')}}")
+  .then(response => response.json())
+  .then(data => {
+    // Clear the existing options in the dropdown menu.
+    select.innerHTML = "";
+
+    // Add the new options to the dropdown menu.
+    for (var i = 0; i < data.length; i++) {
+      var option = document.createElement("option");
+      option.value = data[i].Course+'/'+data[i].Section;
+      option.text = data[i].Course+'/'+data[i].Section+' P'+data[i].Period+' '+data[i].Teacher1;
+      select.appendChild(option);
+    }
+  });
+</script>
+{% endblock %}
