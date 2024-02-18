@@ -15,12 +15,14 @@ main = Blueprint("main", __name__, template_folder="templates", static_folder="s
 
 @main.route("/")
 def return_index():
-
-    forms = {
-        "class_list_form": report_forms.ReportForm(),
-        "class_list_with_google_sheets_form": report_forms.ClassListWithGoogleFormResultsForm(),
+    sections = {
+        "Programming": "scripts.return_programming_reports",
+        "Commutes": "scripts.return_commute_reports",
     }
-    return render_template("index.html", forms=forms)
+    data = {
+        'sections':sections
+    }
+    return render_template("index.html", data=data)
 
 
 @main.route("/view/")

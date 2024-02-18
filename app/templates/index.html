@@ -7,11 +7,23 @@
 <div class="container">
 <h1>Home Page</h1>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    {{class_list_form_card(forms.class_list_form)}}
-
-    {{class_list_with_google_sheet_data_form_card(forms.class_list_with_google_sheets_form)}}
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for key, value in data.sections.items() %}
+  <div class="col">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">
+            <a href="{{url_for(value)}}" class="stretched-link">{{key}}</a>
+        </h5>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 </div>
+
+
+
+
 
 </div>
 {% endblock %}
