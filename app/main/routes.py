@@ -65,8 +65,13 @@ def upload_files():
         f = form.file.data
         filename = secure_filename(f.filename)
         filename = filename.replace("_", "-")
-        report_name = filename.split(".")[0]
-        extension = filename.split(".")[1]
+        if filename.count('.')>2:
+            report_name = filename.split(".")[1]
+            extension = filename.split(".")[-1]
+            filename = f"{report_name}.{extension}"
+        else:
+            report_name = filename.split(".")[0]
+            extension = filename.split(".")[1]
         if "CustomReport" in report_name:
             report_name = report_name[13:-5]
             filename = f"{report_name}.{extension}"

@@ -43,3 +43,5 @@ def return_file_as_df(filename):
         return pd.read_excel(filename)
     if 'csv' in filename:
         return pd.read_csv(filename)
+    if "CSV" in filename:
+        return pd.read_csv(filename)

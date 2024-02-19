@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import datetime as dt 
 from io import BytesIO
 
 from flask import render_template, request, send_file
@@ -71,7 +72,6 @@ def generate_commute_class_report():
 
         flowables = student_commutes_df['flowables'].explode().to_list()
 
-        filename = "data/student_commute_letters.pdf"
         f = BytesIO()
         my_doc = SimpleDocTemplate(
             f,
@@ -84,6 +84,6 @@ def generate_commute_class_report():
         my_doc.build(flowables)
 
         f.seek(0)
-        download_name = f"StudentCommuteLetters.pdf"
+        download_name = f"{course}_{section}_student_commute_letters_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
 
         return send_file(f, as_attachment=True, download_name=download_name)
