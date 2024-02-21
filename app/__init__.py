@@ -21,7 +21,7 @@ def create_app(config_class=Config):
     app.register_blueprint(main)
 
     from app.api_1_0 import api as api_1_0_blueprint
-    app.register_blueprint(api_1_0_blueprint, url_prefix="/api/v1.0")
+    app.register_blueprint(api_1_0_blueprint, url_prefix="/api")
 
     from app.scripts import scripts as scripts_blueprint
     app.register_blueprint(scripts_blueprint, url_prefix="/scripts")

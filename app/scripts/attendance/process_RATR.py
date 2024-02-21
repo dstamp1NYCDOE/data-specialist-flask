@@ -6,7 +6,46 @@ def clean(RATR_df):
     RATR_df["Date"] = pd.to_datetime(RATR_df["Date"])
     RATR_df['Weekday'] = RATR_df["Date"].dt.weekday
     RATR_df["is_monday?"] = RATR_df["Date"].dt.weekday == 0
+    RATR_df["Month"] = RATR_df["Date"].apply(lambda x: x.strftime('%Y-%m'))
     return RATR_df
+
+
+def overall_attd_by_weekday(RATR_df):
+
+    pvt_tbl = pd.pivot_table(
+        RATR_df,
+        index=["Weekday"],
+        columns="ATTD",
+        values="StudentID",
+        aggfunc="count",
+        margins=True,
+        margins_name='total'
+    ).fillna(0)
+
+    pvt_tbl["late_%"] = pvt_tbl["L"] / pvt_tbl["total"]
+
+    pvt_tbl = pvt_tbl.reset_index()
+
+    return pvt_tbl
+
+
+def student_attd_by_month(RATR_df):
+
+    pvt_tbl = pd.pivot_table(
+        RATR_df,
+        index=["StudentID", "Month"],
+        columns="ATTD",
+        values="Date",
+        aggfunc="count",
+    ).fillna(0)
+    pvt_tbl["total"] = pvt_tbl.sum(axis=1)
+    pvt_tbl["late_%"] = pvt_tbl["L"] / pvt_tbl["total"]
+    pvt_tbl["absence_%"] = pvt_tbl["A"] / pvt_tbl["total"]
+
+    pvt_tbl = pvt_tbl.reset_index()
+    
+    return pvt_tbl
+
 
 def student_attd_by_weekday(RATR_df):
 
