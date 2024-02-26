@@ -7,7 +7,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('main.return_index')}}">Home</a>
         </li>
@@ -18,8 +18,17 @@
           <a class="nav-link" href="{{url_for('main.upload_files')}}">Upload Files</a>
         </li>
       </ul>
+       <form class="d-flex" role="search" method="Post" action="{{ url_for('main.set_semester')}}">
+        <select class="form-control" name="semester" id="semester">
+          <option value="2023-2" {{ 'selected' if session.semester == '2023-2' else '' }}>2023/2 - Spring 2024</option>
+          <option value="2023-1" {{ 'selected' if session.semester == '2023-1' else '' }}>2023/1 - Fall 2023</option>
+          <option value="2022-7" {{ 'selected' if session.semester == '2022-7' else '' }}>2022/7 - Summer 2023</option>
+          <option value="2022-2" {{ 'selected' if session.semester == '2022-2' else '' }}>2022/2 - Spring 2023</option>
+          <option value="2022-1" {{ 'selected' if session.semester == '2022-1' else '' }}>2022/1 - Fall 2022</option>
+        </select>
+        <button class="btn btn-outline-success" type="submit">Set</button>
+      </form>     
     </div>
-  </div>
 </nav>
 
 {%- endmacro %}

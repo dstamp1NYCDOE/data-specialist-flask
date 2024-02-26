@@ -1,3 +1,4 @@
+from flask import session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import DateField, SelectField, StringField
@@ -21,6 +22,16 @@ reports_choices = [
     ('scripts.programming.class_lists','Class Lists'),
     ('scripts.surveys.connect_google_survey_with_class_lists','Class Lists with Google Sheets Data'),
 ]
+
+class SemesterSelectForm(FlaskForm):
+    year_and_semester = SelectField(
+        "School Year and Semester",
+        choices=school_year_and_semester_choices,
+    )
+    def __init__(self, *args, **kwargs):
+        super(ClassListWithGoogleFormResultsForm, self).__init__(*args, **kwargs)
+        self.report.data = "scripts.programming.class_lists"
+
 
 class FileForm(FlaskForm):
     file = FileField(validators=[FileRequired()])

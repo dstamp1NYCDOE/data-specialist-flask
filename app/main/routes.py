@@ -1,6 +1,6 @@
 import os
 
-from flask import render_template, request, Blueprint, redirect, url_for, flash, current_app
+from flask import render_template, request, Blueprint, redirect, url_for, flash, current_app, session
 from werkzeug.utils import secure_filename
 
 import app.main.forms as report_forms
@@ -92,3 +92,11 @@ def upload_files():
         return redirect(url_for("main.upload_files"))
 
     return render_template("upload.html", form=form)
+
+@main.route("/setsemester",methods=["POST"])
+def set_semester():
+    
+    semester = request.form.get("semester")
+    session['semester'] = semester 
+    flash(f'Semester set to {semester}')
+    return redirect(request.referrer)
