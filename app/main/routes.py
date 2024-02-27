@@ -19,6 +19,7 @@ def return_index():
         "Programming": "scripts.return_programming_reports",
         "Commutes": "scripts.return_commute_reports",
         "Attendance": "scripts.return_attendance_reports",
+        "Organization": "scripts.return_organization_reports",
     }
     data = {
         'sections':sections

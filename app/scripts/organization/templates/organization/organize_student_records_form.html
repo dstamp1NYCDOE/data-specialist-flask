@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+    <li class="breadcrumb-item active"><a href="#">Organize Student Records by List</a></li>
+  </ol>
+</nav>
+
+<h1>Organize Student Records by List</h1>
+
+<form action="{{url_for('scripts.return_student_records_organized_by_class_list')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.student_records_pdf.label }}
+        {{ form.student_records_pdf(class_="form-select") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.student_records_pdf_orientation.label }}
+        {{ form.student_records_pdf_orientation(class_="form-select") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.student_list.label }}
+        {{ form.student_list(class_="form-select") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.student_list_source.label }}
+        {{ form.student_list_source(class_="form-select") }}
+    </div>
+
+
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Run</button>
+    </div>
+</form>
+
+
+</div>
+{% endblock %}
