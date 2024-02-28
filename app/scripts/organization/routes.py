@@ -38,6 +38,6 @@ def return_student_records_organized_by_class_list():
     else:
         form = OrganizeStudentRecordsForm(request.form)
         f = organize_student_documents_by_list.main(form, request)
-        print(f.seek(0))
+        
         download_name = f"organized_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
         return send_file(f, as_attachment=True, download_name=download_name)

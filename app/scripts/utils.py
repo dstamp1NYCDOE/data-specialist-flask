@@ -45,3 +45,28 @@ def return_file_as_df(filename):
         return pd.read_csv(filename)
     if "CSV" in filename:
         return pd.read_csv(filename)
+
+
+def return_cohort_year(GEC):
+    GEC_dict = {
+        "6": 2026,
+        "5": 2025,
+        "4": 2024,
+        "3": 2023,
+        "2": 2022,
+        "1": 2021,
+        "Z": 2020,
+        "Y": 2019,
+        "X": 2018,
+    }
+    return GEC_dict.get(str(GEC))
+
+def return_year_in_hs(GEC,school_year):
+    return school_year - return_cohort_year(GEC) + 1
+
+def return_hs_graduation_year(GEC):
+    return return_cohort_year(GEC) + 4
+
+
+def return_hs_graduation_month(GEC):
+    return f"June {return_hs_graduation_year(GEC)}"

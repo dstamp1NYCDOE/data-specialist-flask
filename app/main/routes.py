@@ -20,10 +20,9 @@ def return_index():
         "Commutes": "scripts.return_commute_reports",
         "Attendance": "scripts.return_attendance_reports",
         "Organization": "scripts.return_organization_reports",
+        "Testing": "scripts.return_testing_reports",
     }
-    data = {
-        'sections':sections
-    }
+    data = {"sections": dict(sorted(sections.items()))}
     return render_template("index.html", data=data)
 
 
@@ -96,8 +95,12 @@ def upload_files():
 
 @main.route("/setsemester",methods=["POST"])
 def set_semester():
-    
     semester = request.form.get("semester")
-    session['semester'] = semester 
+    school_year, term = semester.split('-')
+    
+    session['semester'] = semester
+    session["school_year"] = int(school_year)
+    session["term"] = int(term)
+
     flash(f'Semester set to {semester}')
     return redirect(request.referrer)

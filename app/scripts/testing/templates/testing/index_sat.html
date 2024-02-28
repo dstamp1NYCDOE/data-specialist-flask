@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_testing_reports')}}">Testing</a></li>
+    <li class="breadcrumb-item active"><a href="#">SAT</a></li>
+  </ol>
+</nav>
+
+<h1>Testing Scripts</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for report in reports %}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{{url_for(report.report_function)}}" class="stretched-link">{{report.report_title}}</a>
+                </h5>
+                <p>{{report.report_description}}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}   
+</div>
+
+</div>
+{% endblock %}
