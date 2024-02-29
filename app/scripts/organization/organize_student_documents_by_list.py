@@ -76,7 +76,7 @@ def main(form, request):
             if page_nums:
                 for pageNum in page_nums:
                     pageObj = pdfReader.pages[pageNum]
-                    if orientation_flag == 'portration':
+                    if orientation_flag == 'portrait':
                         pdfWaterMarkPage = sort_by_potrait_dict.get(sort_by)
                         pageObj.merge_page(pdfWaterMarkPage)
                     if orientation_flag == 'landscape':
@@ -86,11 +86,11 @@ def main(form, request):
 
         pdfWriter.add_blank_page()
 
-    print(pdfWriter)
 
     f = BytesIO()
     pdfWriter.write(f)
-
+    f.seek(0)
+    
     return f
 
 def generate_sortby_dict_landscape(sort_by_list):

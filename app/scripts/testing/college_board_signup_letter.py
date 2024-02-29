@@ -141,6 +141,13 @@ def generate_student_letter(student_row):
             )
     )
 
+    flowables.append( 
+        Paragraph(
+            f"You will not sign in with your College Board account on the day of the {exam}, a separate access code will be given to you in the testing room. You can log into Bluebook with your College Board account before the exam for practice materials",
+            styles["BodyText"]
+            )
+    )
+
     flowables.extend(reportlab_closing)
     flowables.append(PageBreak())
     return flowables

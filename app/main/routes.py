@@ -21,6 +21,7 @@ def return_index():
         "Attendance": "scripts.return_attendance_reports",
         "Organization": "scripts.return_organization_reports",
         "Testing": "scripts.return_testing_reports",
+        "Scholarship": "scripts.return_scholarship_reports",
     }
     data = {"sections": dict(sorted(sections.items()))}
     return render_template("index.html", data=data)
@@ -28,8 +29,15 @@ def return_index():
 
 @main.route("/view/")
 def view_all_reports():
-    reports_html = files_df.to_html(classes=["table", "table-sm"])
-    return render_template("viewReport.html", report_html=reports_html)
+    
+    data = {
+            'reports':[
+                {'html':files_df.to_html(classes=["table", "table-sm"]),
+                'title':'View Files'
+                },
+            ]
+        }
+    return render_template("viewReport.html", data=data)
 
 
 @main.route("/view/<report>")
@@ -79,7 +87,10 @@ def upload_files():
 
         download_date = form.download_date.data
         year_and_semester = form.year_and_semester.data
-        filename = f"{year_and_semester}_{download_date}_{filename}"
+        if report_name=='attendance':
+            filename = f"{year_and_semester}_9999-12-31_{filename}"
+        else:
+            filename = f"{year_and_semester}_{download_date}_{filename}"
 
         path = os.path.join(
             current_app.root_path, f"data/{year_and_semester}/{report_name}"

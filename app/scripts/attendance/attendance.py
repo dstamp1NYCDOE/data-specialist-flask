@@ -11,19 +11,26 @@ import app.scripts.utils as utils
 
 from app.scripts import scripts, files_df
 import app.scripts.attendance.process_RATR as process_RATR
+import app.scripts.attendance.jupiter_attd_by_teacher as jupiter_attd_by_teacher
+import app.scripts.attendance.jupiter_attd_by_student as jupiter_attd_by_student
 
 @scripts.route("/attendance")
 def return_attendance_reports():
     reports = [
         {
-            "report_title": "Student Commutes by Class",
-            "report_function": "scripts.generate_commute_class_report",
-            "report_description": "Select a class list to generate student commute info",
-        },
-        {
             "report_title": "Student Attendance",
             "report_function": "scripts.return_RATR_analysis",
             "report_description": "Analyze student daily attendance using ATS report RATR",
+        },
+        {
+            "report_title": "Jupiter Attd Analysis By Teacher",
+            "report_function": "scripts.return_jupiter_attd_analysis_by_teacher",
+            "report_description": "Analyze student Jupiter attendance by teacher",
+        },
+        {
+            "report_title": "Jupiter Attd Analysis By Student",
+            "report_function": "scripts.return_jupiter_attd_analysis_by_student",
+            "report_description": "Analyze student Jupiter attendance by student",
         },
     ]
     return render_template(
@@ -57,3 +64,58 @@ def return_RATR_analysis():
     }
     template_str = "templates/scripts/dataframes_generic.html"
     return render_template(template_str, data=data)
+
+@scripts.route("/attendance/jupiter/by_teacher")
+def return_jupiter_attd_analysis_by_teacher():
+    df = jupiter_attd_by_teacher.main()
+    report_name = "Jupiter Period Attendance Analysis By Teacher"
+    if request.args.get("download") == "true":
+        f = BytesIO()
+        df.to_excel(f, index=False)
+        f.seek(0)
+        download_name = f"{report_name.replace(' ','')}.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
+    else:
+        df = df.style.set_table_attributes(
+            'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+        )
+        df_html = df.to_html(
+            classes=["table", "table-sm"]
+        )
+
+        data = {
+            "reports": [
+                {
+                    "html": df_html,
+                    "title": report_name,
+                },
+            ]
+        }
+        return render_template("viewReport.html", data=data)
+
+
+@scripts.route("/attendance/jupiter/by_student")
+def return_jupiter_attd_analysis_by_student():
+    df = jupiter_attd_by_student.main()
+    report_name = "Jupiter Period Attendance Analysis By Student"
+    if request.args.get("download") == "true":
+        f = BytesIO()
+        df.to_excel(f, index=False)
+        f.seek(0)
+        download_name = f"{report_name.replace(' ','')}.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
+    else:
+        df = df.style.set_table_attributes(
+            'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+        )
+        df_html = df.to_html(classes=["table", "table-sm"])
+
+        data = {
+            "reports": [
+                {
+                    "html": df_html,
+                    "title": report_name,
+                },
+            ]
+        }
+        return render_template("viewReport.html", data=data)

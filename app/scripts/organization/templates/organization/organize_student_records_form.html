@@ -44,4 +44,19 @@
 
 
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+<script>
+    var file = document.getElementById("student_list").files[0];
+    console.log(file)
+    var reader = new FileReader();
+
+    if (file) {
+    
+    reader.onload = function (e) {
+        var data = e.target.result;
+        var workbook = XLSX.read(data, {type: 'binary'});
+        console.log(workbook)
+    }
+}
+</script>
 {% endblock %}

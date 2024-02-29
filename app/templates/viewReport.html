@@ -4,7 +4,13 @@
 {% block content %}
 
 <div class="container">
-    {{report_html|safe}}
+    <a href="?download=true" class="btn btn-block btn-success" target="_blank">
+        <i class="fas fa-file-excel"></i> Download as Excel
+      </a>
+    {% for report in data.reports%}
+    <h2>{{report.title}}</h2>
+    {{report.html|safe}}
+    {% endfor %}
 </div>
 
 {% endblock %}

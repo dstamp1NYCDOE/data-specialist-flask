@@ -14,7 +14,7 @@ from reportlab.platypus import (
     ListFlowable,
 )
 from reportlab.platypus import SimpleDocTemplate
-
+from reportlab_qrcode import QRCodeImage
 
 import datetime as dt
 
@@ -49,6 +49,14 @@ closing = [
     Paragraph("Derek Stampone", styles["Normal_RIGHT"]),
     Paragraph("Assistant Principal, Attendance", styles["Normal_RIGHT"]),
 ]
+
+MTA_info_url = "https://new.mta.info/"
+MTA_info_url_qr_code = QRCodeImage(
+    MTA_info_url,
+    size=2 * inch,
+)
+
+
 
 
 def main(
@@ -177,6 +185,13 @@ def main(
         start="-",
     )
     flowables.append(directions_lst)
+
+    paragraph = Paragraph(
+        f"Scan the QR code to get info about your commute from the MTA",
+        styles["BodyText"],
+    )
+    flowables.append(paragraph)
+    flowables.append(MTA_info_url_qr_code)
 
     paragraph = Paragraph(
         f"For many students, attending the High School of Fashion Industries means a signficant commute from home, but we know it's worth it! Thousands of students have made the trek to HSFI since 1926 to get an incredible education. The key to getting to school on time every day is to have a plan with clear steps and directions -- knowing exactly your commute, budgeting extra time for delays or errands, and setting alarms to remind you when to go to bed, when to wake up, and when to leave your home.",

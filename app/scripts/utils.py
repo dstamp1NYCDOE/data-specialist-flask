@@ -1,6 +1,8 @@
 import glob
 import pandas as pd
+import re
 
+period_regex = re.compile(r"\d{1,2}")
 
 def return_dataframe_of_files():
     lst = []
@@ -26,12 +28,14 @@ def return_dataframe_of_files():
     return files_df
 
 def return_most_recent_report(files_df,report):
+    files_df = return_dataframe_of_files()
     files_df = files_df[files_df['report']==report]
     files_df = files_df.sort_values(by=['download_date'])
     filename = files_df.iloc[-1,:]['filename']
     return filename
 
 def return_most_recent_report_by_semester(files_df,report,year_and_semester):
+    files_df = return_dataframe_of_files()
     files_df = files_df[files_df['year_and_semester']==year_and_semester]
     files_df = files_df[files_df['report']==report]
     files_df = files_df.sort_values(by=['download_date'])
@@ -70,3 +74,45 @@ def return_hs_graduation_year(GEC):
 
 def return_hs_graduation_month(GEC):
     return f"June {return_hs_graduation_year(GEC)}"
+
+
+def return_CTE_major_by_course(course):
+    major = ''
+    if course[0:2] == 'AF':
+        return 'FD'
+    return major
+
+
+def return_pd(period):
+    mo = period_regex.search(period)
+    return int(mo.group())
+
+
+def convert_percentage_to_ratio(percentage):
+    if percentage >= 0.99:
+        return "Every Day"
+    if percentage >= 0.95 - 0.025:
+        return "Almost Every Day"
+    if percentage >= 0.90 - 0.025:
+        return "About 9 out of 10 days"
+    if percentage >= 0.80 - 0.025:
+        return "About 4 out of 5 days"
+    if percentage >= 0.70 - 0.025:
+        return "About 7 out of 10 days"
+    if percentage >= 0.60 - 0.025:
+        return "About 3 out of 5 days"
+    if percentage >= 0.50 - 0.025:
+        return "About every other day"
+    if percentage >= 0.40 - 0.025:
+        return "About 2 out of 5 days"
+    if percentage >= 0.30 - 0.025:
+        return "About 3 out of 10 days"
+    if percentage >= 0.20 - 0.025:
+        return "About 1 out of 5 days"
+    if percentage >= 0.10 - 0.025:
+        return "About 1 out of 10 days"
+    if percentage >= 0.05 - 0.025:
+        return "About 1 day per month"
+    if percentage == 0:
+        return "Never"
+    return "Almost Never"
