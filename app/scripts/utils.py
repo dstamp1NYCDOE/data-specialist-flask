@@ -1,6 +1,7 @@
 import glob
 import pandas as pd
 import re
+import os
 
 period_regex = re.compile(r"\d{1,2}")
 
@@ -8,7 +9,9 @@ def return_dataframe_of_files():
     lst = []
     for filename in glob.glob("app/data/**/**/*.*"):
         
-        file = filename.split("/")[4]
+        # file = filename.split("/")[4]
+        file = os.path.basename(filename)
+
         year_and_semester, download_date, report = file.split('_')
         school_year, semester = year_and_semester.split('-')
         report = report.split('.')[0].replace('-','_')
