@@ -8,6 +8,7 @@ from app.scripts.programming.class_lists import generate_class_list
 from app.scripts.surveys.connect_google_survey_with_class_lists import connect_google_survey_with_class_lists
 
 import app.scripts.utils as utils
+import app.scripts.update_from_jupiter as update_from_jupiter
 files_df = utils.return_dataframe_of_files()
 
 main = Blueprint("main", __name__, template_folder="templates", static_folder="static")
@@ -47,23 +48,16 @@ def view_most_recent_report(report):
     report_html = report_df.to_html(classes=["table", "table-sm"])
     return render_template("viewReport.html", report_html=report_html)
 
-
-@main.route("/run", methods=["GET", "POST"])
-def run_script():
-    if request.method == "GET":
-        return redirect(url_for("main.return_index"))
-    data = request.form
-    report = request.form["report"]
-    reports_map = {
-        "scripts.programming.class_lists": generate_class_list,
-        "scripts.surveys.connect_google_survey_with_class_lists": connect_google_survey_with_class_lists,
-    }
-
-    response = reports_map.get(report)(data)
-    if response:
-        return response
+@main.route("/update_from_jupiter", methods=["GET","POST"])
+def return_update_from_jupiter():
+    form = report_forms.JupiterUpdateForm()
+    if form.validate_on_submit():
+        report = form.report.data
+        year_and_semester = form.year_and_semester.data
+        update_from_jupiter.main(report,year_and_semester)
+        return ''
     else:
-        return redirect(url_for("main.return_index"))
+        return render_template("updateJupiter.html", form=form)
 
 
 @main.route("/upload", methods=["GET", "POST"])
