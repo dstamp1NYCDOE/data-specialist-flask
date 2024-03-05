@@ -11,3 +11,4 @@ from app.scripts.attendance import attendance
 from app.scripts.organization import routes
 from app.scripts.testing import routes
 from app.scripts.scholarship import routes
+from app.scripts.pbis import routes

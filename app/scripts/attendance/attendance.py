@@ -15,6 +15,7 @@ import app.scripts.attendance.jupiter_attd_by_teacher as jupiter_attd_by_teacher
 import app.scripts.attendance.jupiter_attd_by_student as jupiter_attd_by_student
 import app.scripts.attendance.jupiter_attd_benchmark_analysis as jupiter_attd_benchmark_analysis
 import app.scripts.attendance.jupiter_attd_summary_by_class as jupiter_attd_summary_by_class
+import app.scripts.attendance.jupiter_attd_teacher_completion as jupiter_attd_teacher_completion
 
 from app.scripts.attendance.forms import JupiterCourseSelectForm
 
@@ -41,11 +42,42 @@ def return_attendance_reports():
             "report_function": "scripts.return_jupiter_attd_benchmark_analysis",
             "report_description": "Analyze student Jupiter attendance by student and return benchmark",
         },
+        {
+            "report_title": "Jupiter Period Attendance Completion By Teacher",
+            "report_function": "scripts.return_teacher_jupiter_attd",
+            "report_description": "Return Jupiter Attendance Completion by teacher for current term",
+        },
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
     )
 
+@scripts.route('/attendance/teacher_jupiter_attd', methods=['GET','POST'])
+def return_teacher_jupiter_attd():
+    df = jupiter_attd_teacher_completion.main()
+    report_name = "Jupiter Period Attendance Completition By Teacher"
+    if request.args.get("download") == "true":
+        f = BytesIO()
+        df.to_excel(f, index=False)
+        f.seek(0)
+        download_name = f"{report_name.replace(' ','')}.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
+    else:
+        df = df.style.set_table_attributes(
+            'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+        )
+        df_html = df.to_html(classes=["table", "table-sm"])
+
+        data = {
+            "reports": [
+                {
+                    "html": df_html,
+                    "title": report_name,
+                },
+            ]
+        }
+        return render_template("viewReport.html", data=data)
+    
 
 @scripts.route("/attendance/RATR_analysis")
 def return_RATR_analysis():
