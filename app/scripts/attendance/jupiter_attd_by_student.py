@@ -15,7 +15,7 @@ def main():
 
     students_df = cr_3_07_df[["StudentID", "LastName", "FirstName", "year_in_hs"]]
 
-    jupiter_attd_filename = utils.return_most_recent_report(files_df, "attendance")
+    jupiter_attd_filename = utils.return_most_recent_report(files_df, "jupiter_period_attendance")
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
     periods_df = attendance_marks_df[["Period"]].drop_duplicates()

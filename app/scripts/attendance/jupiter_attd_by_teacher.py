@@ -4,7 +4,7 @@ import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 def main():
-    jupiter_attd_filename = utils.return_most_recent_report(files_df, "attendance")
+    jupiter_attd_filename = utils.return_most_recent_report(files_df, "jupiter_period_attendance")
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
     periods_df = attendance_marks_df[["Period"]].drop_duplicates()

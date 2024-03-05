@@ -1,25 +1,16 @@
-from flask import jsonify
-from app.api_1_0 import api
-from app import cache
+from flask import jsonify, request, session
 
-import pysftp
+import app.scripts.utils as utils
+from app.api_1_0 import api, files_df
 
-import os
+@api.route("/jupiter/classes")
+def return_jupiter_classes():
+    report = "rosters_and_grades"
+    filename = utils.return_most_recent_report(files_df, report)
 
-import pandas as pd
-
-JUPITER_SFTP_HOSTNAME = os.getenv("JUPITER_SFTP_HOSTNAME")
-JUPITER_SFTP_USERNAME = os.getenv("JUPITER_SFTP_USERNAME")
-JUPITER_SFTP_PASSWORD = os.getenv("JUPITER_SFTP_PASSWORD")
-
-
-@api.route("/jupiter/<filename>")
-@cache.cached(timeout=50)
-def return_jupiter_file(filename):
-    with pysftp.Connection(
-        JUPITER_SFTP_HOSTNAME,
-        username=JUPITER_SFTP_USERNAME,
-        password=JUPITER_SFTP_PASSWORD,
-    ) as sftp:
-        df = pd.read_csv(sftp.open(filename))
+    df = utils.return_file_as_df(filename).fillna('')
+    term = session['term']
+    df = df[df['Term']==f'S{term}']
+    df = df.drop_duplicates(subset=['Course','Section'], keep='last')
+    df = df.sort_values(by=['Teacher1','Course','Section'])
     return jsonify(df.to_dict(orient='records'))

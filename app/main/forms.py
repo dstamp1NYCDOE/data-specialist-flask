@@ -46,10 +46,13 @@ class JupiterUpdateForm(FlaskForm):
         "School Year and Semester", choices=school_year_and_semester_choices,
     )
     report = SelectField(
-       "Jupiter File" ,
-       choices = [
+        "Jupiter File",
+        choices=[
+            ("assignments", "Student Assignments"),
+            ("jupiter-master-schedule", "Master Schedule"),
             ("rosters-and-grades", "Grades and Rosters"),
-        ]
+            ("jupiter-period-attendance", "Period Attendance"),
+        ],
     )
 
 class ReportForm(FlaskForm):

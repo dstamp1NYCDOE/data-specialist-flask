@@ -153,7 +153,9 @@ def main(
     )
     flowables.append(times_lst)
 
-    if num_of_other_students > 1:
+    if num_of_other_students == 'Walking Distance':
+        pass
+    elif int(num_of_other_students) > 1:
         paragraph = Paragraph(
             f"Google recommends you start at <b>{starting_station}</b> and there are <b>{int(num_of_other_students-1)}</b> other HSFI students that use this station too! If you're interested in a travel buddy, connect with your counselor.",
             styles["BodyText"],

@@ -82,9 +82,9 @@ def generate_student_letter(student_row):
 
     paragraphs = [
         f"Dear {first_name.title()} {last_name.title()} ({StudentID})",
-        f"The next step in your post-HSFI journey is to take the {exam} this spring. In order to take the exam, you need to have a College Board Account.",
-        "First, see if you have already created a College Board account, go to https://www.collegeboard.org and login. If you have an account but don't remember the password, you will need to go through the password reset process",
-        "If you don't have a College Board account, you'll sign up using information that appears in your NYCPS official records. Scan the QR code below to get to the signup page.",
+        f"The next step in your post-HSFI journey is to take the {exam} this spring.",
+        "<b>If you have  a College Board account</b>, go to www.collegeboard.org and login. If you have an account but don't remember the password, you will need to go through the password reset process",
+        "<b>If you don't have a College Board account</b>, you'll sign up using information that appears in your official school records. Scan the QR code below to get to the signup page.",
     ]
 
     flowables.extend(
@@ -136,14 +136,48 @@ def generate_student_letter(student_row):
 
     flowables.append( 
         Paragraph(
-            f"Parent information is optional, but consider filling it out if you know it. For your password, use the following: {password} so we can assist you if you forget. Write down the security phrase and save it in your phone. Add a phone number. And verify your account",
+            f"Parent information is optional, but consider filling it out if you know it.",
+            styles["BodyText"]
+            )
+    )
+
+    steps_lst = [
+        f"<b>Password</b> - {password}",
+        f"<b>Security Phrase</b> - Fashion",
+    ]
+
+    steps_lst = [
+        Paragraph(
+            x,
+            styles["Normal"],
+        )
+        for x in steps_lst
+    ]
+
+    steps_lst = ListFlowable(
+        steps_lst,
+        bulletType="bullet",
+        start="-",
+    )
+    flowables.append(steps_lst)
+
+    flowables.append( 
+        Paragraph(
+            f"Add your phone number",
             styles["BodyText"]
             )
     )
 
     flowables.append( 
         Paragraph(
-            f"You will not sign in with your College Board account on the day of the {exam}, a separate access code will be given to you in the testing room. You can log into Bluebook with your College Board account before the exam for practice materials",
+            f"<b>Save on your phone your email, password, and security phrase</b>",
+            styles["BodyText"]
+            )
+    )
+
+    flowables.append( 
+        Paragraph(
+            f"With your College Board account you can log into the Bluebook app before the exam to familiarize yourself with the application and complete practice materials",
             styles["BodyText"]
             )
     )

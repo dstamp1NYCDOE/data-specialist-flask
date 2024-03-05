@@ -55,7 +55,8 @@ def return_update_from_jupiter():
         report = form.report.data
         year_and_semester = form.year_and_semester.data
         update_from_jupiter.main(report,year_and_semester)
-        return ''
+        flash(f"{report} successfully uploaded", category="success")
+        return redirect(url_for("main.return_index"))
     else:
         return render_template("updateJupiter.html", form=form)
 
@@ -102,10 +103,11 @@ def upload_files():
 def set_semester():
     semester = request.form.get("semester")
     school_year, term = semester.split('-')
-    
+
     session['semester'] = semester
     session["school_year"] = int(school_year)
     session["term"] = int(term)
+    session.permanent = True
 
     flash(f'Semester set to {semester}')
     return redirect(request.referrer)

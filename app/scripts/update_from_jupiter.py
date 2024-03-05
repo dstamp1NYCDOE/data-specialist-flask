@@ -11,7 +11,6 @@ JUPITER_SFTP_USERNAME = os.getenv("JUPITER_SFTP_USERNAME")
 JUPITER_SFTP_PASSWORD = os.getenv("JUPITER_SFTP_PASSWORD")
 
 
-
 def main(report,year_and_semester):
     with pysftp.Connection(
         JUPITER_SFTP_HOSTNAME,
@@ -28,9 +27,9 @@ def main(report,year_and_semester):
             os.makedirs(path)
         today = dt.datetime.today().strftime('%Y-%m-%d')
 
-        local_filename = f"{year_and_semester}_{today}_{report}.csv"
+        local_filename = f"{year_and_semester}_9999-12-31_{report}.csv"
         local_filename = os.path.join(path, local_filename)
-        
+
         sftp.get(jupiter_filename, local_filename)
 
     return ''
