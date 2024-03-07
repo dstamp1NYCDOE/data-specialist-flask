@@ -1,0 +1,21 @@
+{% macro render_classwork_form(report) -%}
+    {% if report.report_form.meta.type == 'marking_period_dropdown' %}
+        {{render_form_with_marking_period_dropdown(report)}}
+    {% endif %}
+{%- endmacro %}
+
+
+{% macro render_form_with_marking_period_dropdown(report) -%}
+    <form method="POST" action="{{url_for('scripts.return_classwork_report', report_function=report.report_function)}}">
+        {{ report.report_form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ report.report_form.marking_period.label }}
+            {{ report.report_form.marking_period(class_="form-select ") }}
+        </div>
+            
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{%- endmacro %}

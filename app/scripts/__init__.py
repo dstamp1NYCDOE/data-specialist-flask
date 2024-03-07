@@ -12,3 +12,4 @@ from app.scripts.organization import routes
 from app.scripts.testing import routes
 from app.scripts.scholarship import routes
 from app.scripts.pbis import routes
+from app.scripts.classwork import routes

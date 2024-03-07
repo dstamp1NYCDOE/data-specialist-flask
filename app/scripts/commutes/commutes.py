@@ -62,6 +62,8 @@ def generate_commute_class_report():
             starting_station_stats, on=["starting_station"], how="left"
         ).fillna('Walking Distance')
 
+        student_commutes_df = student_commutes_df.sort_values(by=['FirstName','LastName'])
+
         student_commutes_df = student_commutes_df[student_commutes_df["StudentID"].isin(StudentIDs)]
         student_commutes_df["student_steps"] = student_commutes_df["API_Response"].apply(
             commute_utils.return_list_of_directions

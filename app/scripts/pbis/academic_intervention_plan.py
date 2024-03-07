@@ -47,6 +47,6 @@ def return_candidates():
     ## pivot on benchmark
 
     at_risk_by_students_by_term = pd.pivot_table(assignment_pvt, index=['StudentID','Term'], columns='missing_more_than_50%_of_performance', values='Course',aggfunc='count').fillna(0)
-    at_risk_by_students_by_term.columns = ['_'.join(col) for col in at_risk_by_students_by_term.columns]
+    # at_risk_by_students_by_term.columns = ['_'.join(col) for col in at_risk_by_students_by_term.columns]
 
     return at_risk_by_students_by_term.reset_index()

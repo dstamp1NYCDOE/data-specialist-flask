@@ -3,6 +3,9 @@ import pandas as pd
 import re
 import os
 
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
+
 period_regex = re.compile(r"\d{1,2}")
 
 def return_dataframe_of_files():
@@ -119,3 +122,26 @@ def convert_percentage_to_ratio(percentage):
     if percentage == 0:
         return "Never"
     return "Almost Never"
+
+
+def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None, fontsize=8):
+    if cols:
+        table_data = df[cols].values.tolist()
+    else:
+        cols = df.columns
+        table_data = df.values.tolist()
+    table_data.insert(0, cols)
+    t = Table(table_data, colWidths=colWidths,
+              repeatRows=1, rowHeights=rowHeights)
+    t.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (100, 100), 'CENTER'),
+        ('VALIGN', (0, 0), (100, 100), 'MIDDLE'),
+        ('FONTSIZE', (0, 0), (-1, -1), fontsize),
+        ('LEFTPADDING', (0, 0), (-1, -1), 2),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('ROWBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, None)),
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+    ]))
+    return t

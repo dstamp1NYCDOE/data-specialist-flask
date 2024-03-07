@@ -18,6 +18,25 @@ school_year_and_semester_choices = [
             ("2021-1", "Fall 2021"),
         ]
 
+
+MARKING_PERIOD_CHOICES = [
+            ("S1-MP1", "Fall MP1"),
+            ("S1-MP2", "Fall MP2"),
+            ("S1-MP3", "Fall MP3"),
+            ("S2-MP1", "Spring MP1"),
+            ("S2-MP2", "Spring MP2"),
+            ("S2-MP3", "Spring MP3"),
+        ]
+
+SEMESTER_CHOICES = [
+            ("S1-MP1", "Fall MP1"),
+            ("S1-MP2", "Fall MP2"),
+            ("S1-MP3", "Fall MP3"),
+            ("S2-MP1", "Spring MP1"),
+            ("S2-MP2", "Spring MP2"),
+            ("S2-MP3", "Spring MP3"),
+        ]
+
 reports_choices = [
     ('scripts.programming.class_lists','Class Lists'),
     ('scripts.surveys.connect_google_survey_with_class_lists','Class Lists with Google Sheets Data'),
