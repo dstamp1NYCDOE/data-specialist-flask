@@ -7,7 +7,10 @@ from flask import render_template, request, send_file
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
+from app.scripts.testing.forms import CollegeBoardExamInvitationLetter
+
 import app.scripts.testing.college_board_signup_letter as college_board_signup_letter
+import app.scripts.testing.college_board_exam_invitations as college_board_exam_invitations
 
 @scripts.route("/testing")
 def return_testing_reports():
@@ -30,14 +33,38 @@ def return_sat_reports():
             "report_function": "scripts.return_college_board_signup_letters",
             "report_description": "Generates step-by-step guide for students to sign up for their college board accounts",
         },
+        {
+            "report_title": "Generate SAT/PSAT Exam Invitations",
+            "report_function": "scripts.return_college_board_exam_invitations",
+            "report_description": "Generates exam invitations for the SAT and PSAT",
+        },
     ]
     return render_template(
         "testing/templates/testing/index.html", reports=reports
     )
 
-@scripts.route("/testing/SAT/college_board_signup_letters")
+@scripts.route("/testing/college_board/signup_letters")
 def return_college_board_signup_letters():
 
+    cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
+    cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
+    f = college_board_signup_letter.generate_letters(cr_3_07_df)
+    download_name = f"CollegeBoardSignupLetters.pdf"
+    return send_file(f, as_attachment=True, download_name=download_name)
+
+@scripts.route("/testing/college_board/exam_invitations", methods=['GET','POST'])
+def return_college_board_exam_invitations():
+    if request.method == 'GET':
+        form = CollegeBoardExamInvitationLetter()
+        return render_template("testing/templates/testing/college_board_exam_invitations.html", form = form)
+    else:
+        form = CollegeBoardExamInvitationLetter(request.form)
+        f = college_board_exam_invitations.main(form, request)
+
+        download_name = f"CollegeBoardExamInvitations_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+        
+        return send_file(f, as_attachment=True, download_name=download_name, mimetype='application/pdf')
+    
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
     f = college_board_signup_letter.generate_letters(cr_3_07_df)
