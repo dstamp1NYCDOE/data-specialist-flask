@@ -13,34 +13,23 @@
 
 <h1>Generate SAT and PSAT Exam Invitations</h1>
 
-<form action="{{url_for('scripts.return_student_records_organized_by_class_list')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+<form action="{{url_for('scripts.return_college_board_exam_invitations')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
 
     <div class="form-group p-1 g-col-12">
         {{ form.exam_title.label(class_="form-label") }}
         {{ form.exam_title(class_="form-select") }}
     </div>
-    
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.exam_date.label(class_="form-label") }}
+        {{ form.exam_date(class_="form-control") }}
+    </div>
+
     <div class="form-group p-1 g-col-12">
         {{ form.student_testing_assignments.label(class_="form-label") }}
         {{ form.student_testing_assignments(class_="form-control") }}
     </div>
-
-    <div class="form-group p-1 g-col-12">
-        {{ form.testing_room_info.label(class_="form-label") }}
-        {{ form.testing_room_info(class_="form-control") }}
-    </div>
-
-    <div class="form-group p-1 g-col-12">
-        {{ form.student_list.label(class_="form-label") }}
-        {{ form.student_list(class_="form-control") }}
-    </div>
-
-    <div class="form-group p-1 g-col-12">
-        {{ form.student_list_source.label(class_="form-label") }}
-        {{ form.student_list_source(class_="form-select") }}
-    </div>
-
 
 
     <div class="form-group p-1 g-col-12 d-grid">

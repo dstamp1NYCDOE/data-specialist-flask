@@ -12,6 +12,7 @@ from app.scripts.testing.forms import CollegeBoardExamInvitationLetter
 import app.scripts.testing.college_board_signup_letter as college_board_signup_letter
 import app.scripts.testing.college_board_exam_invitations as college_board_exam_invitations
 
+
 @scripts.route("/testing")
 def return_testing_reports():
     reports = [
@@ -21,9 +22,8 @@ def return_testing_reports():
             "report_description": "Reports related to the SAT and PSAT",
         },
     ]
-    return render_template(
-        "testing/templates/testing/index.html", reports=reports
-    )
+    return render_template("testing/templates/testing/index.html", reports=reports)
+
 
 @scripts.route("/testing/SAT")
 def return_sat_reports():
@@ -39,9 +39,8 @@ def return_sat_reports():
             "report_description": "Generates exam invitations for the SAT and PSAT",
         },
     ]
-    return render_template(
-        "testing/templates/testing/index.html", reports=reports
-    )
+    return render_template("testing/templates/testing/index.html", reports=reports)
+
 
 @scripts.route("/testing/college_board/signup_letters")
 def return_college_board_signup_letters():
@@ -52,21 +51,24 @@ def return_college_board_signup_letters():
     download_name = f"CollegeBoardSignupLetters.pdf"
     return send_file(f, as_attachment=True, download_name=download_name)
 
-@scripts.route("/testing/college_board/exam_invitations", methods=['GET','POST'])
+
+@scripts.route("/testing/college_board/exam_invitations", methods=["GET", "POST"])
 def return_college_board_exam_invitations():
-    if request.method == 'GET':
+    if request.method == "GET":
         form = CollegeBoardExamInvitationLetter()
-        return render_template("testing/templates/testing/college_board_exam_invitations.html", form = form)
+        return render_template(
+            "testing/templates/testing/college_board_exam_invitations.html", form=form
+        )
     else:
         form = CollegeBoardExamInvitationLetter(request.form)
         f = college_board_exam_invitations.main(form, request)
 
         download_name = f"CollegeBoardExamInvitations_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
-        
-        return send_file(f, as_attachment=True, download_name=download_name, mimetype='application/pdf')
-    
-    cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
-    cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
-    f = college_board_signup_letter.generate_letters(cr_3_07_df)
-    download_name = f"CollegeBoardSignupLetters.pdf"
-    return send_file(f, as_attachment=True, download_name=download_name)
+
+        # return ""
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )
