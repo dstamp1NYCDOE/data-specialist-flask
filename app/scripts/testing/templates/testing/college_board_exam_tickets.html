@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_testing_reports')}}">Testing</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_testing_reports')}}">College Board</a></li>
+    <li class="breadcrumb-item active"><a href="#">SAT</a></li>
+  </ol>
+</nav>
+
+<h1>Generate SAT and PSAT Exam Tickets</h1>
+
+<form action="{{url_for('scripts.return_college_board_exam_tickets')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.student_exam_tickets.label(class_="form-label") }}
+        {{ form.student_exam_tickets(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.student_testing_assignments.label(class_="form-label") }}
+        {{ form.student_testing_assignments(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Run</button>
+    </div>
+</form>
+
+</div>
+{% endblock %}

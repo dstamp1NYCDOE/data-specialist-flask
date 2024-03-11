@@ -7,10 +7,14 @@ from flask import render_template, request, send_file
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
-from app.scripts.testing.forms import CollegeBoardExamInvitationLetter
+from app.scripts.testing.forms import (
+    CollegeBoardExamInvitationLetter,
+    CollegeBoardExamTicketsLetter,
+)
 
 import app.scripts.testing.college_board_signup_letter as college_board_signup_letter
 import app.scripts.testing.college_board_exam_invitations as college_board_exam_invitations
+import app.scripts.testing.college_board_exam_tickets as college_board_exam_tickets
 
 
 @scripts.route("/testing")
@@ -37,6 +41,11 @@ def return_sat_reports():
             "report_title": "Generate SAT/PSAT Exam Invitations",
             "report_function": "scripts.return_college_board_exam_invitations",
             "report_description": "Generates exam invitations for the SAT and PSAT",
+        },
+        {
+            "report_title": "Generate SAT/PSAT Exam Tickets",
+            "report_function": "scripts.return_college_board_exam_tickets",
+            "report_description": "Generates exam tickets for the SAT and PSAT",
         },
     ]
     return render_template("testing/templates/testing/index.html", reports=reports)
@@ -66,6 +75,29 @@ def return_college_board_exam_invitations():
         download_name = f"CollegeBoardExamInvitations_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
 
         # return ""
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )
+
+
+@scripts.route("/testing/college_board/exam_tickets", methods=["GET", "POST"])
+def return_college_board_exam_tickets():
+    if request.method == "GET":
+        form = CollegeBoardExamTicketsLetter()
+        return render_template(
+            "testing/templates/testing/college_board_exam_tickets.html", form=form
+        )
+    else:
+        form = CollegeBoardExamTicketsLetter(request.form)
+        f = college_board_exam_tickets.main(form, request)
+
+        download_name = (
+            f"CollegeBoardExamTickets_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+        )
+
         return send_file(
             f,
             as_attachment=True,

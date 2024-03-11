@@ -20,3 +20,15 @@ class CollegeBoardExamInvitationLetter(FlaskForm):
     )
 
     exam_date = DateField()
+
+
+class CollegeBoardExamTicketsLetter(FlaskForm):
+    student_exam_tickets = FileField(
+        "Student Exam Tickets as PDF",
+        validators=[FileRequired()],
+    )
+
+    student_testing_assignments = FileField(
+        "Student Testing Assignments (preprocessed with StudentID)",
+        validators=[FileRequired()],
+    )
