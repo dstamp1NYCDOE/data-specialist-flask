@@ -1,0 +1,85 @@
+import pandas as pd
+import app.scripts.utils as utils
+from app.scripts import scripts, files_df
+
+from io import BytesIO
+
+def main(form, request):
+    student_subset_title = form.subset_title.data
+
+    student_lst_str = form.subset_lst.data
+    student_lst = student_lst_str.split("\r\n")
+    student_lst = [int(x) for x in student_lst]
+
+    filename = utils.return_most_recent_report(files_df, "1_49")
+    counselors_df = utils.return_file_as_df(filename)
+    counselors_df = counselors_df[['StudentID','Counselor']]
+
+    filename = utils.return_most_recent_report(files_df, "3_07")
+    student_info_df = utils.return_file_as_df(filename)
+    student_info_df = student_info_df[['StudentID','LastName','FirstName','Student DOE Email']]
+
+    student_info_df = student_info_df.merge(counselors_df, on='StudentID', how='inner')
+
+    filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
+    rosters_df = utils.return_file_as_df(filename)
+    rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
+    rosters_df[student_subset_title] = rosters_df["StudentID"].apply(
+        lambda x: x in student_lst
+    )
+
+    filename = utils.return_most_recent_report(files_df, "jupiter_master_schedule")
+    master_schedule = utils.return_file_as_df(filename).fillna('')
+    master_schedule = master_schedule[
+        ["Course", "Section", "Room", "Teacher1","Teacher2", "Period"]
+    ]
+
+    df = rosters_df.merge(master_schedule, on=["Course", "Section"], how='left').fillna('')
+    df = df.merge(student_info_df, on='StudentID', how='left')
+    
+    if form.inner_or_outer.data == 'inner':
+        df = df[df[student_subset_title]==True]
+    if form.inner_or_outer.data == 'outer':
+        df = df[df[student_subset_title]==False]
+
+    f = BytesIO()
+    writer = pd.ExcelWriter(f)
+
+    cols = ['StudentID','LastName','FirstName','Student DOE Email',
+            'Course',
+            'Section',
+            'Period',
+            'Room',
+            'Teacher1',
+            'Teacher2',
+            student_subset_title		
+            ]
+    
+    teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
+    print(teachers_lst)
+    teachers_lst.sort()
+    teachers_lst = teachers_lst[1:]
+
+    for teacher in teachers_lst:
+        students_df = df[(df['Teacher1']==teacher) | (df['Teacher2']==teacher)]
+        students_df = students_df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName'])
+        students_df.to_excel(writer, index=False, sheet_name=teacher)
+
+    cols = [
+        'StudentID','LastName','FirstName','Student DOE Email',
+        'Counselor',
+        student_subset_title		
+            ]
+    for Counselor, students_df in df.groupby('Counselor'):
+        students_df = students_df[cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName'])
+        students_df.to_excel(writer, index=False, sheet_name=Counselor)
+
+    for sheet in writer.sheets:
+        worksheet = writer.sheets[sheet]
+        worksheet.freeze_panes(1, 3)
+        worksheet.autofit()            
+    
+    writer.close()
+    f.seek(0)
+
+    return f

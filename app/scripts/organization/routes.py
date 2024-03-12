@@ -15,10 +15,11 @@ from app.scripts import scripts, files_df
 from app.scripts.organization.forms import (
     OrganizeStudentRecordsForm,
     ClassListCountsFromSubsetForm,
+    ClassRostersFromList,
 )
 from app.scripts.organization import organize_student_documents_by_list
 from app.scripts.organization import class_list_counts_from_list
-
+from app.scripts.organization import class_rosters_from_list
 
 @scripts.route("/organization")
 def return_organization_reports():
@@ -32,6 +33,11 @@ def return_organization_reports():
             "report_title": "Class List Counts from StudentID List",
             "report_function": "scripts.return_class_list_counts_from_list",
             "report_description": "Return counts of students in each class based on StudentID List",
+        },
+                {
+            "report_title": "Class Rosters from StudentID List",
+            "report_function": "scripts.return_class_rosters_from_list",
+            "report_description": "Return roster of students in each class based on StudentID List (inclusive or exclusive)",
         },
     ]
     return render_template(
@@ -90,3 +96,27 @@ def return_class_list_counts_from_list():
             ]
         }
         return render_template("viewReport.html", data=data)
+
+@scripts.route("/organization/rosters_from_list", methods=["GET", "POST"])
+def return_class_rosters_from_list():
+    if request.method == "GET":
+        form = ClassRostersFromList()
+        return render_template(
+            "organization/templates/organization/class_rosters_from_list_form.html",
+            form=form,
+        )
+    else:
+        form = ClassRostersFromList(request.form)
+
+        student_subset_title = form.subset_title.data
+
+        f = class_rosters_from_list.main(form, request)
+
+        download_name = f"{student_subset_title}_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )

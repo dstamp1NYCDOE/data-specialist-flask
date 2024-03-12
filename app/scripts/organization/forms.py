@@ -35,3 +35,16 @@ class OrganizeStudentRecordsForm(FlaskForm):
 class ClassListCountsFromSubsetForm(FlaskForm):
     subset_lst = StringField("StudentID List", widget=TextArea())
     subset_title = StringField("Subgroup title")
+
+
+class ClassRostersFromList(FlaskForm):
+    subset_lst = StringField("StudentID List", widget=TextArea())
+    subset_title = StringField("Subgroup title")
+
+    inner_or_outer = SelectField(
+        "Mode",
+        choices=[
+            ("inner", "Return Students In List"), ("outer", "Return Students Not In List"),("combined", "Full List with True False")
+            ],
+        validators=[InputRequired()],
+    )

@@ -94,6 +94,12 @@ def generate_room_roster(df, room, session):
     )
     flowables.append(paragraph)
 
+    paragraph = Paragraph(
+        f"{return_computer_login_info(room)}",
+        styles["Normal"],
+    )
+    flowables.append(paragraph)
+
     table_cols = ["StudentName", "StudentUsername", "StudentPassword"]
     students_tbl = utils.return_df_as_table(df, table_cols, fontsize=10)
     flowables.append(students_tbl)
@@ -101,6 +107,13 @@ def generate_room_roster(df, room, session):
     flowables.append(PageBreak())
     return flowables
 
+def return_computer_login_info(room_number):
+    if room_number in ['919','901','603','221']:
+        return f"Username: .\{room_number}s# (Type period + backslash +room number + s + computer number ex. .\{room_number}s24"
+    if room_number in ['704','519']:
+        return f"Username: \{room_number}s# (Type backslash +room number + s + computer number ex. \{room_number}s24"
+    if room_number in ['201']:
+        return f"Username: .\student (Sign-in options -> Key icon Type period + backslash + student ex. \student"
 
 def generate_student_exam_ticket(student_row):
     flowables = []
@@ -147,6 +160,12 @@ def generate_student_exam_ticket(student_row):
     flowables.append(paragraph)
 
     paragraph = Paragraph(
+        f"Generic Computer Login: {return_computer_login_info(room_num)}",
+        styles["Normal"],
+    )
+    flowables.append(paragraph)
+
+    paragraph = Paragraph(
         f"StudentUsername: {StudentUsername}",
         styles["Heading1"],
     )
@@ -164,6 +183,12 @@ def generate_student_exam_ticket(student_row):
     )
     flowables.append(paragraph)
 
+    paragraph = Paragraph(
+        f"Start Code: ________________________",
+        styles["Heading1"],
+    )
+    flowables.append(paragraph)
+
     flowables.append(PageBreak())
     return flowables
 
@@ -177,6 +202,7 @@ def process_exam_tickets(form, request):
     exam_date = pd.to_datetime(exam_date)
 
     df["Room#"] = df["Room"].str.extract(r"(\d{3})")
+    
     df["Session"] = df["Room"].str.extract(r"([AaPp][Mm])")
     df["ExamDate"] = df['Room'].apply(lambda x: exam_date)
     df["StudentName"] = df["Student Name"].apply(swap_name)
