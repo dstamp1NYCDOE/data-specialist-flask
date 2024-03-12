@@ -22,12 +22,28 @@ def overall_attd_by_weekday(RATR_df):
         margins_name='total'
     ).fillna(0)
 
-    pvt_tbl["late_%"] = pvt_tbl["L"] / pvt_tbl["total"]
+    pvt_tbl["late_%"] = pvt_tbl["L"] / (pvt_tbl["P"] + pvt_tbl["L"])
 
     pvt_tbl = pvt_tbl.reset_index()
 
     return pvt_tbl
 
+def overall_attd_by_month(RATR_df):
+
+    pvt_tbl = pd.pivot_table(
+        RATR_df,
+        index=["Month"],
+        columns="ATTD",
+        values="Date",
+        aggfunc="count",
+    ).fillna(0)
+    pvt_tbl["total"] = pvt_tbl.sum(axis=1)
+    pvt_tbl["late_%"] = pvt_tbl["L"] / (pvt_tbl["P"] + pvt_tbl["L"])
+    pvt_tbl["absence_%"] = pvt_tbl["A"] / pvt_tbl["total"]
+
+    pvt_tbl = pvt_tbl.reset_index()
+    
+    return pvt_tbl
 
 def student_attd_by_month(RATR_df):
 
@@ -39,7 +55,7 @@ def student_attd_by_month(RATR_df):
         aggfunc="count",
     ).fillna(0)
     pvt_tbl["total"] = pvt_tbl.sum(axis=1)
-    pvt_tbl["late_%"] = pvt_tbl["L"] / pvt_tbl["total"]
+    pvt_tbl["late_%"] = pvt_tbl["L"] / (pvt_tbl["P"] + pvt_tbl["L"])
     pvt_tbl["absence_%"] = pvt_tbl["A"] / pvt_tbl["total"]
 
     pvt_tbl = pvt_tbl.reset_index()
@@ -57,7 +73,7 @@ def student_attd_by_weekday(RATR_df):
         aggfunc="count",
     ).fillna(0)
     pvt_tbl['total'] = pvt_tbl.sum(axis=1)
-    pvt_tbl["late_%"] = pvt_tbl["L"] / pvt_tbl["total"]
+    pvt_tbl["late_%"] = pvt_tbl["L"] / (pvt_tbl["P"] + pvt_tbl["L"])
 
     pvt_tbl = pvt_tbl.reset_index()
 

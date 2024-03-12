@@ -54,7 +54,7 @@ def main(data):
     attd_by_student['total'] = attd_by_student.sum(axis=1)
 
     attd_by_student["%_late"] = attd_by_student["tardy"] / (
-        attd_by_student["total"] - attd_by_student["excused"]
+        attd_by_student["present"] - attd_by_student["tardy"]
     )
     attd_by_student["%_absent"] = attd_by_student["unexcused"] / (
         attd_by_student["total"] - attd_by_student["excused"]

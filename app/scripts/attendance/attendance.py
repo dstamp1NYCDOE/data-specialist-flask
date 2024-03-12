@@ -101,6 +101,11 @@ def return_RATR_analysis():
         'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
     )
 
+    overall_by_month_pvt = process_RATR.overall_attd_by_month(RATR_df)
+    overall_by_month_pvt = overall_by_month_pvt.style.set_table_attributes(
+        'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+    )
+
     overall_pvt = process_RATR.overall_attd_by_weekday(RATR_df)
     overall_pvt = overall_pvt.style.set_table_attributes(
         'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
@@ -111,6 +116,7 @@ def return_RATR_analysis():
         "dfs": [
             student_pvt.to_html(),
             overall_pvt.to_html(),
+            overall_by_month_pvt.to_html(),
             student_by_month_pvt.to_html(),
         ],
     }

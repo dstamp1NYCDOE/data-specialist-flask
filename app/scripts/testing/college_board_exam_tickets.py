@@ -85,9 +85,11 @@ def main(form, request):
 
 def generate_room_roster(df, room, session):
     exam_title = df.iloc[0, :]["Test Name"]
+    exam_date = df.iloc[0, :]["ExamDate"]
+    exam_date = exam_date.strftime("%B %e")
     flowables = []
     paragraph = Paragraph(
-        f"{exam_title} - Room {room} - Session {session}",
+        f"{exam_date} - {exam_title} - Room {room} - Session {session}",
         styles["Title"],
     )
     flowables.append(paragraph)
@@ -111,15 +113,17 @@ def generate_student_exam_ticket(student_row):
     room_num = student_row["Room#"]
     testing_session = student_row["Session"]
     exam_title = student_row["Test Name"]
+    exam_date = student_row["ExamDate"]
+    exam_date = exam_date.strftime("%B %e")
 
     paragraph = Paragraph(
-        f"{exam_title} Exam Ticket",
+        f"{exam_date} {exam_title} Exam Ticket",
         styles["Title"],
     )
     flowables.append(paragraph)
 
     paragraph = Paragraph(
-        f"{student_name} ({StudentID})",
+        f"{student_name}",
         styles["Title"],
     )
     flowables.append(paragraph)
@@ -169,11 +173,15 @@ def process_exam_tickets(form, request):
     df = pd.read_csv(student_testing_assignments)
     df = df.dropna(subset=["StudentID"])
 
+    exam_date = form.exam_date.data
+    exam_date = pd.to_datetime(exam_date)
+
     df["Room#"] = df["Room"].str.extract(r"(\d{3})")
     df["Session"] = df["Room"].str.extract(r"([AaPp][Mm])")
+    df["ExamDate"] = df['Room'].apply(lambda x: exam_date)
     df["StudentName"] = df["Student Name"].apply(swap_name)
 
-    print(df)
+
 
     PDF = request.files[form.student_exam_tickets.name]
 
@@ -224,6 +232,7 @@ def process_exam_tickets(form, request):
         "Test Name",
         "Room#",
         "Session",
+        "ExamDate",
     ]
     student_exam_tickets_df = student_exam_tickets_df[cols]
     student_exam_tickets_df = student_exam_tickets_df.dropna(subset=["StudentID"])

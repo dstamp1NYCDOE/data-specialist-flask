@@ -7,7 +7,11 @@ from flask import render_template, request, send_file, session
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
+from app.scripts.pbis.forms import ABC_AnalysisForm
+
 import app.scripts.pbis.academic_intervention_plan as academic_intervention_plan
+import app.scripts.pbis.abc_analysis as abc_analysis
+
 @scripts.route("/pbis")
 def return_pbis_reports():
     reports = [
@@ -15,6 +19,11 @@ def return_pbis_reports():
             "report_title": "Academic Intervention Plan Candidates",
             "report_function": "scripts.return_academic_intervention_plan_candidates",
             "report_description": "Return Academic Intervention Plan Candidates",
+        },
+        {
+            "report_title": "ABC Analysis",
+            "report_function": "scripts.return_abc_analysis",
+            "report_description": "Return ABC Analysis",
         },
     ]
     title = 'PBIS'
@@ -48,3 +57,20 @@ def return_academic_intervention_plan_candidates():
             ]
         }
         return render_template("viewReport.html", data=data)    
+    
+@scripts.route("/pbs/abc", methods=["GET", "POST"])
+def return_abc_analysis():
+    if request.method == "GET":
+        form = ABC_AnalysisForm()
+        return render_template(
+            "pbis/templates/pbis/abc_form.html", form=form
+        )
+    else:
+        form = ABC_AnalysisForm(request.form)
+        df = abc_analysis.main(form, request)
+        data = {
+            'df_to_html':df.to_html()
+        }
+        return render_template(
+            "pbis/templates/pbis/abc_results.html", data = data
+        )        

@@ -52,8 +52,13 @@ def main(form, request):
     df = pd.read_csv(file)
     df = df.dropna(subset=["StudentID"])
 
+    exam_date = form.exam_date.data
+    exam_date = pd.to_datetime(exam_date)
+
     df["Room#"] = df["Room"].str.extract(r"(\d{3})")
+    df = df.fillna({"Room#": "202"})
     df["Session"] = df["Room"].str.extract(r"([AaPp][Mm])")
+    df["ExamDate"] = df["Room"].apply(lambda x: exam_date)
 
     print(df)
 
@@ -86,6 +91,7 @@ def generate_student_letter(student_row):
 
     StudentID = int(student_row["StudentID"])
     student_name = student_row["Student Name"]
+    exam_date = student_row["ExamDate"]
 
     room_num = student_row["Room#"]
     testing_session = student_row["Session"]
@@ -115,11 +121,16 @@ def generate_student_letter(student_row):
         I = ""
         pass
 
-    if testing_session == "AM":
-        report_time = "8:15 AM"
     if testing_session == "PM":
-        report_time = "12:15 AM"
+        report_time = "12:00 PM"
+    else:
+        report_time = "8:15 AM"
 
+    paragraph = Paragraph(
+        f"Exam Date: {exam_date.strftime('%A, %B %e, %Y')}",
+        styles["Heading1"],
+    )
+    flowables.append(paragraph)
     paragraph = Paragraph(
         f"Report Time: {report_time}",
         styles["Heading1"],

@@ -48,7 +48,7 @@ def return_sat_reports():
             "report_description": "Generates exam tickets for the SAT and PSAT",
         },
     ]
-    return render_template("testing/templates/testing/index.html", reports=reports)
+    return render_template("testing/templates/testing/index_sat.html", reports=reports)
 
 
 @scripts.route("/testing/college_board/signup_letters")
