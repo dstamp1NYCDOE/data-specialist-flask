@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% from 'progress_towards_graduation/templates/progress_towards_graduation/_forms.html' import render_progress_towards_graduation_form %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item active"><a href="#">Progresss Towards Graduation</a></li>
+  </ol>
+</nav>
+
+<h1>Progresss Towards Graduation Scripts</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for report in reports %}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{report.report_title}}</h5>
+                <p>{{report.report_description}}</p>
+                <div>
+                    {{render_progress_towards_graduation_form(report)}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}   
+</div>
+
+</div>
+{% endblock %}

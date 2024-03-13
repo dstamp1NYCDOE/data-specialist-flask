@@ -54,24 +54,31 @@ def main(form, request):
             'Teacher2',
             student_subset_title		
             ]
-    
+
+    counselor_cols = [
+        'StudentID','LastName','FirstName','Student DOE Email',
+        'Counselor',
+        student_subset_title		
+            ]
+        
     teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
-    print(teachers_lst)
+    
     teachers_lst.sort()
     teachers_lst = teachers_lst[1:]
+
+    ## all students with course info
+    df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_rosters')
+    
+    ## all students with counselor info
+    df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_students')
 
     for teacher in teachers_lst:
         students_df = df[(df['Teacher1']==teacher) | (df['Teacher2']==teacher)]
         students_df = students_df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName'])
         students_df.to_excel(writer, index=False, sheet_name=teacher)
 
-    cols = [
-        'StudentID','LastName','FirstName','Student DOE Email',
-        'Counselor',
-        student_subset_title		
-            ]
     for Counselor, students_df in df.groupby('Counselor'):
-        students_df = students_df[cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName'])
+        students_df = students_df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName'])
         students_df.to_excel(writer, index=False, sheet_name=Counselor)
 
     for sheet in writer.sheets:

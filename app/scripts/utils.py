@@ -72,6 +72,8 @@ def return_cohort_year(GEC):
         "Z": 2020,
         "Y": 2019,
         "X": 2018,
+        "W": 2017,
+        "V": 2016,
     }
     return GEC_dict.get(str(GEC))
 

@@ -25,6 +25,7 @@ def return_index():
         "Scholarship": "scripts.return_scholarship_reports",
         "PBIS": "scripts.return_pbis_reports",
         "Classwork": "scripts.return_classwork_reports",
+        "Progress Towards Graduation": "scripts.return_progress_towards_graduation_reports",
     }
     data = {"sections": dict(sorted(sections.items()))}
     return render_template("index.html", data=data)
