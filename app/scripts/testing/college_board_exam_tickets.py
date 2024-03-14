@@ -25,6 +25,8 @@ import os
 
 from io import BytesIO
 from flask import session, current_app
+
+from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
 styles = getSampleStyleSheet()
@@ -100,6 +102,12 @@ def generate_room_roster(df, room, session):
     )
     flowables.append(paragraph)
 
+    paragraph = Paragraph(
+        f"This roster is meant to help with checking in students but the roster of record is what appears in Test Day Toolkit.",
+        styles["Normal"],
+    )
+    flowables.append(paragraph)
+
     table_cols = ["StudentName", "StudentUsername", "StudentPassword"]
     students_tbl = utils.return_df_as_table(df, table_cols, fontsize=10)
     flowables.append(students_tbl)
@@ -122,6 +130,16 @@ def generate_student_exam_ticket(student_row):
     student_name = student_row["StudentName"]
     StudentUsername = student_row["StudentUsername"]
     StudentPassword = student_row["StudentPassword"]
+
+    email_address = student_row["Student DOE Email"]
+    date_of_birth = student_row["DOB"].strftime("%m/%d/%Y")
+    
+    apt_num = student_row['AptNum']
+    street = student_row["Street"]
+    city = student_row["City"]
+    state = student_row["State"]
+    zipcode = student_row['Zip']
+    street_address = f"{street} {apt_num} {city}, {state} {zipcode}"
 
     room_num = student_row["Room#"]
     testing_session = student_row["Session"]
@@ -166,26 +184,39 @@ def generate_student_exam_ticket(student_row):
     flowables.append(paragraph)
 
     paragraph = Paragraph(
+        f"DOE Email: {email_address}",
+        styles["Heading3"],
+    )
+    flowables.append(paragraph)
+
+    paragraph = Paragraph(
+        f"Home Address: {street_address}",
+        styles["Heading3"],
+    )
+    flowables.append(paragraph)
+
+
+    paragraph = Paragraph(
         f"StudentUsername: {StudentUsername}",
-        styles["Heading1"],
+        styles["Heading2"],
     )
     flowables.append(paragraph)
 
     paragraph = Paragraph(
         f"StudentPassword: {StudentPassword}",
-        styles["Heading1"],
+        styles["Heading2"],
     )
     flowables.append(paragraph)
 
     paragraph = Paragraph(
         f"Room Code: ________________________",
-        styles["Heading1"],
+        styles["Heading3"],
     )
     flowables.append(paragraph)
 
     paragraph = Paragraph(
         f"Start Code: ________________________",
-        styles["Heading1"],
+        styles["Heading3"],
     )
     flowables.append(paragraph)
 
@@ -262,6 +293,11 @@ def process_exam_tickets(form, request):
     ]
     student_exam_tickets_df = student_exam_tickets_df[cols]
     student_exam_tickets_df = student_exam_tickets_df.dropna(subset=["StudentID"])
+
+    cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
+    cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
+
+    student_exam_tickets_df = student_exam_tickets_df.merge(cr_3_07_df,on='StudentID',how='left')
     return student_exam_tickets_df
 
 
