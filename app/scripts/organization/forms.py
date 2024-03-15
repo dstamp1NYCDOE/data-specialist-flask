@@ -48,3 +48,15 @@ class ClassRostersFromList(FlaskForm):
             ],
         validators=[InputRequired()],
     )
+
+class CareerDayReportsForm(FlaskForm):
+    survey_responses = FileField(
+        "Student Survey Responses",
+        description='Each sheet of the spreadsheet should be the responses from a interest form',
+        validators=[FileRequired()],
+    )
+    output_file = SelectField(
+        "Output File",
+        choices=[("xlsx", "Assignments as Spreadsheet"),("pdf", "Assignment Letters")],
+        validators=[InputRequired()],
+    )    

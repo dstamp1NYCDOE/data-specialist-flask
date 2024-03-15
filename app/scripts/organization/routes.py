@@ -16,10 +16,13 @@ from app.scripts.organization.forms import (
     OrganizeStudentRecordsForm,
     ClassListCountsFromSubsetForm,
     ClassRostersFromList,
+    CareerDayReportsForm
 )
 from app.scripts.organization import organize_student_documents_by_list
 from app.scripts.organization import class_list_counts_from_list
 from app.scripts.organization import class_rosters_from_list
+
+from app.scripts.organization import career_day
 
 @scripts.route("/organization")
 def return_organization_reports():
@@ -34,10 +37,15 @@ def return_organization_reports():
             "report_function": "scripts.return_class_list_counts_from_list",
             "report_description": "Return counts of students in each class based on StudentID List",
         },
-                {
+        {
             "report_title": "Class Rosters from StudentID List",
             "report_function": "scripts.return_class_rosters_from_list",
             "report_description": "Return roster of students in each class based on StudentID List (inclusive or exclusive)",
+        },
+        {
+            "report_title": "Career Day Organization",
+            "report_function": "scripts.return_career_day_reports",
+            "report_description": "Generate career day assignments as spreadsheet or letters",
         },
     ]
     return render_template(
@@ -120,3 +128,22 @@ def return_class_rosters_from_list():
             download_name=download_name,
             mimetype="application/pdf",
         )
+
+@scripts.route("/organization/career_day", methods=["GET","POST"])
+def return_career_day_reports():
+    if request.method == 'GET':
+        form = CareerDayReportsForm()
+        return render_template("organization/templates/organization/career_day_form.html", form=form)
+    else:
+        form = CareerDayReportsForm(request.form)
+        if form.output_file.data == 'xlsx':
+            f = career_day.process_spreadsheet(form, request)
+            download_name = f"CareerDayAssignments_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
+            mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype=mimetype,
+        )        
