@@ -132,13 +132,14 @@ def generate_student_exam_ticket(student_row):
     StudentPassword = student_row["StudentPassword"]
 
     email_address = student_row["Student DOE Email"]
-    date_of_birth = student_row["DOB"].strftime("%m/%d/%Y")
+    date_of_birth = student_row["DOB"]
+    # .strftime("%m/%d/%Y")
     
     apt_num = student_row['AptNum']
     street = student_row["Street"]
     city = student_row["City"]
     state = student_row["State"]
-    zipcode = student_row['Zip']
+    zipcode = int(student_row['Zip'])
     street_address = f"{street} {apt_num} {city}, {state} {zipcode}"
 
     room_num = student_row["Room#"]
@@ -275,10 +276,12 @@ def process_exam_tickets(form, request):
         student_lst.append(temp_dict)
 
     student_exam_tickets_df = pd.DataFrame(student_lst)
+    
 
     student_exam_tickets_df = student_exam_tickets_df.merge(
         df, on=["StudentName"], how="left"
     )
+    students_registered_for_exam_df = student_exam_tickets_df
 
     cols = [
         "StudentID",
@@ -296,8 +299,11 @@ def process_exam_tickets(form, request):
 
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
+    student_exam_tickets_df = student_exam_tickets_df.merge(cr_3_07_df,on='StudentID',how='inner')
+    students_on_register_testing = student_exam_tickets_df['StudentID']
 
-    student_exam_tickets_df = student_exam_tickets_df.merge(cr_3_07_df,on='StudentID',how='left')
+    print(students_registered_for_exam_df[~students_registered_for_exam_df['StudentID'].isin(students_on_register_testing)])
+
     return student_exam_tickets_df
 
 
