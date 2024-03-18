@@ -16,13 +16,14 @@ from app.scripts.organization.forms import (
     OrganizeStudentRecordsForm,
     ClassListCountsFromSubsetForm,
     ClassRostersFromList,
-    CareerDayReportsForm
+    CareerDayReportsForm,
 )
 from app.scripts.organization import organize_student_documents_by_list
 from app.scripts.organization import class_list_counts_from_list
 from app.scripts.organization import class_rosters_from_list
 
 from app.scripts.organization import career_day
+
 
 @scripts.route("/organization")
 def return_organization_reports():
@@ -105,6 +106,7 @@ def return_class_list_counts_from_list():
         }
         return render_template("viewReport.html", data=data)
 
+
 @scripts.route("/organization/rosters_from_list", methods=["GET", "POST"])
 def return_class_rosters_from_list():
     if request.method == "GET":
@@ -120,7 +122,9 @@ def return_class_rosters_from_list():
 
         f = class_rosters_from_list.main(form, request)
 
-        download_name = f"{student_subset_title}_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
+        download_name = (
+            f"{student_subset_title}_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
+        )
 
         return send_file(
             f,
@@ -129,21 +133,28 @@ def return_class_rosters_from_list():
             mimetype="application/pdf",
         )
 
-@scripts.route("/organization/career_day", methods=["GET","POST"])
+
+@scripts.route("/organization/career_day", methods=["GET", "POST"])
 def return_career_day_reports():
-    if request.method == 'GET':
+    if request.method == "GET":
         form = CareerDayReportsForm()
-        return render_template("organization/templates/organization/career_day_form.html", form=form)
+        return render_template(
+            "organization/templates/organization/career_day_form.html", form=form
+        )
     else:
         form = CareerDayReportsForm(request.form)
-        if form.output_file.data == 'xlsx':
+        if form.output_file.data == "xlsx":
             f = career_day.process_spreadsheet(form, request)
-            download_name = f"CareerDayAssignments_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
-            mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-
+            download_name = (
+                f"CareerDayAssignments_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
+            )
+            mimetype = (
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            return f.to_html()
         return send_file(
             f,
             as_attachment=True,
             download_name=download_name,
             mimetype=mimetype,
-        )        
+        )
