@@ -144,14 +144,23 @@ def return_career_day_reports():
     else:
         form = CareerDayReportsForm(request.form)
         if form.output_file.data == "xlsx":
-            f = career_day.process_spreadsheet(form, request)
+            df = career_day.process_spreadsheet(form, request)
+            f = career_day.return_assignments_as_spreadsheet(df)
             download_name = (
                 f"CareerDayAssignments_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
             )
             mimetype = (
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-            return f.to_html()
+        if form.output_file.data == "pdf":
+            df = career_day.process_spreadsheet(form, request)
+            f = career_day.return_student_letters(df)
+
+            download_name = (
+                f"CareerDayAssignments_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+            )
+            mimetype = "application/pdf"
+
         return send_file(
             f,
             as_attachment=True,

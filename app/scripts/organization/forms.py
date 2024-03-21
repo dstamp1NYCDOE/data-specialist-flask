@@ -1,7 +1,7 @@
 from flask import session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import DateField, SelectField, StringField
+from wtforms import DateField, SelectField, StringField, SelectMultipleField
 from wtforms.validators import DataRequired, Regexp, InputRequired
 from wtforms.widgets import TextArea
 
@@ -20,7 +20,11 @@ class OrganizeStudentRecordsForm(FlaskForm):
         validators=[InputRequired()],
     )
 
-    student_list = FileField("Student List as Spreadsheet", validators=[FileRequired()])
+    student_list = FileField(
+        "Student List as Spreadsheet",
+        description="File must be saved as .xlsx",
+        validators=[FileRequired()],
+    )
 
     student_list_source = SelectField(
         "StudentID Column",
@@ -41,22 +45,58 @@ class ClassRostersFromList(FlaskForm):
     subset_lst = StringField("StudentID List", widget=TextArea())
     subset_title = StringField("Subgroup title")
 
+
+    teacher = SelectField(
+        "Teacher",
+        choices=[
+            ("BOTH", "BOTH"),
+            ("Teacher1", "Teacher1"),
+            ("Teacher2", "Teacher2"),
+        ],
+        validators=[InputRequired()],
+    )
+
+    periods = SelectMultipleField(
+        "Periods",
+        choices=[
+            ("ALL", "ALL"),
+            ("1", "P1"),
+            ("2", "P2"),
+            ("3", "P3"),
+            ("4", "P4"),
+            ("5", "P5"),
+            ("6", "P6"),
+            ("7", "P7"),
+            ("8", "P8"),
+            ("9", "P9"),
+        ],
+        validators=[InputRequired()],
+    )
+
     inner_or_outer = SelectField(
         "Mode",
         choices=[
-            ("inner", "Return Students In List"), ("outer", "Return Students Not In List"),("combined", "Full List with True False")
-            ],
+            ("inner", "Return Students In List"),
+            ("outer", "Return Students Not In List"),
+            ("combined", "Full List with True False"),
+        ],
         validators=[InputRequired()],
     )
+
 
 class CareerDayReportsForm(FlaskForm):
     survey_responses = FileField(
         "Student Survey Responses",
-        description='Each sheet of the spreadsheet should be the responses from a interest form',
+        description="Each sheet of the spreadsheet should be the responses from a interest form",
+        validators=[FileRequired()],
+    )
+    locations_file = FileField(
+        "Locations (.CSV)",
+        description="Locations as .csv file",
         validators=[FileRequired()],
     )
     output_file = SelectField(
         "Output File",
-        choices=[("xlsx", "Assignments as Spreadsheet"),("pdf", "Assignment Letters")],
+        choices=[("xlsx", "Assignments as Spreadsheet"), ("pdf", "Assignment Letters")],
         validators=[InputRequired()],
-    )    
+    )

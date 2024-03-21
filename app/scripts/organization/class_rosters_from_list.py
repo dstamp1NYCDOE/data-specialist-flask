@@ -36,6 +36,20 @@ def main(form, request):
 
     df = rosters_df.merge(master_schedule, on=["Course", "Section"], how='left').fillna('')
     df = df.merge(student_info_df, on='StudentID', how='left')
+
+    ## periods
+    periods = form.periods.data
+    if 'ALL' in periods:
+        pass
+    else:
+        periods = [x for x in periods if x!='ALL']
+        period_regex_match = ''.join(periods)
+        df = df[df['Period'].str.match(f"[{period_regex_match}]")]
+
+     ## teacher
+    teacher_flag = form.teacher.data
+
+
     
     if form.inner_or_outer.data == 'inner':
         df = df[df[student_subset_title]==True]
@@ -60,9 +74,13 @@ def main(form, request):
         'Counselor',
         student_subset_title		
             ]
-        
-    teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
-    
+    if teacher_flag == 'BOTH':
+         teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
+    if teacher_flag == 'Teacher1':    
+        teachers_lst = pd.unique(df[["Teacher1"]].values.ravel("K"))
+    if teacher_flag == 'Teacher2':    
+        teachers_lst = pd.unique(df[["Teacher2"]].values.ravel("K"))
+
     teachers_lst.sort()
     teachers_lst = teachers_lst[1:]
 
@@ -73,7 +91,14 @@ def main(form, request):
     df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_students')
 
     for teacher in teachers_lst:
-        students_df = df[(df['Teacher1']==teacher) | (df['Teacher2']==teacher)]
+        if teacher_flag == 'BOTH':
+            students_df = df[(df['Teacher1']==teacher) | (df['Teacher2']==teacher)]
+        if teacher_flag == 'Teacher1':    
+            students_df = df[df['Teacher1']==teacher]
+        if teacher_flag == 'Teacher2':    
+            students_df = df[df['Teacher2']==teacher]
+
+        
         students_df = students_df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName'])
         students_df.to_excel(writer, index=False, sheet_name=teacher)
 
