@@ -115,13 +115,15 @@ def generate_room_roster(df, room, session):
     flowables.append(PageBreak())
     return flowables
 
+
 def return_computer_login_info(room_number):
-    if room_number in ['919','901','603','221']:
+    if room_number in ["919", "901", "603", "221"]:
         return f"Username: .\{room_number}s# (Type period + backslash +room number + s + computer number ex. .\{room_number}s24"
-    if room_number in ['704','519']:
+    if room_number in ["704", "519", "319"]:
         return f"Username: \{room_number}s# (Type backslash +room number + s + computer number ex. \{room_number}s24"
-    if room_number in ['201']:
+    if room_number in ["201"]:
         return f"Username: .\student (Sign-in options -> Key icon Type period + backslash + student ex. \student"
+
 
 def generate_student_exam_ticket(student_row):
     flowables = []
@@ -134,12 +136,12 @@ def generate_student_exam_ticket(student_row):
     email_address = student_row["Student DOE Email"]
     date_of_birth = student_row["DOB"]
     # .strftime("%m/%d/%Y")
-    
-    apt_num = student_row['AptNum']
+
+    apt_num = student_row["AptNum"]
     street = student_row["Street"]
     city = student_row["City"]
     state = student_row["State"]
-    zipcode = int(student_row['Zip'])
+    zipcode = int(student_row["Zip"])
     street_address = f"{street} {apt_num} {city}, {state} {zipcode}"
 
     room_num = student_row["Room#"]
@@ -178,45 +180,72 @@ def generate_student_exam_ticket(student_row):
     )
     flowables.append(paragraph)
 
-    paragraph = Paragraph(
-        f"Generic Computer Login: {return_computer_login_info(room_num)}",
-        styles["Normal"],
+    ## Student to Do List
+    student_to_dos = ListFlowable(
+        [
+            Paragraph(
+                f"Log into the computer with your DOE email/password OR {return_computer_login_info(room_num)}",
+                styles["Normal"],
+            ),
+            Paragraph(
+                "Open Blue Book app on desktop. If BlueBook does not appear, restart computer",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"Log into Bluebook with your test day username ({StudentUsername}) and registration number ({StudentPassword})",
+                styles["Normal"],
+            ),
+            Paragraph("Complete the digital readiness section", styles["Normal"]),
+            Paragraph(
+                "Wait for the proctor to provide the room code and start code",
+                styles["Normal"],
+            ),
+        ],
+        bulletType="bullet",
+        start="squarelrs",
     )
-    flowables.append(paragraph)
+
+    flowables.append(student_to_dos)
 
     paragraph = Paragraph(
-        f"DOE Email: {email_address}",
+        f"Student Info",
         styles["Heading3"],
     )
     flowables.append(paragraph)
 
-    paragraph = Paragraph(
-        f"Home Address: {street_address}",
-        styles["Heading3"],
+    student_info = ListFlowable(
+        [
+            Paragraph(
+                f"<b>DOE Email:</b> {email_address}",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"<b>Home Address:</b> {street_address}",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"<b>BlueBook Username:</b> {StudentUsername}",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"<b>BlueBook Password:</b> {StudentPassword}",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"<b>Room Code:</b> ______________________",
+                styles["Normal"],
+            ),
+            Paragraph(
+                f"<b>Start Code:</b> ______________________",
+                styles["Normal"],
+            ),
+        ],
+        bulletType="bullet",
+        start="squarelrs",
     )
-    flowables.append(paragraph)
-
 
     paragraph = Paragraph(
-        f"StudentUsername: {StudentUsername}",
-        styles["Heading2"],
-    )
-    flowables.append(paragraph)
-
-    paragraph = Paragraph(
-        f"StudentPassword: {StudentPassword}",
-        styles["Heading2"],
-    )
-    flowables.append(paragraph)
-
-    paragraph = Paragraph(
-        f"Room Code: ________________________",
-        styles["Heading3"],
-    )
-    flowables.append(paragraph)
-
-    paragraph = Paragraph(
-        f"Start Code: ________________________",
+        f"THIS PAPER WILL BE COLLECTED AT THE END OF THE EXAM",
         styles["Heading3"],
     )
     flowables.append(paragraph)
@@ -234,12 +263,10 @@ def process_exam_tickets(form, request):
     exam_date = pd.to_datetime(exam_date)
 
     df["Room#"] = df["Room"].str.extract(r"(\d{3})")
-    
+
     df["Session"] = df["Room"].str.extract(r"([AaPp][Mm])")
-    df["ExamDate"] = df['Room'].apply(lambda x: exam_date)
+    df["ExamDate"] = df["Room"].apply(lambda x: exam_date)
     df["StudentName"] = df["Student Name"].apply(swap_name)
-
-
 
     PDF = request.files[form.student_exam_tickets.name]
 
@@ -276,7 +303,6 @@ def process_exam_tickets(form, request):
         student_lst.append(temp_dict)
 
     student_exam_tickets_df = pd.DataFrame(student_lst)
-    
 
     student_exam_tickets_df = student_exam_tickets_df.merge(
         df, on=["StudentName"], how="left"
@@ -299,10 +325,18 @@ def process_exam_tickets(form, request):
 
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
-    student_exam_tickets_df = student_exam_tickets_df.merge(cr_3_07_df,on='StudentID',how='inner')
-    students_on_register_testing = student_exam_tickets_df['StudentID']
+    student_exam_tickets_df = student_exam_tickets_df.merge(
+        cr_3_07_df, on="StudentID", how="inner"
+    )
+    students_on_register_testing = student_exam_tickets_df["StudentID"]
 
-    print(students_registered_for_exam_df[~students_registered_for_exam_df['StudentID'].isin(students_on_register_testing)])
+    print(
+        students_registered_for_exam_df[
+            ~students_registered_for_exam_df["StudentID"].isin(
+                students_on_register_testing
+            )
+        ]
+    )
 
     return student_exam_tickets_df
 
