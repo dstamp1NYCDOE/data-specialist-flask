@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_testing_reports')}}">Testing</a></li>
+    <li class="breadcrumb-item active">Regents</li>
+  </ol>
+</nav>
+
+<h1>Regents Testing Scripts</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for report in reports %}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{{url_for(report.report_function)}}" class="stretched-link">{{report.report_title}}</a>
+                </h5>
+                <p>{{report.report_description}}</p>
+                   
+                <p>Files Needed:
+                {% for file_needed in report.files_needed %}
+                <span id="{{file_needed}}" class="badge rounded-pill">{{file_needed}}</span>
+                {% endfor %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}   
+</div>
+
+</div>
+
+<script>
+    {% for report in reports %}
+        var files_needed = {{report.files_needed|safe}}
+        for (let i = 0; i < files_needed.length; i++) {
+            var apiUrl = `{{url_for('api.return_files')}}?report=${files_needed[i]}`;
+            
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var files_needed_badge = document.getElementById(files_needed[i])
+                    console.log(files_needed_badge)
+                    if (data.length > 0){
+                        files_needed_badge.classList.toggle('text-bg-success')
+                    } else {
+                        files_needed_badge.classList.toggle('text-bg-danger')
+                    }
+
+                    console.log(data);
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    {% endfor %}
+</script>
+{% endblock %}
+

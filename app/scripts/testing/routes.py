@@ -25,6 +25,11 @@ def return_testing_reports():
             "report_function": "scripts.return_sat_reports",
             "report_description": "Reports related to the SAT and PSAT",
         },
+        {
+            "report_title": "Regents",
+            "report_function": "scripts.return_regents_reports",
+            "report_description": "Reports related to the Regents Exams",
+        },
     ]
     return render_template("testing/templates/testing/index.html", reports=reports)
 
@@ -104,3 +109,32 @@ def return_college_board_exam_tickets():
             download_name=download_name,
             mimetype="application/pdf",
         )
+
+
+@scripts.route("/testing/regents")
+def return_regents_reports():
+    reports = [
+        {
+            "report_title": "Generate Exam Invitations",
+            "report_function": "scripts.return_regents_exam_invitations",
+            "report_description": "Generates student exam invitations from CR 1.08 and Regents Exam Calendar",
+            "files_needed": ["1_01", "1_08", "regents_exam_calendar"],
+        },
+    ]
+    return render_template(
+        "testing/templates/testing/regents/index.html", reports=reports
+    )
+
+
+@scripts.route("/testing/regents/examinvitations")
+def return_regents_exam_invitations():
+
+    f = ""
+    testing_period = "June2024"
+    download_name = f"{testing_period}_exam_invitations.pdf"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        mimetype="application/pdf",
+    )
