@@ -15,12 +15,19 @@
 <form action="{{url_for('scripts.return_career_day_reports')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
 
-      <div class="form-group p-1 g-col-12">
+    <div class="form-group p-1 g-col-12">
         {{ form.survey_responses.label(class_="form-label") }}
         {{ form.survey_responses(class_="form-control") }}
+        <div id="surveyResponsesHelp" class="form-text">{{form.survey_responses.description}}</div>
     </div>
 
+    <div class="form-group p-1 g-col-12">
+        {{ form.locations_file.label(class_="form-label") }}
+        {{ form.locations_file(class_="form-control") }}
+        <div id="locationsFileHelp" class="form-text">{{form.locations_file.description}}</div>
+    </div>
 
+    
 
     <div class="form-group p-1 g-col-12">
       {{ form.output_file.label(class_="form-label") }}
