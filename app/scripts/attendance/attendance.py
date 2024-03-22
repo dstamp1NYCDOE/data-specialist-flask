@@ -18,7 +18,10 @@ import app.scripts.attendance.jupiter_attd_summary_by_class as jupiter_attd_summ
 import app.scripts.attendance.jupiter_attd_teacher_completion as jupiter_attd_teacher_completion
 import app.scripts.attendance.jupiter_attd_patterns as jupiter_attd_patterns
 
+import app.scripts.attendance.daily_attd_predictor as daily_attd_predictor
+
 from app.scripts.attendance.forms import JupiterCourseSelectForm
+
 
 @scripts.route("/attendance")
 def return_attendance_reports():
@@ -48,17 +51,23 @@ def return_attendance_reports():
             "report_function": "scripts.return_teacher_jupiter_attd",
             "report_description": "Return Jupiter Attendance Completion by teacher for current term",
         },
-                {
+        {
             "report_title": "Jupiter Attendance Patterns",
             "report_function": "scripts.return_jupiter_attd_patterns",
             "report_description": "Return Jupiter Attendance Patterns",
+        },
+        {
+            "report_title": "Daily Attd Predictor",
+            "report_function": "scripts.return_daily_attd_predictor",
+            "report_description": "Return Daily Attd Predictor",
         },
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
     )
 
-@scripts.route('/attendance/teacher_jupiter_attd', methods=['GET','POST'])
+
+@scripts.route("/attendance/teacher_jupiter_attd", methods=["GET", "POST"])
 def return_teacher_jupiter_attd():
     df = jupiter_attd_teacher_completion.main()
     report_name = "Jupiter Period Attendance Completition By Teacher"
@@ -83,7 +92,27 @@ def return_teacher_jupiter_attd():
             ]
         }
         return render_template("viewReport.html", data=data)
-    
+
+
+@scripts.route("/attendance/daily_attd_predictor")
+def return_daily_attd_predictor():
+    RATR_filename = utils.return_most_recent_report(files_df, "RATR")
+    RATR_df = utils.return_file_as_df(RATR_filename)
+
+    output_df = daily_attd_predictor.main(RATR_df)
+
+    output_df = output_df.style.set_table_attributes(
+        'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+    )
+    data = {
+        "report_title": "Daily Attd Predictor",
+        "dfs": [
+            output_df.to_html(),
+        ],
+    }
+    template_str = "templates/scripts/dataframes_generic.html"
+    return render_template(template_str, data=data)
+
 
 @scripts.route("/attendance/RATR_analysis")
 def return_RATR_analysis():
@@ -150,6 +179,7 @@ def return_jupiter_attd_analysis_by_teacher():
         }
         return render_template("viewReport.html", data=data)
 
+
 @scripts.route("/attendance/jupiter/patterns")
 def return_jupiter_attd_patterns():
     df = jupiter_attd_patterns.main()
@@ -175,6 +205,7 @@ def return_jupiter_attd_patterns():
             ]
         }
         return render_template("viewReport.html", data=data)
+
 
 @scripts.route("/attendance/jupiter/by_student")
 def return_jupiter_attd_analysis_by_student():
@@ -218,7 +249,6 @@ def return_jupiter_attd_benchmark_analysis():
         download_name = f"{report_name.replace(' ','')}.xlsx"
         return send_file(f, as_attachment=True, download_name=download_name)
     else:
-        # df = df.head(2000)
         df = df.style.set_table_attributes(
             'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
         )
@@ -247,11 +277,11 @@ def generate_jupiter_attendance_class_report():
         course, section = course_and_section.split("/")
 
         data = {
-            'Course':course,
-            'Section':section,
+            "Course": course,
+            "Section": section,
         }
         df = jupiter_attd_summary_by_class.main(data)
-        
+
         df = df.style.set_table_attributes(
             'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
         )

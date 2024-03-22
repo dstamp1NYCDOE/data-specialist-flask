@@ -16,6 +16,7 @@ import app.scripts.testing.college_board_signup_letter as college_board_signup_l
 import app.scripts.testing.college_board_exam_invitations as college_board_exam_invitations
 import app.scripts.testing.college_board_exam_tickets as college_board_exam_tickets
 
+import app.scripts.testing.regents.initial_registration as regents_initial_registration
 
 @scripts.route("/testing")
 def return_testing_reports():
@@ -120,9 +121,32 @@ def return_regents_reports():
             "report_description": "Generates student exam invitations from CR 1.08 and Regents Exam Calendar",
             "files_needed": ["1_01", "1_08", "regents_exam_calendar"],
         },
+        {
+            "report_title": "Generate Initial Exam Registrations",
+            "report_function": "scripts.return_initial_regents_registrations",
+            "report_description": "Generates student exam invitations from CR 1.08 and Regents Exam Calendar",
+            "files_needed": ["1_14","1_01"],
+        },
     ]
+    files_needed = ['1_01','1_08','1_14']
     return render_template(
-        "testing/templates/testing/regents/index.html", reports=reports
+        "testing/templates/testing/regents/index.html", reports=reports, files_needed=files_needed
+    )
+
+@scripts.route("/testing/regents/initial_registrations")
+def return_initial_regents_registrations():
+    df = regents_initial_registration()
+    print(df)
+    return ''
+
+    f = ""
+    testing_period = "June2024"
+    download_name = f"{testing_period}_exam_invitations.pdf"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        mimetype="application/pdf",
     )
 
 
