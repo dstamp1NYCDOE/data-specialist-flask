@@ -12,10 +12,14 @@ JUPITER_SFTP_PASSWORD = os.getenv("JUPITER_SFTP_PASSWORD")
 
 
 def main(report,year_and_semester):
+    cnopts = pysftp.CnOpts()
+    cnopts.hostkeys = None 
+
     with pysftp.Connection(
         JUPITER_SFTP_HOSTNAME,
         username=JUPITER_SFTP_USERNAME,
         password=JUPITER_SFTP_PASSWORD,
+        cnopts=cnopts,
     ) as sftp:
         jupiter_filename = f"{report}.csv"
 
