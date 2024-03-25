@@ -1,7 +1,7 @@
 import datetime as dt
+from io import BytesIO
 
-
-from flask import render_template, request, send_file
+from flask import render_template, request, send_file, session
 
 
 from app.scripts import scripts, files_df
@@ -17,6 +17,7 @@ import app.scripts.testing.college_board_exam_invitations as college_board_exam_
 import app.scripts.testing.college_board_exam_tickets as college_board_exam_tickets
 
 import app.scripts.testing.regents.initial_registration as regents_initial_registration
+
 
 @scripts.route("/testing")
 def return_testing_reports():
@@ -125,28 +126,37 @@ def return_regents_reports():
             "report_title": "Generate Initial Exam Registrations",
             "report_function": "scripts.return_initial_regents_registrations",
             "report_description": "Generates student exam invitations from CR 1.08 and Regents Exam Calendar",
-            "files_needed": ["1_14","1_01"],
+            "files_needed": ["1_42", "1_01"],
         },
     ]
-    files_needed = ['1_01','1_08','1_14']
+    files_needed = ["1_01", "1_08", "1_42"]
     return render_template(
-        "testing/templates/testing/regents/index.html", reports=reports, files_needed=files_needed
+        "testing/templates/testing/regents/index.html",
+        reports=reports,
+        files_needed=files_needed,
     )
+
 
 @scripts.route("/testing/regents/initial_registrations")
 def return_initial_regents_registrations():
-    df = regents_initial_registration()
-    print(df)
-    return ''
+    school_year = session["school_year"]
+    term = session["term"]
+    if term == 1:
+        month = "January"
+    if term == 2:
+        month = "June"
 
-    f = ""
-    testing_period = "June2024"
-    download_name = f"{testing_period}_exam_invitations.pdf"
+    df = regents_initial_registration.main(month)
+    f = BytesIO()
+    df.to_excel(f, index=False)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_exam_registrations.xlsx"
     return send_file(
         f,
         as_attachment=True,
         download_name=download_name,
-        mimetype="application/pdf",
+        # mimetype="application/pdf",
     )
 
 
