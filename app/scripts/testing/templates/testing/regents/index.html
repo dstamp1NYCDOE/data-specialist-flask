@@ -24,7 +24,7 @@
                    
                 <p>Files Needed:
                 {% for file_needed in report.files_needed %}
-                <span class="badge rounded-pill {{file_needed}}">{{file_needed}}</span>
+                <span class="badge rounded-pill cr_{{file_needed}}">{{file_needed}}</span>
                 {% endfor %}
                 </p>
             </div>
@@ -35,37 +35,6 @@
 
 </div>
 
-<script>
-    var files_needed = {{files_needed|safe}}
-    for (let i = 0; i < files_needed.length; i++) {
-        var apiUrl = `{{url_for('api.return_files')}}?report=${files_needed[i]}`;
-        
-        fetch(apiUrl)
-            .then(response => {
-                if (!response.ok) {
-                throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // const files_needed_badges = document.querySelectorAll(`.${files_needed[i]}`)
-                const files_needed_badges = document.querySelectorAll(files_needed[i])
-                files_needed_badges.forEach((files_needed_badge) => {
-                    if (data.length > 0){
-                    files_needed_badge.classList.toggle('text-bg-success')
-                    } else {
-                        files_needed_badge.classList.toggle('text-bg-danger')
-                    }
-                });
 
-
-                console.log(data);
-
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
-</script>
 {% endblock %}
 
