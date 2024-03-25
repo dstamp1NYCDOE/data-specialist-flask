@@ -1,7 +1,7 @@
 from flask import session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import DateField, SelectField, StringField, SelectMultipleField
+from wtforms import DateField, SelectField, StringField, SelectMultipleField, BooleanField
 from wtforms.validators import DataRequired, Regexp, InputRequired
 from wtforms.widgets import TextArea
 
@@ -71,6 +71,11 @@ class ClassRostersFromList(FlaskForm):
             ("9", "P9"),
         ],
         validators=[InputRequired()],
+        default=['ALL'],
+    )
+
+    computer_labs_flag = BooleanField(
+        "Computer Labs Only",default=False
     )
 
     inner_or_outer = SelectField(

@@ -33,12 +33,12 @@ def main(RATR_df):
     RATR_df = RATR_df.merge(calendar_df, on="Date", how="left")
 
     student_attd_df = return_student_attd(RATR_df)
-    student_attd_by_month_df = student_attd_by_days_before_break_df = (
-        return_student_pvt_by_subcolumn(RATR_df, "Month")
-    )
-    student_attd_by_day_of_week_df = student_attd_by_days_before_break_df = (
-        return_student_pvt_by_subcolumn(RATR_df, "Weekday")
-    )
+
+    student_attd_by_month_df = return_student_pvt_by_subcolumn(RATR_df, "Month")
+    
+    student_attd_by_term_df = return_student_pvt_by_subcolumn(RATR_df, "Term")
+    
+    student_attd_by_day_of_week_df = return_student_pvt_by_subcolumn(RATR_df, "Weekday")
     student_attd_by_days_before_break_df = return_student_pvt_by_subcolumn(
         RATR_df, "DaysBeforeBreak"
     )
@@ -53,8 +53,14 @@ def main(RATR_df):
     month_df = student_attd_by_month_df.pivot(
         index="StudentID", columns="Month", values="absence_%"
     )
-    monthly_trend_df = return_monthly_trend_df(student_attd_by_month_df)
+    monthly_trend_df = return_trend_df(student_attd_by_month_df)
     month_df = month_df.merge(monthly_trend_df, on=["StudentID"], how="left")
+
+    term_df = student_attd_by_term_df.pivot(
+        index="StudentID", columns="Term", values="absence_%"
+    )
+    term_trend_df = return_trend_df(student_attd_by_term_df)
+    term_df = term_df.merge(term_trend_df, on=["StudentID"], how="left")
 
     vacation_extender_df = return_vacation_extender_df(
         student_attd_by_days_before_break_df, student_attd_by_days_after_break
@@ -63,6 +69,7 @@ def main(RATR_df):
 
     output_df = output_df.merge(student_attd_df, on="StudentID")
     output_df = output_df.merge(month_df, on="StudentID")
+    output_df = output_df.merge(term_df, on='StudentID')
     output_df = output_df.merge(vacation_extender_df, on="StudentID")
     output_df = output_df.merge(day_of_week_df, on="StudentID")
     output_df = output_df.merge(multiple_day_df, on="StudentID")
@@ -72,7 +79,7 @@ def main(RATR_df):
     return output_df
 
 
-def return_monthly_trend_df(student_attd_by_month_df):
+def return_trend_df(student_attd_by_month_df):
     metric = "absence_%"
     df = (
         student_attd_by_month_df.groupby(["StudentID"])[metric]
@@ -107,7 +114,10 @@ def return_multiple_day_df(RATR_df):
         for i, j in list(pairwise(attd_list)):
             possible_pairs += 1
             if i == "A" and j == "A":
-                consecutive_days_absent += 1
+                if consecutive_days_absent == 0:
+                    consecutive_days_absent += 2
+                else:
+                    consecutive_days_absent += 1
 
         if total_days_absent == 0:
             consecutive_days_absent_metric = 0
@@ -259,11 +269,15 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
     return output_df
 
 
+from app.scripts.date_to_marking_period import return_mp_from_date
 def clean(RATR_df):
+    school_year = session["school_year"]
+
     RATR_df["StudentID"] = RATR_df["STUDENT ID"].str.extract("(\d{9})")
     RATR_df["StudentID"] = RATR_df["StudentID"].astype(int)
     RATR_df["Date"] = RATR_df["SCHOOL DAY"].str.extract("(\d{2}/\d{2}/\d{2})")
     RATR_df["Date"] = pd.to_datetime(RATR_df["Date"])
     RATR_df["Weekday"] = RATR_df["Date"].dt.day_name()
     RATR_df["Month"] = RATR_df["Date"].apply(lambda x: x.strftime("%Y-%m"))
+    RATR_df["Term"] = RATR_df["Date"].apply(return_mp_from_date, args=(school_year,))
     return RATR_df

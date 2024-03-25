@@ -37,6 +37,11 @@ def main(form, request):
     df = rosters_df.merge(master_schedule, on=["Course", "Section"], how='left').fillna('')
     df = df.merge(student_info_df, on='StudentID', how='left')
 
+    ## computer labs only
+    if form.computer_labs_flag.data:
+        computer_labs = [201,221,319,519,603,704,729,901,919]
+        df = df[df['Room'].isin(computer_labs)]
+
     ## periods
     periods = form.periods.data
     if 'ALL' in periods:

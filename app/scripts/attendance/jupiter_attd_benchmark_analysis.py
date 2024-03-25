@@ -24,6 +24,9 @@ def main(data):
     jupiter_attd_filename = utils.return_most_recent_report(files_df, "jupiter_period_attendance")
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
+    ## drop SAGA
+    attendance_marks_df = attendance_marks_df[attendance_marks_df['Course']!='MQS22']
+
     ## keep enrolled students only
     attendance_marks_df = attendance_marks_df[
         attendance_marks_df["StudentID"].isin(still_enrolled_students)
@@ -54,10 +57,10 @@ def main(data):
     attd_by_student['total'] = attd_by_student.sum(axis=1)
 
     attd_by_student["%_late"] = attd_by_student["tardy"] / (
-        attd_by_student["present"] - attd_by_student["tardy"]
+        attd_by_student["total"]
     )
     attd_by_student["%_absent"] = attd_by_student["unexcused"] / (
-        attd_by_student["total"] - attd_by_student["excused"]
+        attd_by_student["total"]
     )
     attd_by_student = attd_by_student.fillna(0)
 
