@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% import '_student_lookup_form.html' as _student_lookup_form %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item active"><a href="#">Privileges</a></li>
+  </ol>
+</nav>
+
+<h1>Privileges Scripts</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for form_card in form_cards %}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{form_card.Title}}</h5>
+                <p>{{form_card.Description}}</p>
+                {{_student_lookup_form.form(form_card.form,form_card.route)}}
+            </div>
+        </div>
+    </div>
+    {% endfor %}   
+</div>
+
+</div>
+{% endblock %}

@@ -14,7 +14,9 @@ def main(month):
 
     filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
     rosters_df = utils.return_file_as_df(filename)
+    rosters_df = rosters_df[rosters_df['Term']==f"S{term}"]
     rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
+    
 
     regents_max_df = process_regents_max.main()
 
@@ -46,7 +48,10 @@ def for_june(rosters_df, regents_max_df, regents_calendar_df):
         | (regents_max_df["NumericEquivalent"] < 75)
     ]
     ela_retakes = ela_retakes[ela_retakes["CourseCode"] == "EXRC"]
+    ela_retakes = ela_retakes[ela_retakes["year_in_hs"] == 3]
     ela_retakes["CourseCode"] = ela_retakes["CourseCode"].apply(lambda x: x + "E")
+
+    print(ela_retakes)
 
     ela_retakes_lst = ela_retakes[["StudentID", "CourseCode"]].to_dict("records")
 

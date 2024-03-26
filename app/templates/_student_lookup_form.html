@@ -1,0 +1,16 @@
+{% macro form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.StudentID.label }}
+        {{ form.StudentID(class_="form-select student_dropdown") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}

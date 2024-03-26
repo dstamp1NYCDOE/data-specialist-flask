@@ -78,6 +78,10 @@ class ClassRostersFromList(FlaskForm):
         "Computer Labs Only",default=False
     )
 
+    include_counselors_flag = BooleanField(
+        "Include Counselors",default=False
+    )
+
     inner_or_outer = SelectField(
         "Mode",
         choices=[

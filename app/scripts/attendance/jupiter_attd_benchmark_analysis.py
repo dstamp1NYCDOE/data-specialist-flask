@@ -6,6 +6,8 @@ from app.scripts import scripts, files_df
 
 from app.scripts.date_to_marking_period import return_mp_from_date
 
+import math 
+
 def main(data):
     ## student_info
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
@@ -56,21 +58,21 @@ def main(data):
     ).fillna(0)
     attd_by_student['total'] = attd_by_student.sum(axis=1)
 
-    attd_by_student["%_late"] = attd_by_student["tardy"] / (
-        attd_by_student["total"]
-    )
-    attd_by_student["%_absent"] = attd_by_student["unexcused"] / (
-        attd_by_student["total"]
-    )
+    attd_by_student['%_present'] = 100*(1-attd_by_student['unexcused']/attd_by_student['total'])
+    attd_by_student['%_on_time'] = 100*attd_by_student['present']/(attd_by_student['present'] + attd_by_student['tardy'])
     attd_by_student = attd_by_student.fillna(0)
+    
+    for standard in ['%_present','%_on_time']:
+        attd_by_student[standard] = attd_by_student[standard].apply(lambda x: math.ceil(x))
+    
 
-    LATE_BENCHMARK = data["on_time"]
-    attd_by_student["meeting_on_time_benchmark"] = attd_by_student["%_late"] <= (1-LATE_BENCHMARK)
 
-    PRESENT_BENCHMARK = data["present"]
-    attd_by_student["meeting_present_benchmark"] = attd_by_student["%_absent"] <= (
-        1 - PRESENT_BENCHMARK
-    )
+    ON_TIME_BENCHMARK = 80
+    attd_by_student["meeting_on_time_benchmark"] = attd_by_student["%_on_time"] >= ON_TIME_BENCHMARK
+
+    PRESENT_BENCHMARK = 90
+    attd_by_student["meeting_present_benchmark"] = attd_by_student["%_present"] >= PRESENT_BENCHMARK
+
 
     attd_by_student = attd_by_student.reset_index()
 

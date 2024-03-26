@@ -107,9 +107,10 @@ def main(form, request):
         students_df = students_df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName'])
         students_df.to_excel(writer, index=False, sheet_name=teacher)
 
-    for Counselor, students_df in df.groupby('Counselor'):
-        students_df = students_df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName'])
-        students_df.to_excel(writer, index=False, sheet_name=Counselor)
+    if form.include_counselors_flag.data:
+        for Counselor, students_df in df.groupby('Counselor'):
+            students_df = students_df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName'])
+            students_df.to_excel(writer, index=False, sheet_name=Counselor)
 
     for sheet in writer.sheets:
         worksheet = writer.sheets[sheet]

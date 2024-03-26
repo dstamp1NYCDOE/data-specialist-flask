@@ -24,6 +24,7 @@ def return_index():
         "Testing": "scripts.return_testing_reports",
         "Scholarship": "scripts.return_scholarship_reports",
         "PBIS": "scripts.return_pbis_reports",
+        "Privileges": "scripts.return_privileges_reports",
         "Classwork": "scripts.return_classwork_reports",
         "Progress Towards Graduation": "scripts.return_progress_towards_graduation_reports",
     }

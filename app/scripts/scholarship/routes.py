@@ -21,18 +21,43 @@ def return_scholarship_reports():
             "report_description": "Reports related student transcripts",
         },
         {
+            "report_title": "Jupiter Grades Analysis",
+            "report_function": "scripts.return_jupiter_analysis_reports",
+            "report_description": "Reports based on Jupiter Grades",
+        },
+
+    ]
+    return render_template(
+        "scholarship/templates/scholarship/index.html", reports=reports
+    )
+
+@scripts.route("/scholarship/jupiter")
+def return_jupiter_analysis_reports():
+    reports = [
+        {
             "report_title": "Jupiter Grades Benchmark Analysis",
             "report_function": "scripts.return_jupiter_grades_benchmark_analysis",
             "report_description": "Determine if students are meeting grades benchmark based on Jupiter",
+        },
+        {
+            "report_title": "Jupiter Grades Trajectory",
+            "report_function": "scripts.return_jupiter_grades_trajectory",
+            "report_description": "Determine student grade trajectory for school year in Jupiter",
         },
         {
             "report_title": "Jupiter Grades Teacher Analysis",
             "report_function": "scripts.return_jupiter_grades_teacher_analysis",
             "report_description": "Analyze grades by teacher",
         },
+                {
+            "report_title": "Jupiter Grades Senior Checkup",
+            "report_function": "scripts.return_jupiter_grads_senior_checkup",
+            "report_description": "Analyze jupiter grades for seniors by teacher",
+        },
     ]
     return render_template(
-        "scholarship/templates/scholarship/index.html", reports=reports
+        "scholarship/templates/scholarship/index_transcript_analysis.html",
+        reports=reports,
     )
 
 
@@ -80,8 +105,66 @@ def return_grade_point_trajectory():
         }
         return render_template("viewReport.html", data=data)
 
+from app.scripts.scholarship.jupiter import senior_checkup
+@scripts.route("/scholarship/jupiter/senior_checkup")
+def return_jupiter_grads_senior_checkup():
+    pvt = senior_checkup.main()
 
-@scripts.route("/scholarship/jupiter_grades_benchmark_analysis")
+    if request.args.get("download") == "true":
+        f = BytesIO()
+        pvt.to_excel(f, index=False)
+        f.seek(0)
+        download_name = f"JupiterGradesSeniorCheckup.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
+    else:
+        pvt = pvt.style.set_table_attributes(
+            'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+        )
+        pvt_html = (
+            pvt.to_html(classes=["table", "table-sm"])
+        )
+
+        data = {
+            "reports": [
+                {
+                    "html": pvt_html,
+                    "title": "Jupiter Grades Senior Checkup",
+                },
+            ]
+        }
+        return render_template("viewReport.html", data=data)
+
+
+from app.scripts.scholarship.jupiter import semester_trajectory
+@scripts.route("/scholarship/jupiter/grade_trajectory")
+def return_jupiter_grades_trajectory():
+    pvt = semester_trajectory.main()
+
+    if request.args.get("download") == "true":
+        f = BytesIO()
+        pvt.to_excel(f, index=False)
+        f.seek(0)
+        download_name = f"JupiterGradesSemesterTrajectory.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
+    else:
+        pvt = pvt.style.set_table_attributes(
+            'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
+        )
+        pvt_html = (
+            pvt.to_html(classes=["table", "table-sm"])
+        )
+
+        data = {
+            "reports": [
+                {
+                    "html": pvt_html,
+                    "title": "Jupiter Grades Benchmark Analysis",
+                },
+            ]
+        }
+        return render_template("viewReport.html", data=data)
+
+@scripts.route("/scholarship/jupiter/grades_benchmark_analysis")
 def return_jupiter_grades_benchmark_analysis():
     jupiter_grades_benchmark_analysis_pvt = jupiter_grades_benchmark_analysis.main()
 
@@ -110,7 +193,7 @@ def return_jupiter_grades_benchmark_analysis():
         return render_template("viewReport.html", data=data)
 
 
-@scripts.route("/scholarship/jupiter_grades_teacher_analysis")
+@scripts.route("/scholarship/jupiter/grades_teacher_analysis")
 def return_jupiter_grades_teacher_analysis():
     jupiter_grades_teacher_analysis_pvt = jupiter_grades_teacher_analysis.main()
 

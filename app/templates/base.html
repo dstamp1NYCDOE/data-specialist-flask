@@ -37,8 +37,28 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
+    <script>
+        // Get the select element.
+    var select = document.getElementsByClassName("student_dropdown");
+    
+    // Make an API call to get the data for the dropdown menu.
+    fetch("{{url_for('api.return_students')}}")
+      .then(response => response.json())
+      .then(data => {
+        // Clear the existing options in the dropdown menu.
+        select[0].innerHTML = "";
+    
+        // Add the new options to the dropdown menu.
+        for (var i = 0; i < data.length; i++) {
+          var option = document.createElement("option");
+          option.value = data[i].StudentID;
+          option.text = data[i].LastName+', '+data[i].FirstName;
+          select[0].appendChild(option);
+        }
+      });
+    </script>
 
-<script>
+    <script>
     var files_needed = {{files_needed|safe}}
     for (let i = 0; i < files_needed.length; i++) {
         var apiUrl = `{{url_for('api.return_files')}}?report=${files_needed[i]}`;
