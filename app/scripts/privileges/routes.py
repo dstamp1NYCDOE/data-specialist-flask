@@ -8,29 +8,71 @@ from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
 from app.main.forms import SelectStudentForm
+from app.scripts.privileges.forms import StudentPrivilegeSummaryForm
+from app.scripts.privileges.forms import AttendanceBenchmarkForm
+
 
 @scripts.route("/privileges")
 def return_privileges_reports():
 
-    PrivilegesStudentLookupForm = SelectStudentForm()
+    attendance_benchmark_form = AttendanceBenchmarkForm()
+    student_privileges_summary_form = StudentPrivilegeSummaryForm()
 
     form_cards = [
-        {'Title':'Student Privileges Lookup','Description':"Search individual student HSFI privileges","form":PrivilegesStudentLookupForm, 'route':'scripts.return_student_privileges_report'}
+        {
+            "Title": "Attendance Benchmark",
+            "Description": "Search individual student HSFI privileges",
+            "form": attendance_benchmark_form,
+            "route": "scripts.return_student_attendance_benchmark",
+        },
+        {
+            "Title": "Student Privileges Lookup",
+            "Description": "Search individual student HSFI privileges",
+            "form": student_privileges_summary_form,
+            "route": "scripts.return_student_privileges_report",
+        },
     ]
 
-    return render_template('/privileges/templates/privileges/index.html', form_cards=form_cards)
+    return render_template(
+        "/privileges/templates/privileges/index.html", form_cards=form_cards
+    )
+
 
 from app.scripts.privileges.out_to_lunch import summary_page
-@scripts.route("/privileges/student", methods=['GET','POST'])
+
+
+@scripts.route("/privileges/student", methods=["GET", "POST"])
 def return_student_privileges_report():
     if request.method == "GET":
-        form = SelectStudentForm()
-        return redirect(url_for('scripts.return_privileges_reports'))
+        form = StudentPrivilegeSummaryForm()
+        return redirect(url_for("scripts.return_privileges_reports"))
     else:
-        form = SelectStudentForm(request.form)
-        f = summary_page.return_student_letter(form, request)
+        form = StudentPrivilegeSummaryForm(request.form)
+        f, student_name = summary_page.return_student_letter(form, request)
+        download_name = f"{student_name}_Student_Privileges_report_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+        mimetype = "application/pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype=mimetype,
+        )
+
+
+from app.scripts.privileges.attendance_benchmark import attendance_benchmark
+
+
+@scripts.route("/privileges/attendance_benchmark", methods=["GET", "POST"])
+def return_student_attendance_benchmark():
+    if request.method == "GET":
+
+        return redirect(url_for("scripts.return_privileges_reports"))
+    else:
+        f = attendance_benchmark.return_overall_attd_file()
+
         download_name = (
-            f"Student_Privileges_report_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+            f"Attendance_Benchmark_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
         )
         mimetype = "application/pdf"
 

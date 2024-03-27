@@ -20,12 +20,17 @@ import datetime as dt
 from io import BytesIO
 import pandas as pd
 import math
+import json
 
 from flask import session
 
 import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 from app.scripts.date_to_marking_period import return_mp_from_date
+
+from app.scripts.privileges.attendance_benchmark import attendance_benchmark
+
+from app.api_1_0.students import return_student_info
 
 styles = getSampleStyleSheet()
 
@@ -59,76 +64,65 @@ closing = [
     Paragraph("Assistant Principal, Attendance", styles["Normal_RIGHT"]),
 ]
 
-def return_student_letter(form,request):
+
+def return_student_letter(form, request):
     school_year = session["school_year"]
-    
+
     StudentID = int(form.StudentID.data)
 
-    first_name = ''
-    last_name = ''
+    PRESENT_STANDARD = form.in_class_percentage.data
+    ON_TIME_STANDARD = form.on_time_percentage.data
 
-    
+    student_info = json.loads(return_student_info(StudentID).data)[0]
+    print(student_info)
 
-    jupiter_attd_filename = utils.return_most_recent_report(files_df, "jupiter_period_attendance")
-    attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)    
-    
+    first_name = student_info["FirstName"]
+    last_name = student_info["LastName"]
 
-    attendance_marks_df["Date"] = pd.to_datetime(attendance_marks_df["Date"])
-    attendance_marks_df["Term"] = attendance_marks_df["Date"].apply(return_mp_from_date, args=(school_year,))
+    df = attendance_benchmark.main(PRESENT_STANDARD, ON_TIME_STANDARD)
+    df = df[df["StudentID"] == StudentID]
 
-    
-    
-    periods_df = attendance_marks_df[["Period"]].drop_duplicates()
-    periods_df["Pd"] = periods_df["Period"].apply(utils.return_pd)
-
-    attendance_marks_df = attendance_marks_df.merge(
-        periods_df, on=["Period"], how="left"
-    )
-    ## keep classes during the school day
-    attendance_marks_df = attendance_marks_df[
-        (attendance_marks_df["Pd"] > 0) & (attendance_marks_df["Pd"] < 10)
+    student_pd_df_cols = [
+        "Term",
+        "Pd",
+        "excused",
+        "present",
+        "tardy",
+        "unexcused",
+        "total",
+        "%_present",
+        "%_on_time",
+        "meet_attd_standard",
     ]
 
-    ## exclude SAGA
-    attendance_marks_df = attendance_marks_df[~attendance_marks_df['Course'].isin(['MQS22','MQS21'])]       
+    student_pd_df = df[student_pd_df_cols]
+    student_pd_table = utils.return_df_as_table(student_pd_df)
 
-
-    student_attd_marks_df = attendance_marks_df[attendance_marks_df['StudentID']==StudentID]
-    student_attd_pvt = pd.pivot_table(student_attd_marks_df,index=['Term','Pd'],columns='Type',values='Date',aggfunc='count').fillna(0)
-    student_attd_pvt['total'] = student_attd_pvt.sum(axis=1)
-    student_attd_pvt['%_present'] = 100*(1-student_attd_pvt['unexcused']/student_attd_pvt['total'])
-    student_attd_pvt['%_on_time'] = 100*student_attd_pvt['present']/(student_attd_pvt['present'] + student_attd_pvt['tardy'])
-
-    for standard in ['%_present','%_on_time']:
-        student_attd_pvt[standard] = student_attd_pvt[standard].apply(lambda x: math.ceil(x))
-    
-    ## meets present + on time standard
-    PRESENT_STANDARD = 90
-    ON_TIME_STANDARD = 80
-
-    student_attd_pvt['meeting_present_standard'] = student_attd_pvt['%_present'] >= PRESENT_STANDARD
-    student_attd_pvt['meeting_on_time_standard'] = student_attd_pvt['%_on_time'] >= ON_TIME_STANDARD
-    student_attd_pvt['meet_attd_standard'] = student_attd_pvt['meeting_present_standard'] & student_attd_pvt['meeting_on_time_standard']
-
-    print(student_attd_pvt)
+    student_eligibility_df_cols = ["Term", "overall_meet_attd_standard"]
+    student_eligibility_df = df[student_eligibility_df_cols]
+    student_eligibility_df = student_eligibility_df.drop_duplicates(subset=["Term"])
+    student_eligibility_df_table = utils.return_df_as_table(student_eligibility_df)
 
     flowables = []
 
-    flowables.extend(letter_head)
     paragraph = Paragraph(
-        f"Dear {first_name.title()} {last_name.title()} ({StudentID})",
-        styles["BodyText"],
+        f"{first_name.title()} {last_name.title()} ({StudentID})",
+        styles["Heading1"],
+    )
+    flowables.append(paragraph)
+    paragraph = Paragraph(
+        f"Attendance Benchmark Data - Present {PRESENT_STANDARD}% & On Time {ON_TIME_STANDARD}%",
+        styles["Heading2"],
     )
     flowables.append(paragraph)
 
-
-    flowables.extend(closing)
-
+    flowables.append(student_eligibility_df_table)
+    flowables.append(student_pd_table)
 
     f = BytesIO()
     my_doc = SimpleDocTemplate(
         f,
-        pagesize=letter,
+        pagesize=landscape(letter),
         topMargin=0.50 * inch,
         leftMargin=1 * inch,
         rightMargin=1 * inch,
@@ -138,4 +132,4 @@ def return_student_letter(form,request):
 
     f.seek(0)
 
-    return f
+    return f, f"{first_name.title()}_{last_name.title()}"

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
-{% import '_student_lookup_form.html' as _student_lookup_form %}
+
+{% from 'privileges/templates/privileges/_forms.html' import render_privileges_form %}
 
 {% block content %}
 <div class="container">
@@ -20,7 +21,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{form_card.Title}}</h5>
                 <p>{{form_card.Description}}</p>
-                {{_student_lookup_form.form(form_card.form,form_card.route)}}
+                {{render_privileges_form(form_card)}}
             </div>
         </div>
     </div>

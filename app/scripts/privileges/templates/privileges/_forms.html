@@ -1,0 +1,61 @@
+{% macro render_privileges_form(form_card) -%}
+    {% if form_card.Title == "Student Privileges Lookup" %}
+        {{student_form(form_card.form,form_card.route)}}
+    {% elif form_card.Title == "Attendance Benchmark" %}
+        {{benchmark_form(form_card.form,form_card.route)}}
+    {% endif %}
+{%- endmacro %}
+
+
+{% macro student_form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.StudentID.label }}
+        {{ form.StudentID(class_="form-select student_dropdown") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.in_class_percentage.label }}
+        {{ form.in_class_percentage(class_="form-control") }}
+    </div>
+
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.on_time_percentage.label }}
+        {{ form.on_time_percentage(class_="form-control") }}
+    </div>
+
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}
+
+
+{% macro benchmark_form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.in_class_percentage.label }}
+        {{ form.in_class_percentage(class_="form-control") }}
+    </div>
+
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.on_time_percentage.label }}
+        {{ form.on_time_percentage(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}
