@@ -161,12 +161,20 @@ def return_consecutive_days_absent_flag(consecutive_days_absent_metric):
 
 def return_day_of_week_df(student_attd_by_day_of_week_df):
 
+    print(student_attd_by_day_of_week_df)
+    dff = pd.pivot_table(student_attd_by_day_of_week_df,index='StudentID',columns='Weekday',values='absence_%',aggfunc='max').reset_index()
+    dff = dff[['StudentID','Monday','Tuesday','Wednesday','Thursday','Friday']]
+    print(dff)
     df = student_attd_by_day_of_week_df.sort_values("z_score")
     df = df.drop_duplicates(subset=["StudentID"], keep="last")
 
+
+
     df = df.fillna(0)
     df["WeekdayFlag"] = df.apply(return_day_of_week_flag, axis=1)
-    return df[["StudentID", "WeekdayFlag"]]
+    df = df[["StudentID", "WeekdayFlag"]]
+    df = dff.merge(df,on=['StudentID'], how='left')
+    return df
 
 
 def return_day_of_week_flag(student_row):

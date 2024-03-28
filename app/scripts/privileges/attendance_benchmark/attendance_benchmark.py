@@ -60,10 +60,8 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
     full_term_attd_pvt["total"] = full_term_attd_pvt.sum(axis=1)
     full_term_attd_pvt = full_term_attd_pvt.reset_index()
     full_term_attd_pvt["Term"] = "Full Semester"
-    print(full_term_attd_pvt)
 
     semester_attd_pvt = pd.concat([semester_attd_pvt, full_term_attd_pvt])
-    print(semester_attd_pvt)
 
     semester_attd_pvt["%_present"] = 100 * (
         1 - semester_attd_pvt["unexcused"] / semester_attd_pvt["total"]
@@ -110,6 +108,55 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
     return semester_attd_pvt
 
 
+def return_attd_grid(StudentID):
+    school_year = session["school_year"]
+
+    jupiter_attd_filename = utils.return_most_recent_report(
+        files_df, "jupiter_period_attendance"
+    )
+    attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
+    attendance_marks_df = attendance_marks_df[
+        attendance_marks_df["StudentID"] == StudentID
+    ]
+
+    attendance_marks_df["Date"] = pd.to_datetime(attendance_marks_df["Date"])
+    attendance_marks_df["Term"] = attendance_marks_df["Date"].apply(
+        return_mp_from_date, args=(school_year,)
+    )
+    attendance_marks_df["date"] = attendance_marks_df["Date"].apply(
+        lambda x: x.strftime("%-m/%d")
+    )
+
+    periods_df = attendance_marks_df[["Period"]].drop_duplicates()
+    periods_df["Pd"] = periods_df["Period"].apply(utils.return_pd)
+
+    attendance_marks_df = attendance_marks_df.merge(
+        periods_df, on=["Period"], how="left"
+    )
+    ## keep classes during the school day
+    attendance_marks_df = attendance_marks_df[
+        (attendance_marks_df["Pd"] > 0) & (attendance_marks_df["Pd"] < 10)
+    ]
+
+    ## exclude SAGA
+    attendance_marks_df = attendance_marks_df[
+        ~attendance_marks_df["Course"].isin(["MQS22", "MQS21"])
+    ]
+
+    student_attd_mark_grid = (
+        pd.pivot_table(
+            attendance_marks_df,
+            index="Pd",
+            columns="date",
+            values="Attendance",
+            aggfunc=return_attd_mark,
+        )
+        .fillna("")
+        .reset_index()
+    )
+    return student_attd_mark_grid
+
+
 def return_overall_attd_benchmark(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
     semester_attd_pvt = main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80)
     output_cols = ["StudentID", "Term", "overall_meet_attd_standard"]
@@ -128,6 +175,10 @@ def return_overall_attd_file(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
     f.seek(0)
 
     return f
+
+
+def return_attd_mark(x):
+    return x
 
 
 def all_true(x):
