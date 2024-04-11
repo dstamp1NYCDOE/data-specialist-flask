@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 
-{% from 'reports_forms/class_lists_form.html' import class_list_form_card %}
-{% from 'reports_forms/class_lists_with_google_sheets_data_form.html' import class_list_with_google_sheet_data_form_card %}
 
+{% from 'programming/templates/programming/_forms.html' import render_programming_form %}
 
 {% block content %}
-<div class="container">
-<h1>Programming Scripts</h1>
 <div class="container">
     <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -14,11 +11,21 @@
     <li class="breadcrumb-item active"><a href="#">Programming</a></li>
   </ol>
 </nav>
-<div class="row row-cols-1 row-cols-md-3 g-4">
-      {{class_list_form_card(forms.class_list_form)}}
 
-    {{class_list_with_google_sheet_data_form_card(forms.class_list_with_google_sheets_form)}}
-</div>
+<h1>Programming Scripts</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for form_card in form_cards %}
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{form_card.Title}}</h5>
+                <p>{{form_card.Description}}</p>
+                {{render_programming_form(form_card)}}
+            </div>
+        </div>
+    </div>
+    {% endfor %}   
 </div>
 
 </div>

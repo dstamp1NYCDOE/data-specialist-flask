@@ -1,0 +1,36 @@
+{% macro render_programming_form(form_card) -%}
+    {% if form_card.Title == "Student Vetting" %}
+        {{student_vetting_form(form_card.form,form_card.route)}}
+    {% else %}
+        {{no_parameters_form(form_card.form,form_card.route)}}
+    {% endif %}
+{%- endmacro %}
+
+
+
+
+{% macro student_vetting_form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}
+
+{% macro no_parameters_form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}
