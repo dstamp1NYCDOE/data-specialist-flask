@@ -32,51 +32,75 @@ def main(RATR_df):
 
     RATR_df = RATR_df.merge(calendar_df, on="Date", how="left")
 
-    student_attd_df = return_student_attd(RATR_df)
+    MONTHS_lst = RATR_df["Month"].unique().tolist()
+    MONTHS_lst.pop(0)
+    MONTHS_lst.insert(0, "ytd")
 
-    student_attd_by_month_df = return_student_pvt_by_subcolumn(RATR_df, "Month")
-    
-    student_attd_by_term_df = return_student_pvt_by_subcolumn(RATR_df, "Term")
-    
-    student_attd_by_day_of_week_df = return_student_pvt_by_subcolumn(RATR_df, "Weekday")
-    student_attd_by_days_before_break_df = return_student_pvt_by_subcolumn(
-        RATR_df, "DaysBeforeBreak"
-    )
-    student_attd_by_days_after_break = return_student_pvt_by_subcolumn(
-        RATR_df, "DaysAfterBreak"
-    )
+    output_dict = {}
+    for month in MONTHS_lst:
+        if month != "ytd":
+            RATR_dff = RATR_df[RATR_df["Month"] <= month]
+        else:
+            RATR_dff = RATR_df
 
-    multiple_day_df = return_multiple_day_df(RATR_df)
+        student_attd_df = return_student_attd(RATR_dff)
 
-    output_df = students_df
-    student_attd_df = student_attd_df[["StudentID", "ytd_absence_%"]]
-    month_df = student_attd_by_month_df.pivot(
-        index="StudentID", columns="Month", values="absence_%"
-    )
-    monthly_trend_df = return_trend_df(student_attd_by_month_df)
-    month_df = month_df.merge(monthly_trend_df, on=["StudentID"], how="left")
+        student_attd_by_month_df = return_student_pvt_by_subcolumn(RATR_dff, "Month")
 
-    term_df = student_attd_by_term_df.pivot(
-        index="StudentID", columns="Term", values="absence_%"
-    )
-    term_trend_df = return_trend_df(student_attd_by_term_df)
-    term_df = term_df.merge(term_trend_df, on=["StudentID"], how="left")
+        student_attd_by_term_df = return_student_pvt_by_subcolumn(RATR_dff, "Term")
 
-    vacation_extender_df = return_vacation_extender_df(
-        student_attd_by_days_before_break_df, student_attd_by_days_after_break
-    )
-    day_of_week_df = return_day_of_week_df(student_attd_by_day_of_week_df)
+        student_attd_by_day_of_week_df = return_student_pvt_by_subcolumn(
+            RATR_dff, "Weekday"
+        )
+        student_attd_by_days_before_break_df = return_student_pvt_by_subcolumn(
+            RATR_dff, "DaysBeforeBreak"
+        )
+        
+        student_attd_by_days_after_break = return_student_pvt_by_subcolumn(
+            RATR_dff, "DaysAfterBreak"
+        )
 
-    output_df = output_df.merge(student_attd_df, on="StudentID")
-    output_df = output_df.merge(month_df, on="StudentID")
-    output_df = output_df.merge(term_df, on='StudentID')
-    output_df = output_df.merge(vacation_extender_df, on="StudentID")
-    output_df = output_df.merge(day_of_week_df, on="StudentID")
-    output_df = output_df.merge(multiple_day_df, on="StudentID")
+        multiple_day_df = return_multiple_day_df(RATR_dff)
 
-    output_df["AttdTier"] = output_df["ytd_absence_%"].apply(return_attd_tier)
-    output_df = output_df.sort_values(by=["year_in_hs", "LastName", "FirstName"])
-    return output_df
+        output_df = students_df
+        student_attd_df = student_attd_df[["StudentID", "ytd_absence_%"]]
+        month_df = student_attd_by_month_df.pivot(
+            index="StudentID", columns="Month", values="absence_%"
+        )
+        month_df["MonthlySparkline"] = month_df.apply(return_sparkline_formula, axis=1)
+        monthly_trend_df = return_trend_df(student_attd_by_month_df)
+        month_df = month_df.merge(monthly_trend_df, on=["StudentID"], how="left")
+
+        term_df = student_attd_by_term_df.pivot(
+            index="StudentID", columns="Term", values="absence_%"
+        )
+        term_df["MarkingPeriodSparkline"] = term_df.apply(
+            return_sparkline_formula, axis=1
+        )
+        term_trend_df = return_trend_df(student_attd_by_term_df)
+        term_df = term_df.merge(term_trend_df, on=["StudentID"], how="left")
+
+        vacation_extender_df = return_vacation_extender_df(
+            student_attd_by_days_before_break_df, student_attd_by_days_after_break
+        )
+        day_of_week_df = return_day_of_week_df(student_attd_by_day_of_week_df)
+
+        student_attd_correl_df = return_student_correlation_to_overall(RATR_df)
+
+        output_df = output_df.merge(student_attd_df, on="StudentID")
+        output_df = output_df.merge(student_attd_correl_df, on="StudentID")
+        output_df = output_df.merge(month_df, on="StudentID")
+        output_df = output_df.merge(term_df, on="StudentID")
+        output_df = output_df.merge(vacation_extender_df, on="StudentID")
+        output_df = output_df.merge(day_of_week_df, on="StudentID")
+        output_df = output_df.merge(multiple_day_df, on="StudentID")
+
+        output_df["AttdTier"] = output_df["ytd_absence_%"].apply(return_attd_tier)
+        output_df = output_df.sort_values(by=["year_in_hs", "LastName", "FirstName"])
+
+        output_dict[month] = output_df.copy()
+
+    return output_dict
 
 
 def return_trend_df(student_attd_by_month_df):
@@ -87,6 +111,11 @@ def return_trend_df(student_attd_by_month_df):
         .reset_index()
         .rename(columns={metric: f"{metric}_trend"})
     )
+
+    df[f"{metric}_trend_direction"] = df[f"{metric}_trend"].apply(
+        lambda x: "Trending Less Absent" if x < 0 else "Trending More Absent"
+    )
+
     return df
 
 
@@ -161,19 +190,32 @@ def return_consecutive_days_absent_flag(consecutive_days_absent_metric):
 
 def return_day_of_week_df(student_attd_by_day_of_week_df):
 
-    print(student_attd_by_day_of_week_df)
-    dff = pd.pivot_table(student_attd_by_day_of_week_df,index='StudentID',columns='Weekday',values='absence_%',aggfunc='max').reset_index()
-    dff = dff[['StudentID','Monday','Tuesday','Wednesday','Thursday','Friday']]
-    print(dff)
+    dff = pd.pivot_table(
+        student_attd_by_day_of_week_df,
+        index="StudentID",
+        columns="Weekday",
+        values="absence_%",
+        aggfunc="max",
+    )
+    dff = dff[
+        [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+        ]
+    ]
+    dff["WeekdaySparkline"] = dff.apply(return_sparkline_formula, axis=1)
+    dff = dff.reset_index()
+
     df = student_attd_by_day_of_week_df.sort_values("z_score")
     df = df.drop_duplicates(subset=["StudentID"], keep="last")
-
-
 
     df = df.fillna(0)
     df["WeekdayFlag"] = df.apply(return_day_of_week_flag, axis=1)
     df = df[["StudentID", "WeekdayFlag"]]
-    df = dff.merge(df,on=['StudentID'], how='left')
+    df = dff.merge(df, on=["StudentID"], how="left")
     return df
 
 
@@ -193,26 +235,36 @@ def return_vacation_extender_df(
     day_before_df = student_attd_by_days_before_break_df[
         student_attd_by_days_before_break_df["DaysBeforeBreak"] == 1
     ]
+    
     day_after_df = student_attd_by_days_after_break[
         student_attd_by_days_after_break["DaysAfterBreak"] == 1
     ]
     df = day_before_df.merge(day_after_df, on=["StudentID"])
-    df["Holiday Pattern"] = df.apply(return_vacation_extender_flag, axis=1)
 
-    df = df[["StudentID", "Holiday Pattern"]]
+
+
+    df["Holiday Pattern"] = df.apply(return_vacation_extender_flag, axis=1)
+    df["Holiday Pattern %"] = df.apply(return_vacation_extender_pct, axis=1)
+
+    df = df[["StudentID", "Holiday Pattern","Holiday Pattern %"]]
     return df
 
-
+def return_vacation_extender_pct(student_row):
+    before_z_score = student_row["absence_%_x"]
+    after_z_score = student_row["absence_%_y"]
+    return 0.5*before_z_score+0.5*after_z_score
+    
 def return_vacation_extender_flag(student_row):
+    
     before_z_score = student_row["z_score_x"]
     after_z_score = student_row["z_score_y"]
 
     if before_z_score < 0.25 and after_z_score < 0.25:
         return "No"
 
-    if before_z_score > 2 and after_z_score > 2:
+    if before_z_score > 1.25 and after_z_score > 1.25:
         return "Yes-High"
-    if before_z_score > 1 and after_z_score > 1:
+    if before_z_score > 0.75 and after_z_score > 0.75:
         return "Yes-Medium"
     if before_z_score > 0.25 and after_z_score > 0.25:
         return "Yes-Low"
@@ -221,6 +273,42 @@ def return_vacation_extender_flag(student_row):
         return "Yes-Before"
     if after_z_score > 0.25:
         return "Yes-After"
+
+
+def return_overall_attd_by_date(RATR_df):
+    pvt_tbl = pd.pivot_table(
+        RATR_df,
+        index="Date",
+        columns="ATTD",
+        values="StudentID",
+        aggfunc="count",
+    ).fillna(0)
+    pvt_tbl["actual_total"] = pvt_tbl.sum(axis=1)
+    pvt_tbl["actual_absences"] = pvt_tbl["A"]
+    pvt_tbl["overall_daily_absence_%"] = pvt_tbl["A"] / pvt_tbl["actual_total"]
+
+    pvt_tbl = pvt_tbl.reset_index()
+
+    return pvt_tbl[["Date", "overall_daily_absence_%"]]
+
+
+def return_student_correlation_to_overall(RATR_df):
+    overall_attd_by_date_df = return_overall_attd_by_date(RATR_df)
+    RATR_df["Attd"] = RATR_df["ATTD"].apply(lambda x: 1 if x == "A" else 0)
+
+    df = RATR_df[["StudentID", "Date", "Attd"]].merge(
+        overall_attd_by_date_df, on="Date", how="left"
+    )
+
+    output_df = (
+        df.groupby("StudentID")[["Attd", "overall_daily_absence_%"]]
+        .corr()
+        .iloc[0::2, -1]
+    )
+    output_df = output_df.reset_index()
+    output_df.columns = ["StudentID", "", "Overall_Daily_Absence_Corr"]
+    print(output_df.columns)
+    return output_df[["StudentID", "Overall_Daily_Absence_Corr"]]
 
 
 def return_student_attd(RATR_df):
@@ -238,6 +326,15 @@ def return_student_attd(RATR_df):
     pvt_tbl = pvt_tbl.reset_index()
 
     return pvt_tbl
+
+
+def return_sparkline_formula(lst):
+    lst = lst.dropna()
+    lst = [str(x) for x in lst]
+    data_lst = ", ".join(lst)
+    data_lst = "{" + data_lst + "}"
+    options = '{"charttype","column";"ymin",0;"ymax",1;"color","red"}'
+    return f"=sparkline({data_lst},{options})"
 
 
 def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
@@ -278,6 +375,8 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
 
 
 from app.scripts.date_to_marking_period import return_mp_from_date
+
+
 def clean(RATR_df):
     school_year = session["school_year"]
 

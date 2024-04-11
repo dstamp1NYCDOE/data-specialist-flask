@@ -77,15 +77,20 @@ def return_attendance_reports():
 def return_attd_tiers_from_RATR():
     RATR_filename = utils.return_most_recent_report(files_df, "RATR")
     RATR_df = utils.return_file_as_df(RATR_filename)
-    df = attendance_tiers.main(RATR_df)
+    df_dict = attendance_tiers.main(RATR_df)
+
     report_name = "Student Attd Tiers"
     if request.args.get("download") == "true":
         f = BytesIO()
-        df.to_excel(f, index=False)
+        writer = pd.ExcelWriter(f)
+        for sheet_name, df in df_dict.items():
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+        writer.close()
         f.seek(0)
         download_name = f"{report_name.replace(' ','')}.xlsx"
         return send_file(f, as_attachment=True, download_name=download_name)
     else:
+        df = df_dict["ytd"]
         df = df.style.set_table_attributes(
             'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
         )
