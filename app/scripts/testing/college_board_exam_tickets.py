@@ -117,6 +117,7 @@ def generate_room_roster(df, room, session):
 
 
 def return_computer_login_info(room_number):
+    return "Log in with your DOE email and password"
     if room_number in ["919", "901", "603", "221"]:
         return f"Username: .\{room_number}s# (Type period + backslash +room number + s + computer number ex. .\{room_number}s24"
     if room_number in ["704", "519", "319"]:
@@ -135,7 +136,7 @@ def generate_student_exam_ticket(student_row):
 
     email_address = student_row["Student DOE Email"]
     date_of_birth = student_row["DOB"]
-    # .strftime("%m/%d/%Y")
+    date_of_birth = date_of_birth.strftime("%m/%d/%Y")
 
     apt_num = student_row["AptNum"]
     street = student_row["Street"]
@@ -184,7 +185,7 @@ def generate_student_exam_ticket(student_row):
     student_to_dos = ListFlowable(
         [
             Paragraph(
-                f"Log into the computer with your DOE email/password OR {return_computer_login_info(room_num)}",
+                f"Log into the computer with your DOE email ({email_address}) and password",
                 styles["Normal"],
             ),
             Paragraph(
@@ -216,33 +217,22 @@ def generate_student_exam_ticket(student_row):
     student_info = ListFlowable(
         [
             Paragraph(
-                f"<b>DOE Email:</b> {email_address}",
+                f"<b>Date of Birth:</b> {date_of_birth}",
                 styles["Normal"],
             ),
             Paragraph(
-                f"<b>Home Address:</b> {street_address}",
+                f"{street} {apt_num}",
                 styles["Normal"],
             ),
             Paragraph(
-                f"<b>BlueBook Username:</b> {StudentUsername}",
-                styles["Normal"],
-            ),
-            Paragraph(
-                f"<b>BlueBook Password:</b> {StudentPassword}",
-                styles["Normal"],
-            ),
-            Paragraph(
-                f"<b>Room Code:</b> ______________________",
-                styles["Normal"],
-            ),
-            Paragraph(
-                f"<b>Start Code:</b> ______________________",
+                f"{city}, {state} {zipcode}",
                 styles["Normal"],
             ),
         ],
         bulletType="bullet",
         start="squarelrs",
     )
+    flowables.append(student_info)
 
     paragraph = Paragraph(
         f"THIS PAPER WILL BE COLLECTED AT THE END OF THE EXAM",
