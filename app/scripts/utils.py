@@ -52,13 +52,13 @@ def return_most_recent_report_by_semester(files_df, report, year_and_semester):
     return filename
 
 
-def return_file_as_df(filename):
+def return_file_as_df(filename,**kwargs):
     if "xlsx" in filename:
-        return pd.read_excel(filename)
+        return pd.read_excel(filename,**kwargs)
     if "csv" in filename:
-        return pd.read_csv(filename)
+        return pd.read_csv(filename,**kwargs)
     if "CSV" in filename:
-        return pd.read_csv(filename)
+        return pd.read_csv(filename,**kwargs)
 
 
 def return_cohort_year(GEC):

@@ -49,7 +49,7 @@ def main(form, request):
     else:
         periods = [x for x in periods if x!='ALL']
         period_regex_match = ''.join(periods)
-        df = df[df['Period'].str.match(f"[{period_regex_match}]")]
+        df = df[df['Period'].str.contains(f"[{period_regex_match}]")]
 
      ## teacher
     teacher_flag = form.teacher.data
@@ -80,14 +80,14 @@ def main(form, request):
         student_subset_title		
             ]
     if teacher_flag == 'BOTH':
-         teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
+        teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
     if teacher_flag == 'Teacher1':    
         teachers_lst = pd.unique(df[["Teacher1"]].values.ravel("K"))
     if teacher_flag == 'Teacher2':    
         teachers_lst = pd.unique(df[["Teacher2"]].values.ravel("K"))
 
     teachers_lst.sort()
-    teachers_lst = teachers_lst[1:]
+    
 
     ## all students with course info
     df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_rosters')
@@ -96,6 +96,7 @@ def main(form, request):
     df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_students')
 
     for teacher in teachers_lst:
+        
         if teacher_flag == 'BOTH':
             students_df = df[(df['Teacher1']==teacher) | (df['Teacher2']==teacher)]
         if teacher_flag == 'Teacher1':    
