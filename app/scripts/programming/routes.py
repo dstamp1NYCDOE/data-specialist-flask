@@ -33,12 +33,28 @@ def return_programming_reports():
         "/programming/templates/programming/index.html", form_cards=form_cards
     )
 
-
-@scripts.route("/programming/student_vetting")
+import app.scripts.programming.vetting.main as vetting
+@scripts.route("/programming/student_vetting", methods=['GET','POST'])
 def return_student_vetting_report():
+    school_year = session["school_year"]
+    term = session["term"]
 
-    return ""
 
+    df = vetting.main()
+    
+    
+    f = BytesIO()
+    df.to_excel(f, index=False)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_student_vetting.xlsx"
+    
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
+    )
 
 from app.scripts.programming.requests import main as requests
 

@@ -8,8 +8,11 @@ def main(form, request):
     student_subset_title = form.subset_title.data
 
     student_lst_str = form.subset_lst.data
-    student_lst = student_lst_str.split("\r\n")
-    student_lst = [int(x) for x in student_lst]
+    student_lst = []
+    if student_lst_str != '':
+        student_lst = student_lst_str.split("\r\n")
+        student_lst = [int(x) for x in student_lst]
+        
 
     filename = utils.return_most_recent_report(files_df, "1_49")
     counselors_df = utils.return_file_as_df(filename)

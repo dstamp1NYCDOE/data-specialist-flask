@@ -17,6 +17,8 @@ import app.scripts.programming.requests.spanish_request as spanish_request
 import app.scripts.programming.requests.session_request as session_request
 import app.scripts.programming.requests.finalize_requests as finalize_requests
 
+from app.scripts.attendance.process_RATR import student_lateness_overall
+
 import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
@@ -27,7 +29,7 @@ def main():
     transcript_df = process_transcript.main(cr_1_14_df)
 
     students_with_transcripts = cr_1_14_df["StudentID"].unique()
-    print(students_with_transcripts)
+    
 
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
     register_df = utils.return_file_as_df(cr_3_07_filename)
@@ -45,12 +47,16 @@ def main():
     programs_df = utils.return_file_as_df(cr_1_01_filename)
     majors_dict = process_majors.main(programs_df)
 
-    # jupiter_attd_df = pd.read_csv('data/attendance.csv')
-    # jupiter_attd_df = process_jupiter_attd.main(jupiter_attd_df)
+    RATR_filename = utils.return_most_recent_report(files_df, "RATR")
+    RATR_df = utils.return_file_as_df(RATR_filename)
+    student_lateness_df = student_lateness_overall(RATR_df)
+    
 
-    # jupiter_attd_df = register_df.merge( jupiter_attd_df, on=['StudentID'], how='left').fillna(0)
+    student_lateness_df = student_lateness_df.merge(register_df, on=['StudentID'], how='right')
+    
+    best_on_time_students_by_year_in_hs = student_lateness_df.sort_values(by=["ytd_lateness_%"]).groupby('year_in_hs').head(150).reset_index(drop=True)['StudentID'].to_list()
+    
 
-    # best_on_time_students_by_year_in_hs = jupiter_attd_df.sort_values('%Late', ascending=True).groupby('year_in_hs').head(150)['StudentID'].to_list()
 
     output_list = []
 
@@ -87,11 +93,11 @@ def main():
 
             student_courses.extend(spanish_request.main(student, student_transcript))
 
-            student_courses.extend(["ZM18"])
-            # student_courses.extend(
-            #     session_request.main(
-            #         student, student_transcript, best_on_time_students_by_year_in_hs)
-            # )
+            
+            student_courses.extend(
+                session_request.main(
+                    student, student_transcript, best_on_time_students_by_year_in_hs)
+            )
 
             student_courses.extend(["ZL"])
 

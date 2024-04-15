@@ -128,8 +128,14 @@ def return_regents_reports():
             "report_description": "Generates student exam invitations from CR 1.08 and Regents Exam Calendar",
             "files_needed": ["1_42", "1_01"],
         },
+        {
+            "report_title": "Generate Walk In Spreadsheet Signup",
+            "report_function": "scripts.return_regents_walkin_spreadsheet",
+            "report_description": "Generates regents walk-in preregistration spreadsheet",
+            "files_needed": ["1_49", "1_08"],
+        },        
     ]
-    files_needed = ["1_01", "1_08", "1_42"]
+    files_needed = ["1_01", "1_08", "1_42","1_49"]
     return render_template(
         "testing/templates/testing/regents/index.html",
         reports=reports,
@@ -171,4 +177,25 @@ def return_regents_exam_invitations():
         as_attachment=True,
         download_name=download_name,
         mimetype="application/pdf",
+    )
+
+
+import app.scripts.testing.regents.create_walkin_signup_spreadsheet as create_walkin_signup_spreadsheet
+@scripts.route("/testing/regents/walk_in_spreadsheet")
+def return_regents_walkin_spreadsheet():
+    school_year = session["school_year"]
+    term = session["term"]
+
+
+    df = create_walkin_signup_spreadsheet.main()
+    f = BytesIO()
+    df.to_excel(f, index=False)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_regents_walkin_registration.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
     )
