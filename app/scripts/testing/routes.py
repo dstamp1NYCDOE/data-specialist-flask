@@ -133,9 +133,21 @@ def return_regents_reports():
             "report_function": "scripts.return_regents_walkin_spreadsheet",
             "report_description": "Generates regents walk-in preregistration spreadsheet",
             "files_needed": ["1_49", "1_08"],
-        },        
+        }, 
+        {
+            "report_title": "Process Testing Accommodations",
+            "report_function": "scripts.return_processed_testing_accommodations",
+            "report_description": "Processes testing accommodations from SESIS file",
+            "files_needed": ["TestingAccommodations"],
+        },  
+        {
+            "report_title": "Schedule Students For Exams",
+            "report_function": "scripts.return_students_scheduled_for_regents",
+            "report_description": "Schedule students for sections based on testing accommodations and teacher of record",
+            "files_needed": ["1_08"],
+        },       
     ]
-    files_needed = ["1_01", "1_08", "1_42","1_49"]
+    files_needed = ["1_01", "1_08", "1_42","1_49","TestingAccommodations"]
     return render_template(
         "testing/templates/testing/regents/index.html",
         reports=reports,
@@ -193,6 +205,51 @@ def return_regents_walkin_spreadsheet():
     f.seek(0)
 
     download_name = f"{school_year}_{term}_regents_walkin_registration.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
+    )
+
+
+import app.scripts.testing.regents.process_testing_accommodations as process_testing_accommodations
+@scripts.route("/testing/regents/process_testing_accommodations")
+def return_processed_testing_accommodations():
+    school_year = session["school_year"]
+    term = session["term"]
+
+
+    df = process_testing_accommodations.main()
+    
+    f = BytesIO()
+    df.to_excel(f, index=False)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_processed_testing_accommodations.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
+    )
+
+
+import app.scripts.testing.regents.schedule_students as schedule_students
+@scripts.route("/testing/regents/schedule_students")
+def return_students_scheduled_for_regents():
+    school_year = session["school_year"]
+    term = session["term"]
+
+
+    df = schedule_students.main()
+    return df.to_html()
+    
+    f = BytesIO()
+    df.to_excel(f, index=False)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_processed_testing_accommodations.xlsx"
     return send_file(
         f,
         as_attachment=True,
