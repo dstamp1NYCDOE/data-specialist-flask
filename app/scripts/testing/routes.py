@@ -152,8 +152,8 @@ def return_regents_reports():
             "report_title": "Determine Lab Eligibility",
             "report_function": "scripts.return_lab_eligibility",
             "report_description": "Determine which students are lab eligible",
-            "files_needed": ["1_01","1_08","1_14"],
-        },        
+            "files_needed": ["1_01", "1_08", "1_14"],
+        },
         {
             "report_title": "Schedule Students For Exams",
             "report_function": "scripts.return_students_scheduled_for_regents",
@@ -176,7 +176,12 @@ def return_regents_reports():
         files_needed=files_needed,
     )
 
-from app.scripts.testing.regents import determine_lab_eligibility as determine_lab_eligibility
+
+from app.scripts.testing.regents import (
+    determine_lab_eligibility as determine_lab_eligibility,
+)
+
+
 @scripts.route("/testing/regents/lab_eligibility")
 def return_lab_eligibility():
     school_year = session["school_year"]
@@ -185,6 +190,7 @@ def return_lab_eligibility():
     f = determine_lab_eligibility.main()
 
     download_name = f"{school_year}_{term}_lab_eligibility.xlsx"
+    return ""
     return send_file(
         f,
         as_attachment=True,

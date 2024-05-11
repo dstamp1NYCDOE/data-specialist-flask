@@ -30,6 +30,9 @@ def main():
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
+    regents_calendar_df["Curriculum"] = regents_calendar_df["CulminatingCourse"].str[
+        0:2
+    ]
     section_properties_df = pd.read_excel(path, sheet_name="SectionProperties")
 
     registrations_df["senior?"] = registrations_df["Grade"].apply(lambda x: x == "12")
@@ -38,12 +41,22 @@ def main():
     registrations_df = registrations_df[registrations_df["Status"] == True]
     registrations_df = registrations_df[cols]
 
+    ## get lab eligibility
+    filename = utils.return_most_recent_report(files_df, "lab_eligibility")
+    lab_eligibility_df = utils.return_file_as_df(filename)
+
     # ## exam_info
 
     ## attach exam info to registrations
     registrations_df = registrations_df.merge(
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
     )
+
+    ## attach lab eligibility
+    registrations_df = registrations_df.merge(
+        lab_eligibility_df, on=["StudentID", "Curriculum"], how="left"
+    )
+    print(registrations_df)
 
     filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
     rosters_df = utils.return_file_as_df(filename)
@@ -148,6 +161,7 @@ def main():
 
     ## attach default_section_number
     registrations_df = registrations_df.merge(sections_df, on=flags_cols)
+    registrations_df["Section"] = registrations_df.apply(remove_lab_ineligible, axis=1)
 
     ## number_of_students_per_section
     registrations_df["running_total"] = (
@@ -163,8 +177,10 @@ def main():
     for (exam, section), exam_section_df in registrations_df.groupby(
         ["Course", "Section"]
     ):
-        if section < 18 or section in [20, 25, 30, 34,35, 54,55]:
+        if section < 18 or section in [20, 25, 30, 34, 35, 54, 55]:
             max_capacity = return_gen_ed_section_capacity(exam, month)
+        elif section == 88:
+            max_capacity = 99
         else:
             max_capacity = 15
 
@@ -264,7 +280,17 @@ def return_gen_ed_section_capacity(exam_code, month):
             return 34
 
 
+def remove_lab_ineligible(row):
+    course = row["CourseCode"]
+    LabEligible = row["LabEligible"]
+    if course[0] == "S" and LabEligible == 0:
+        return 88
+    else:
+        return row["Section"]
+
+
 def return_section_number(row):
+
     senior = row["senior?"]
     SWD = row["SWD?"]
     D75 = row["D75?"]
@@ -342,70 +368,3 @@ def return_section_number(row):
     }
 
     return section_dict.get(temp_str, 20)
-
-    if conflict and double_time and ENL and senior and QR:
-        return 86
-    if conflict and double_time and ENL and QR:
-        return 87
-    if conflict and double_time and senior and QR:
-        return 85
-    if conflict and double_time and QR:
-        return 88
-
-    if conflict and double_time and ENL and senior:
-        return 82
-    if conflict and double_time and ENL:
-        return 83
-    if conflict and double_time and senior:
-        return 81
-    if conflict and double_time:
-        return 84
-
-    if double_time and ENL and senior and QR:
-        return 66
-    if double_time and ENL and QR:
-        return 67
-    if double_time and senior and QR:
-        return 65
-    if double_time and QR:
-        return 68
-
-    if double_time and ENL and senior:
-        return 62
-    if double_time and ENL:
-        return 63
-    if double_time and senior:
-        return 61
-    if double_time:
-        return 64
-
-    if conflict and QR and ENL and senior:
-        return 51
-    if conflict and QR and time_and_a_half and senior:
-        return 55
-    if conflict and QR and ENL:
-        return 52
-    if conflict and QR and time_and_a_half:
-        return 56
-
-    if conflict and time_and_a_half and senior and ENL:
-        return 35
-    if conflict and time_and_a_half and senior:
-        return 35
-    if conflict and time_and_a_half and senior:
-        return 35
-
-    if QR and ENL and senior:
-        return 41
-    if QR and time_and_a_half and senior:
-        return 45
-    if QR and time_and_a_half:
-        return 46
-
-    if time_and_a_half and senior:
-        return 25
-    if time_and_a_half:
-        return 26
-
-    ## Checkvalve for Sped
-    return 19
