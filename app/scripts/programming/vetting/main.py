@@ -53,12 +53,13 @@ def main():
         values="NumericEquivalent",
         aggfunc="mean",
     )
-    student_department_gpa = student_department_gpa[["E", "M", "S", "H"]]
+    student_department_gpa = student_department_gpa[["E", "M", "S", "H", "A"]]
     student_department_gpa.columns = [
         "ELA GPA",
         "Math GPA",
         "Science GPA",
         "Soc Stud GPA",
+        "Art GPA",
     ]
     students_df = students_df.merge(student_department_gpa, on="StudentID", how="left")
 
@@ -149,9 +150,17 @@ def main():
         student_on_time_pvt, on="StudentID", how="left"
     ).fillna("")
 
-    return students_df
+    RATR_filename = utils.return_most_recent_report(files_df, "RATR")
+    RATR_df = utils.return_file_as_df(RATR_filename)
+    import app.scripts.attendance.attendance_tiers as attendance_tiers
 
-    return students_df.sort_values(by=["LastName", "FirstName"])
+    df_dict = attendance_tiers.main(RATR_df)
+    ytd_attd_df = df_dict["ytd"]
+
+    ytd_attd_dff = ytd_attd_df[["StudentID", "AttdTier"]]
+    students_df = students_df.merge(ytd_attd_dff, on="StudentID", how="left")
+
+    return students_df
 
 
 def return_reg_mark(marks):

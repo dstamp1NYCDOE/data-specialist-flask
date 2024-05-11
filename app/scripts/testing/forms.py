@@ -34,3 +34,11 @@ class CollegeBoardExamTicketsLetter(FlaskForm):
         "Student Testing Assignments (preprocessed with StudentID)",
         validators=[FileRequired()],
     )
+
+
+class ProcessWalkingSpreadsheet(FlaskForm):
+    walkin_spreadsheet_file = FileField(
+        "WalkIn Signup Spreadsheet",
+        validators=[FileRequired()],
+        description="File must be saved as .xlsx",
+    )

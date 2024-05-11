@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import os
 
+from flask import current_app
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
 
@@ -156,3 +157,20 @@ def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None, fontsize=
         )
     )
     return t
+
+
+def save_report_to_file(f,report_name,year,term):
+    year_and_semester = f"{year}-{term}"
+    
+    filename = f"{year_and_semester}_9999-12-31_{report_name}"
+
+    path = os.path.join(
+        current_app.root_path, f"data/{year_and_semester}/{report_name}"
+    )
+    isExist = os.path.exists(path)
+    if not isExist:
+        os.makedirs(path)
+    
+    f.save(os.path.join(path, filename))
+    
+    return True

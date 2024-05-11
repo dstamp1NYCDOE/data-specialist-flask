@@ -1,4 +1,5 @@
 import datetime as dt
+import pandas as pd
 from io import BytesIO
 
 from flask import render_template, request, send_file, session
@@ -10,6 +11,7 @@ import app.scripts.utils as utils
 from app.scripts.testing.forms import (
     CollegeBoardExamInvitationLetter,
     CollegeBoardExamTicketsLetter,
+    ProcessWalkingSpreadsheet,
 )
 
 import app.scripts.testing.college_board_signup_letter as college_board_signup_letter
@@ -133,25 +135,61 @@ def return_regents_reports():
             "report_function": "scripts.return_regents_walkin_spreadsheet",
             "report_description": "Generates regents walk-in preregistration spreadsheet",
             "files_needed": ["1_49", "1_08"],
-        }, 
+        },
+        {
+            "report_title": "Process Walk In Spreadsheet Signup",
+            "report_function": "scripts.return_processed_regents_walkin_spreadsheet",
+            "report_description": "Generates regents walk-in preregistration spreadsheet",
+            "files_needed": [],
+        },
         {
             "report_title": "Process Testing Accommodations",
             "report_function": "scripts.return_processed_testing_accommodations",
             "report_description": "Processes testing accommodations from SESIS file",
             "files_needed": ["TestingAccommodations"],
-        },  
+        },
+        {
+            "report_title": "Determine Lab Eligibility",
+            "report_function": "scripts.return_lab_eligibility",
+            "report_description": "Determine which students are lab eligible",
+            "files_needed": ["1_01","1_08","1_14"],
+        },        
         {
             "report_title": "Schedule Students For Exams",
             "report_function": "scripts.return_students_scheduled_for_regents",
             "report_description": "Schedule students for sections based on testing accommodations and teacher of record",
-            "files_needed": ["1_08"],
-        },       
+            "files_needed": ["1_08", "testing_accommodations_processed"],
+        },
     ]
-    files_needed = ["1_01", "1_08", "1_42","1_49","TestingAccommodations"]
+    files_needed = [
+        "1_01",
+        "1_08",
+        "1_14",
+        "1_42",
+        "1_49",
+        "TestingAccommodations",
+        "testing_accommodations_processed",
+    ]
     return render_template(
         "testing/templates/testing/regents/index.html",
         reports=reports,
         files_needed=files_needed,
+    )
+
+from app.scripts.testing.regents import determine_lab_eligibility as determine_lab_eligibility
+@scripts.route("/testing/regents/lab_eligibility")
+def return_lab_eligibility():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    f = determine_lab_eligibility.main()
+
+    download_name = f"{school_year}_{term}_lab_eligibility.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
     )
 
 
@@ -193,11 +231,12 @@ def return_regents_exam_invitations():
 
 
 import app.scripts.testing.regents.create_walkin_signup_spreadsheet as create_walkin_signup_spreadsheet
+
+
 @scripts.route("/testing/regents/walk_in_spreadsheet")
 def return_regents_walkin_spreadsheet():
     school_year = session["school_year"]
     term = session["term"]
-
 
     df = create_walkin_signup_spreadsheet.main()
     f = BytesIO()
@@ -213,15 +252,42 @@ def return_regents_walkin_spreadsheet():
     )
 
 
+import app.scripts.testing.regents.process_walkin_signup_spreadsheet as process_walkin_signup_spreadsheet
+
+
+@scripts.route("/testing/regents/process_walkin_spreadsheet", methods=["GET", "POST"])
+def return_processed_regents_walkin_spreadsheet():
+    if request.method == "GET":
+        form = ProcessWalkingSpreadsheet()
+        return render_template(
+            "testing/templates/testing/regents/process_walkin_spreadsheet.html",
+            form=form,
+        )
+    else:
+        form = ProcessWalkingSpreadsheet(request.form)
+        df = process_walkin_signup_spreadsheet.main(form, request)
+        f = BytesIO()
+        df.to_excel(f, index=False)
+        f.seek(0)
+
+        download_name = f"Processed_Regents_Walkin_Spreadsheet_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
+
 import app.scripts.testing.regents.process_testing_accommodations as process_testing_accommodations
+
+
 @scripts.route("/testing/regents/process_testing_accommodations")
 def return_processed_testing_accommodations():
     school_year = session["school_year"]
     term = session["term"]
 
-
     df = process_testing_accommodations.main()
-    
+
     f = BytesIO()
     df.to_excel(f, index=False)
     f.seek(0)
@@ -236,20 +302,23 @@ def return_processed_testing_accommodations():
 
 
 import app.scripts.testing.regents.schedule_students as schedule_students
+
+
 @scripts.route("/testing/regents/schedule_students")
 def return_students_scheduled_for_regents():
     school_year = session["school_year"]
     term = session["term"]
 
+    df_dict = schedule_students.main()
 
-    df = schedule_students.main()
-    return df.to_html()
-    
     f = BytesIO()
-    df.to_excel(f, index=False)
+    writer = pd.ExcelWriter(f)
+    for sheet_name, dff in df_dict.items():
+        dff.to_excel(writer, sheet_name=sheet_name)
+    writer.close()
     f.seek(0)
 
-    download_name = f"{school_year}_{term}_processed_testing_accommodations.xlsx"
+    download_name = f"{school_year}_{term}_regents_scheduled_students.xlsx"
     return send_file(
         f,
         as_attachment=True,
