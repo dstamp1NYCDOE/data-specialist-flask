@@ -57,60 +57,80 @@ import pandas as pd
 import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
+
 def main(data):
-    term = data['form']['marking_period']
-    semester, marking_period = term.split('-')
+    term = data["form"]["marking_period"]
+    semester, marking_period = term.split("-")
 
     filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
     grades_df = utils.return_file_as_df(filename)
-    
+
     ## keep grades from current semester
-    grades_df = grades_df[grades_df['Term']==semester]
+    grades_df = grades_df[grades_df["Term"] == semester]
     ## drop courses with no grades
-    grades_df = grades_df.dropna(subset=['Pct'])
+    grades_df = grades_df.dropna(subset=["Pct"])
     ## determine failing classes
-    grades_df['failing?'] = grades_df['Pct'] < 65
+    grades_df["failing?"] = grades_df["Pct"] < 65
 
     ## drop non-credit-bearing-classes
-    grades_df = grades_df[~grades_df['Course'].str[0].isin(['G'])]
+    grades_df = grades_df[~grades_df["Course"].str[0].isin(["G"])]
 
-    #grades_pvt 
-    grades_pvt = pd.pivot_table( 
-        grades_df, index=['StudentID'], columns='failing?', values='Pct', aggfunc='count'
-    ).fillna(0).reset_index()
+    # grades_pvt
+    grades_pvt = (
+        pd.pivot_table(
+            grades_df,
+            index=["StudentID"],
+            columns="failing?",
+            values="Pct",
+            aggfunc="count",
+        )
+        .fillna(0)
+        .reset_index()
+    )
 
     ## student's failing one class
-    students_failing_one_class =  grades_pvt[grades_pvt[True]==1]['StudentID']
-    print(students_failing_one_class)
+    students_failing_one_class = grades_pvt[grades_pvt[True] == 1]["StudentID"]
 
-    students_df = grades_df[(grades_df['StudentID'].isin(students_failing_one_class)) & (grades_df['failing?'])]
+    students_df = grades_df[
+        (grades_df["StudentID"].isin(students_failing_one_class))
+        & (grades_df["failing?"])
+    ]
 
     filename = utils.return_most_recent_report(files_df, "3_07")
     cr_3_07_df = utils.return_file_as_df(filename)
-    cr_3_07_df = cr_3_07_df[['StudentID','LastName','FirstName']]
-    
-    students_df = students_df.merge(cr_3_07_df, on='StudentID', how='inner')
+    cr_3_07_df = cr_3_07_df[["StudentID", "LastName", "FirstName"]]
+
+    students_df = students_df.merge(cr_3_07_df, on="StudentID", how="inner")
 
     ## process assignments
     filename = utils.return_most_recent_report(files_df, "assignments")
     assignments_df = utils.return_file_as_df(filename)
     # Keep Assignments from Marking Period
-    assignments_df = assignments_df[assignments_df['Term']==term]
+    assignments_df = assignments_df[assignments_df["Term"] == term]
     # keep just assignments from relevant students
-    assignments_df = assignments_df[assignments_df['StudentID'].isin(students_failing_one_class)]
+    assignments_df = assignments_df[
+        assignments_df["StudentID"].isin(students_failing_one_class)
+    ]
     # keep assignments less than passing
-    assignments_df = assignments_df[assignments_df['Percent'] < 65]
+    assignments_df = assignments_df[assignments_df["Percent"] < 65]
     ## drop duplicates due to mutliple objectives
-    assignments_df = assignments_df.drop_duplicates(subset=['StudentID','Course','Assignment','DueDate'])
-    assignments_df = assignments_df.sort_values(by=['Category','Missing','WorthPoints'], ascending=[True,True,False])
+    assignments_df = assignments_df.drop_duplicates(
+        subset=["StudentID", "Course", "Assignment", "DueDate"]
+    )
+    assignments_df = assignments_df.sort_values(
+        by=["Category", "Missing", "WorthPoints"], ascending=[True, True, False]
+    )
 
-
-    students_df['flowables'] = students_df.apply(return_student_flowables, axis=1, args=(assignments_df,))
+    students_df["flowables"] = students_df.apply(
+        return_student_flowables, axis=1, args=(assignments_df,)
+    )
 
     ## sort by teacher, course, section
-    students_df = students_df.sort_values(by=['Teacher1','Course','Section','FirstName'])
+    students_df = students_df.sort_values(
+        by=["Teacher1", "Course", "Section", "FirstName"]
+    )
 
-    flowables = students_df['flowables'].explode().to_list()
+    flowables = students_df["flowables"].explode().to_list()
 
     f = BytesIO()
     my_doc = SimpleDocTemplate(
@@ -135,14 +155,16 @@ def return_student_flowables(student_row, assignments_df):
     first_name = student_row["FirstName"]
     last_name = student_row["LastName"]
 
-    course = student_row['Course']
-    section = student_row['Section']
-    teacher = student_row['Teacher1']
+    course = student_row["Course"]
+    section = student_row["Section"]
+    teacher = student_row["Teacher1"]
 
-    student_assignments = assignments_df[ (assignments_df['StudentID']==StudentID) & (assignments_df['Course']==course)]
-    table_cols = ['Assignment','Category','DueDate','RawScore','WorthPoints']
+    student_assignments = assignments_df[
+        (assignments_df["StudentID"] == StudentID)
+        & (assignments_df["Course"] == course)
+    ]
+    table_cols = ["Assignment", "Category", "DueDate", "RawScore", "WorthPoints"]
     student_assignments = student_assignments[table_cols]
-    
 
     paragraph = Paragraph(
         f"{teacher} - {course}/{section}",
@@ -164,8 +186,9 @@ def return_student_flowables(student_row, assignments_df):
     )
     flowables.append(paragraph)
 
-
-    assignments_table = utils.return_df_as_table(student_assignments, table_cols, fontsize=9)
+    assignments_table = utils.return_df_as_table(
+        student_assignments, table_cols, fontsize=9
+    )
     flowables.append(Spacer(width=0, height=0.1 * inch))
     flowables.append(assignments_table)
     flowables.append(Spacer(width=0, height=0.1 * inch))
@@ -174,23 +197,29 @@ def return_student_flowables(student_row, assignments_df):
         f"It can be overwhelming trying to make up your classwork, especially if you are missing many items. Here are two strategies that can be successful.",
         styles["BodyText"],
     )
-    flowables.append(paragraph)  
+    flowables.append(paragraph)
 
     strategies_lst = ListFlowable(
-    [
-        Paragraph("<b>The Snowball Method</b> - Pick out 2-3 small assignments you can get through quickly. The momentum of knocking out a few assignments can snowball into more success. And these smaller assignments will help you with the larger ones.", styles["Normal"]),
-        Paragraph("<b>The Avalanche Method</b> - Review your low scores and select the assignment with the most worth points in the performance category. This assignment will have the largest impact on changing your grade. Think about how to break it down into smaller chunks with a to-do list and snowball method your way to the finish line!", styles["Normal"]),
-    ],
-    bulletType="bullet",
-    start="squarelrs",
+        [
+            Paragraph(
+                "<b>The Snowball Method</b> - Pick out 2-3 small assignments you can get through quickly. The momentum of knocking out a few assignments can snowball into more success. And these smaller assignments will help you with the larger ones.",
+                styles["Normal"],
+            ),
+            Paragraph(
+                "<b>The Avalanche Method</b> - Review your low scores and select the assignment with the most worth points in the performance category. This assignment will have the largest impact on changing your grade. Think about how to break it down into smaller chunks with a to-do list and snowball method your way to the finish line!",
+                styles["Normal"],
+            ),
+        ],
+        bulletType="bullet",
+        start="squarelrs",
     )
-    flowables.append(strategies_lst) 
+    flowables.append(strategies_lst)
 
     paragraph = Paragraph(
         f"Everyone here at HSFI is here to help! If you need more support or help making a plan, stop by your wellness center to chat with your guidance counselor",
         styles["BodyText"],
     )
-    flowables.append(paragraph)     
+    flowables.append(paragraph)
 
     flowables.extend(closing)
     flowables.append(PageBreak())

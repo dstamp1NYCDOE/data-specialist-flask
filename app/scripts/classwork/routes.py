@@ -18,6 +18,7 @@ import app.scripts.classwork.scripts.failing_one_class_missing_assignments_repor
 import app.scripts.classwork.scripts.failing_all_classes_assignment_report as failing_all_classes_assignment_report
 import app.scripts.classwork.scripts.assignments_analysis as assignments_analysis
 
+
 @scripts.route("/classwork")
 def return_classwork_reports():
     reports = [
@@ -43,6 +44,17 @@ def return_classwork_reports():
                 }
             ),
         },
+        {
+            "report_title": "Student Assignment Analysis",
+            "report_function": "assignments_analysis",
+            "report_description": "Return Spreadsheet of Students Assignments Analysis",
+            "report_form": MarkingPeriodChoiceForm(
+                meta={
+                    "title": "assignments_analysis",
+                    "type": "marking_period_dropdown",
+                }
+            ),
+        },
     ]
     return render_template("classwork/templates/classwork/index.html", reports=reports)
 
@@ -55,13 +67,26 @@ def return_classwork_report(report_function):
     data = {"form": request.form}
     school_year = session["school_year"]
     term = session["term"]
-    if report_function == "failing_one_class_missing_assignments_reports":
-        f = failing_one_class_missing_assignments_reports.main(data)
-        download_name = f"{school_year}_{term}_StudentsFailingOneClassReport.pdf"
-    if report_function == "failing_all_classes_assignment_report":
-        f = failing_all_classes_assignment_report.main(data)
-        download_name = f"{school_year}_{term}_StudentsFailingAllClasses.xlsx"
-    if report_function == "assignments_analysis":
-        f = failing_all_classes_assignment_report.main(data)
-        download_name = f"{school_year}_{term}_JupiterAssignmentsAnalysis.xlsx"
-    return send_file(f, as_attachment=True, download_name=download_name)
+
+    reports_dict = {
+        "failing_one_class_missing_assignments_reports": {
+            "function": failing_one_class_missing_assignments_reports.main,
+            "download_name": f"{school_year}_{term}_StudentsFailingOneClassReport.pdf",
+        },
+        "failing_all_classes_assignment_report": {
+            "function": failing_all_classes_assignment_report.main,
+            "download_name": f"{school_year}_{term}_StudentsFailingAllClasses.xlsx",
+        },
+        "assignments_analysis": {
+            "function": assignments_analysis.main,
+            "download_name": f"{school_year}_{term}_JupiterAssignmentsAnalysis.xlsx",
+        },
+    }
+    report_dict = reports_dict.get(report_function)
+    if report_dict:
+        f = report_dict["function"](data)
+        download_name = report_dict["download_name"]
+        return send_file(f, as_attachment=True, download_name=download_name)
+    else:
+        flash(f"Resubmit form to run {report_function}", category="warning")
+        return redirect(url_for("scripts.return_classwork_reports"))
