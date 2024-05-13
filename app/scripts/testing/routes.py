@@ -160,6 +160,12 @@ def return_regents_reports():
             "report_description": "Schedule students for sections based on testing accommodations and teacher of record",
             "files_needed": ["1_08", "testing_accommodations_processed"],
         },
+        {
+            "report_title": "Return Regents Exam Invitations",
+            "report_function": "scripts.return_regents_exam_invitations",
+            "report_description": "Schedule students for sections based on testing accommodations and teacher of record",
+            "files_needed": ["1_08", "testing_accommodations_processed"],
+        },
     ]
     files_needed = [
         "1_01",
@@ -222,10 +228,13 @@ def return_initial_regents_registrations():
     )
 
 
+from app.scripts.testing.regents import create_exam_invitation as create_exam_invitation
+
+
 @scripts.route("/testing/regents/examinvitations")
 def return_regents_exam_invitations():
 
-    f = ""
+    f = create_exam_invitation.main()
     testing_period = "June2024"
     download_name = f"{testing_period}_exam_invitations.pdf"
     return send_file(
