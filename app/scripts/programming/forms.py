@@ -85,3 +85,10 @@ class MajorReapplicationForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class UploadAdvancedCourseSurveyForm(FlaskForm):
+    advanced_course_survey_file = FileField(
+        "Upload combined excel file with student survey results",
+        validators=[FileRequired()],
+    )

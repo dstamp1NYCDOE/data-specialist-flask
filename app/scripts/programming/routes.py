@@ -20,6 +20,7 @@ def return_programming_reports():
     student_vetting_form = StudentVettingForm()
     initial_request_form = InitialRequestForm()
     initial_request_inform_letter_form = InitialRequestInformLetters()
+    upload_advanced_coursework_surveys = UploadAdvancedCourseSurveyForm()
     form_cards = [
         {
             "Title": "Student Vetting",
@@ -38,6 +39,12 @@ def return_programming_reports():
             "Description": "Return spreadsheet initial student requests",
             "form": initial_request_inform_letter_form,
             "route": "scripts.return_initial_request_inform",
+        },
+        {
+            "Title": "Process Advanced Coursework Survey",
+            "Description": "Return spreadsheet with student interest in advanced coursework combined with student vetting",
+            "form": upload_advanced_coursework_surveys,
+            "route": "scripts.return_processed_advanced_course_survey",
         },
     ]
 
@@ -68,6 +75,35 @@ def return_student_vetting_report():
         download_name=download_name,
         # mimetype="application/pdf",
     )
+
+from app.scripts.programming.forms import UploadAdvancedCourseSurveyForm
+@scripts.route("/programming/process_advanced_course_survey", methods=["GET", "POST"])
+def return_processed_advanced_course_survey():
+    if request.method == "GET":
+        form = UploadAdvancedCourseSurveyForm()
+        return render_template(
+            "programming/templates/programming/process_advanced_course_survey.html",
+            form=form,
+        )
+    else:
+        form = UploadAdvancedCourseSurveyForm(request.form)
+        data = {
+            'form':form,
+            'request':request,
+        }
+        f = vetting.merge_with_interest_forms(data)
+
+        school_year = session["school_year"]
+        term = session["term"]
+
+
+        download_name = f"{school_year+1}_{1}_student_vetting_for_advanced_coursework.xlsx"
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
 
 
 from app.scripts.programming.requests import main as requests

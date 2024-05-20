@@ -14,12 +14,13 @@ def main():
     term = session["term"]
 
     filename = utils.return_most_recent_report(files_df, "1_49")
-    students_df = utils.return_file_as_df(filename)
+    students_df = utils.return_file_as_df(filename).fillna({'Counselor':'D75'})
 
     filename = utils.return_most_recent_report(files_df, "1_08")
     current_registrations_df = utils.return_file_as_df(filename)
 
-    registrations_pvt = pd.pivot_table(current_registrations_df, index='StudentID',columns='Course', values='Section', aggfunc='max').fillna(0)
+    registrations_pvt = pd.pivot_table(current_registrations_df, index='StudentID',columns='Course', values='Section', aggfunc='max')
+    registrations_pvt = registrations_pvt.fillna(0)
     registrations_pvt = registrations_pvt.apply(lambda x: x>0)
     registrations_pvt = registrations_pvt.reset_index()
     

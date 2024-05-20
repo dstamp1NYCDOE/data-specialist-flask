@@ -5,6 +5,7 @@ from app.scripts import scripts, files_df
 from app.scripts.testing.regents import process_regents_max
 
 import os
+from io import BytesIO
 from flask import current_app, session
 
 
@@ -165,3 +166,64 @@ def main():
 
 def return_reg_mark(marks):
     return marks.to_list()[0]
+
+def merge_with_interest_forms(data):
+    vetting_df = main()
+    vetting_df = vetting_df.drop(columns=['FirstName','LastName'])
+    request = data['request']
+    form = data['form']
+    advanced_course_survey_file = request.files[form.advanced_course_survey_file.name]
+
+    df_dict = pd.read_excel(advanced_course_survey_file, sheet_name=None)
+
+    df_lst = []
+    for course, df in df_dict.items():
+        df['Course'] = course
+        df_lst.append(df)
+
+    df = pd.concat(df_lst)
+
+    # keep interested students
+    df = df[df['I am...']=='interested']
+
+    # keep last submission
+    df = df.drop_duplicates(subset=['StudentID','Course'], keep='last')
+    cols = ['StudentID', 'FirstName', 'LastName',
+       'Course', 'Rate your interest level in this course',
+       'In a few sentences, why do you want to take this course?']
+    df = df[cols]
+    ## figure out interest level by all APs
+
+    pvt_df = pd.pivot_table(df,index='StudentID',columns='Course',values='Rate your interest level in this course',aggfunc='max').reset_index()
+
+    df['decision'] = ''
+    df = df.merge(pvt_df, on='StudentID', how='left')
+    
+
+    df = df.merge(vetting_df, on='StudentID', how='left')
+    
+    
+    df = df.sort_values(by=['Course','AttdTier','Rate your interest level in this course'])
+
+    f = BytesIO()
+    writer = pd.ExcelWriter(f)
+    df.to_excel(writer, sheet_name='combined', index=False)
+    
+    for course, dff in df.groupby('Course'):
+        dff = dff.sort_values(by=['Course','AttdTier','Rate your interest level in this course'])
+        dff.to_excel(writer, sheet_name=course, index=False)
+
+
+    for sheet in writer.sheets:
+        worksheet = writer.sheets[sheet]
+        worksheet.freeze_panes(1, 3)
+        worksheet.autofit()
+        worksheet.data_validation('G2:G200', {'validate': 'list',
+                                 'source': ['Yes','No','Waitlist'],
+                                 })
+
+    writer.close()
+
+    f.seek(0)
+    
+    return f

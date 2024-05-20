@@ -15,3 +15,4 @@ from app.scripts.pbis import routes
 from app.scripts.privileges import routes
 from app.scripts.classwork import routes
 from app.scripts.progress_towards_graduation import routes
+from app.scripts.officialclass import routes

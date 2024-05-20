@@ -7,6 +7,15 @@ from wtforms.validators import (DataRequired, Regexp,InputRequired)
 from werkzeug.utils import secure_filename
 
 
+COHORT_YEAR_CHOICES = [
+            ("4", "Cohort 2024/Class of 2028"),
+            ("3", "Cohort 2023/Class of 2027"),
+            ("2", "Cohort 2022/Class of 2026"),
+            ("1", "Cohort 2021/Class of 2025"),
+            ("Z", "Cohort 2020/Class of 2024"),
+        ]
+
+
 school_year_and_semester_choices = [
             ("2023-2", "Spring 2024"),
             ("2023-1", "Fall 2023"),

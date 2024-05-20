@@ -1,0 +1,52 @@
+{% macro render_official_class_form(report) -%}
+    {% if report.report_form.meta.type == 'marking_period_dropdown' %}
+        {{render_form_with_marking_period_dropdown(report)}}
+    {% elif report.report_form.meta.type == 'cohort_year_dropdown' %}
+        {{render_form_with_cohort_year_dropdown(report)}}
+    {% else %}
+        {{render_form(report)}}
+    {% endif %}
+{%- endmacro %}
+
+{% macro render_form(report) -%}
+    <form method="POST" action="{{url_for('scripts.return_officialclass_report', report_function=report.report_function)}}">
+        {{ report.report_form.hidden_tag() }}
+            
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{%- endmacro %}
+
+
+
+{% macro render_form_with_marking_period_dropdown(report) -%}
+    <form method="POST" action="{{url_for('scripts.return_officialclass_report', report_function=report.report_function)}}">
+        {{ report.report_form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ report.report_form.marking_period.label }}
+            {{ report.report_form.marking_period(class_="form-select ") }}
+        </div>
+            
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{%- endmacro %}
+
+{% macro render_form_with_cohort_year_dropdown(report) -%}
+    <form method="POST" action="{{url_for('scripts.return_officialclass_report', report_function=report.report_function)}}">
+        {{ report.report_form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ report.report_form.cohort_code.label }}
+            {{ report.report_form.cohort_code(class_="form-select ") }}
+        </div>
+            
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{%- endmacro %}
+

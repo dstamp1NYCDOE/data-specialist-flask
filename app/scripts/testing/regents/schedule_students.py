@@ -192,7 +192,6 @@ def main():
                 registrations.append(student)
         else:
             current_capacity = 1
-            # current_section = section - 1
             current_section = section
 
             for teacher, teacher_df in exam_section_df.groupby("Teacher1"):

@@ -166,6 +166,12 @@ def return_regents_reports():
             "report_description": "Schedule students for sections based on testing accommodations and teacher of record",
             "files_needed": ["1_08", "testing_accommodations_processed"],
         },
+        {
+            "report_title": "Return Processed ENL Glossary Numbers",
+            "report_function": "scripts.return_processed_enl_glossaries",
+            "report_description": "Return number of Glossaries Needed By Exam",
+            "files_needed": ["1_08", "testing_accommodations_processed"],
+        },
     ]
     files_needed = [
         "1_01",
@@ -325,6 +331,32 @@ def return_students_scheduled_for_regents():
     term = session["term"]
 
     df_dict = schedule_students.main()
+
+    f = BytesIO()
+    writer = pd.ExcelWriter(f)
+    for sheet_name, dff in df_dict.items():
+        dff.to_excel(writer, sheet_name=sheet_name)
+    writer.close()
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_regents_scheduled_students.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
+    )
+
+
+import app.scripts.testing.regents.process_enl_glossaries as process_enl_glossaries
+
+
+@scripts.route("/testing/regents/process_enl_glossaries")
+def return_processed_enl_glossaries():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    df_dict = process_enl_glossaries.main()
 
     f = BytesIO()
     writer = pd.ExcelWriter(f)
