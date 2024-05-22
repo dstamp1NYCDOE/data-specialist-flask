@@ -10,6 +10,7 @@ from app.scripts.surveys.connect_google_survey_with_class_lists import connect_g
 import app.scripts.utils as utils
 import app.scripts.update_from_jupiter as update_from_jupiter
 files_df = utils.return_dataframe_of_files()
+gsheets_df = utils.return_dataframe_of_gsheets()
 
 main = Blueprint("main", __name__, template_folder="templates", static_folder="static")
 
@@ -41,6 +42,9 @@ def view_all_reports():
                 {'html':files_df.to_html(classes=["table", "table-sm"]),
                 'title':'View Files'
                 },
+                {'html':gsheets_df.to_html(classes=["table", "table-sm"]),
+                'title':'View Gsheets'
+                },
             ]
         }
     return render_template("viewReport.html", data=data)
@@ -65,6 +69,52 @@ def return_update_from_jupiter():
     else:
         return render_template("updateJupiter.html", form=form)
 
+@main.route("/upload_gsheet", methods=["GET", "POST"])
+def upload_gsheet():
+    form = report_forms.GsheetForm()
+
+    if form.validate_on_submit():
+        gsheet_category = form.gsheet_category.data
+        gsheet_url = form.gsheet_url.data
+        year_and_semester = form.year_and_semester.data
+        school_year, semester = year_and_semester.split("-")
+
+        file_dict = {
+            "gsheet_url": gsheet_url,
+            "gsheet_category": gsheet_category,
+            "year_and_semester": year_and_semester,
+            "school_year": school_year,
+            "semester": semester,
+        }
+
+        from csv import DictWriter
+ 
+        # list of column names
+        field_names = ['gsheet_url', 'gsheet_category', 'year_and_semester',
+                    'school_year', 'semester']
+        
+        # Open CSV file in append mode
+        # Create a file object for this file
+        gsheet_urls_csv_filepath = os.path.join(
+            current_app.root_path, f"data/gsheet_urls.csv"
+        )
+        with open(gsheet_urls_csv_filepath, 'a') as f_object:
+        
+            # Pass the file object and a list
+            # of column names to DictWriter()
+            # You will get a object of DictWriter
+            dictwriter_object = DictWriter(f_object, fieldnames=field_names)
+        
+            # Pass the dictionary as an argument to the Writerow()
+            dictwriter_object.writerow(file_dict)
+        
+            # Close the file object
+            f_object.close()
+
+        flash(f"{gsheet_category} successfully uploaded", category="success")
+        return redirect(url_for("main.upload_gsheet"))
+
+    return render_template("uploadGsheet.html", form=form)
 
 @main.route("/upload", methods=["GET", "POST"])
 def upload_files():

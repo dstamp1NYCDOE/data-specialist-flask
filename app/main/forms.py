@@ -1,7 +1,7 @@
 from flask import session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import DateField, SelectField, StringField
+from wtforms import DateField, SelectField, StringField, URLField
 from wtforms.validators import (DataRequired, Regexp,InputRequired)
 
 from werkzeug.utils import secure_filename
@@ -17,11 +17,18 @@ COHORT_YEAR_CHOICES = [
 
 
 school_year_and_semester_choices = [
+            ("2024-7", "Summer 2025"),
+            ("2024-2", "Spring 2025"),
+            ("2024-1", "Fall 2024"),
+
+            ("2023-7", "Summer 2024"),
             ("2023-2", "Spring 2024"),
             ("2023-1", "Fall 2023"),
+
             ("2022-7", "Summer 2023"),
             ("2022-2", "Spring 2023"),
             ("2022-1", "Fall 2022"),
+
             ("2021-7", "Summer 2022"),
             ("2021-2", "Spring 2022"),
             ("2021-1", "Fall 2021"),
@@ -60,6 +67,19 @@ class SemesterSelectForm(FlaskForm):
         super(ClassListWithGoogleFormResultsForm, self).__init__(*args, **kwargs)
         self.report.data = "scripts.programming.class_lists"
 
+class GsheetForm(FlaskForm):
+    gsheet_category = SelectField(
+        "Google Sheet Category",
+        choices=[
+            ("master_schedule_planning", "Master Schedule Planning"),
+        ],
+    )
+    gsheet_url = URLField("Google Sheet URL",
+                          description="Share the Google Sheet with hsfi-data-dashboard@quickstart-1567988320342.iam.gserviceaccount.com")
+    year_and_semester = SelectField(
+        "School Year and Semester",
+        choices=school_year_and_semester_choices,
+    )
 
 class FileForm(FlaskForm):
     file = FileField(validators=[FileRequired()])

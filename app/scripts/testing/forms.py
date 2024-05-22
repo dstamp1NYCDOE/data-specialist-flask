@@ -42,3 +42,17 @@ class ProcessWalkingSpreadsheet(FlaskForm):
         validators=[FileRequired()],
         description="File must be saved as .xlsx",
     )
+
+
+class AssignRegentsProctoringForm(FlaskForm):
+    
+
+    exam_book = FileField(
+        "Exam Book as csv",
+        validators=[FileRequired()],
+    )
+
+    proctor_availability = FileField(
+        "Proctor Availabiliy as csv",
+        validators=[FileRequired()],
+    )

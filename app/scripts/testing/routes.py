@@ -172,6 +172,12 @@ def return_regents_reports():
             "report_description": "Return number of Glossaries Needed By Exam",
             "files_needed": ["1_08", "testing_accommodations_processed"],
         },
+                {
+            "report_title": "Assign Proctors",
+            "report_function": "scripts.return_regents_proctor_assignments",
+            "report_description": "Upload exam book and proctor availability to assign regents proctors",
+            "files_needed": [],
+        },
     ]
     files_needed = [
         "1_01",
@@ -365,10 +371,39 @@ def return_processed_enl_glossaries():
     writer.close()
     f.seek(0)
 
-    download_name = f"{school_year}_{term}_regents_scheduled_students.xlsx"
+    download_name = f"{school_year}_{term}_regents_enl_registrations.xlsx"
     return send_file(
         f,
         as_attachment=True,
         download_name=download_name,
         # mimetype="application/pdf",
     )
+
+from app.scripts.testing.forms import AssignRegentsProctoringForm
+from app.scripts.testing.regents.proctoring import main as regents_proctoring_assignments
+@scripts.route("/testing/regents/assign_proctors", methods=["GET", "POST"])
+def return_regents_proctor_assignments():
+    if request.method == "GET":
+        form = AssignRegentsProctoringForm()
+        return render_template(
+            "testing/templates/testing/regents/assign_proctors.html",
+            form=form,
+        )
+    else:
+        form = AssignRegentsProctoringForm(request.form)
+        data = {
+            'form':form,
+            'request':request,
+        }
+        f = regents_proctoring_assignments.main(form, request)
+
+        school_year = session["school_year"]
+        term = session["term"]
+
+
+        download_name = f"{school_year}_{term}_proctor_assignments.xlsx"
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )

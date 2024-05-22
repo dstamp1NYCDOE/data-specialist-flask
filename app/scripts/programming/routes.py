@@ -46,6 +46,12 @@ def return_programming_reports():
             "form": upload_advanced_coursework_surveys,
             "route": "scripts.return_processed_advanced_course_survey",
         },
+                {
+            "Title": "Process Master Schedule",
+            "Description": "Process Master Schedule Spreadsheet to upload to STARS",
+            "form": initial_request_form,
+            "route": "scripts.return_processed_master_schedule",
+        },
     ]
 
     return render_template(
@@ -166,3 +172,10 @@ def return_cte_major_reapplication():
             download_name=download_name,
             # mimetype="application/pdf",
         )
+
+
+from app.scripts.programming.master_schedule import main as process_master_schedule
+
+@scripts.route("/programming/process_master_schedule", methods=["GET", "POST"])
+def return_processed_master_schedule():
+    return process_master_schedule.main()

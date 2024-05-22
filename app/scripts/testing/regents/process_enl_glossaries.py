@@ -59,7 +59,18 @@ def main():
     ).fillna(False)
 
     registrations_df = registrations_df[registrations_df['ENL?']]
-
+    registrations_df = registrations_df.sort_values(by=['Day','Time','Room','Section'])
     dataframe_dict['ENL_Glossaries'] = registrations_df
+
+
+    # pivot table by exam
+    pvt_tbl = pd.pivot_table( 
+        registrations_df, index='ExamTitle', columns='HomeLang',values='StudentID',aggfunc='count'
+    ).fillna(0).reset_index()
+
+    dataframe_dict['ENL_Glossaries_count'] = pvt_tbl
+
+    for exam_title, students_df in registrations_df.groupby('ExamTitle'):
+        dataframe_dict[exam_title] = students_df[['LastName','FirstName','ExamTitle','Section','Room','HomeLang']]
 
     return dataframe_dict

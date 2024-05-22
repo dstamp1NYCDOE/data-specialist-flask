@@ -10,11 +10,20 @@ from reportlab.platypus import Table, TableStyle
 period_regex = re.compile(r"\d{1,2}")
 
 
+def return_dataframe_of_gsheets():
+    # gsheet_urls_csv_filepath = os.path.join(
+    #     current_app.root_path, f"data/gsheet_urls.csv"
+    #     )
+    gsheet_urls_csv_filepath = f"app/data/gsheet_urls.csv"
+    gsheet_urls_df = pd.read_csv(gsheet_urls_csv_filepath)
+    return gsheet_urls_df
+
+
 def return_dataframe_of_files():
     lst = []
     for filename in glob.glob("app/data/**/**/*.*"):
 
-        # file = filename.split("/")[4]
+        # file = filename.split("/")[4]s
         file = os.path.basename(filename)
 
         year_and_semester, download_date, report = file.split("_")
