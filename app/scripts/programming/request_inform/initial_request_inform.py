@@ -1,20 +1,15 @@
-import pandas as pd
-import numpy as np
-import datetime as dt
 from io import BytesIO
 
 import app.scripts.utils as utils
-from app.scripts import scripts, files_df
+from app.scripts import files_df
 
-import os
-from flask import current_app, session
+from flask import session
 
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER, TA_RIGHT
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.enums import TA_JUSTIFY, TA_RIGHT
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm, inch
-from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, TableStyle
+from reportlab.platypus import Paragraph, PageBreak, Spacer, Table, TableStyle
 from reportlab.platypus import ListFlowable, ListItem
 from reportlab.platypus import SimpleDocTemplate
 

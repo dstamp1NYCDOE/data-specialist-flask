@@ -54,6 +54,11 @@ def create_courses(teacher_row,period):
         #             teacher_row, period, day, cycle_day))
         # output.append(map_mental_health_mondays(
         #     teacher_row, period, day, cycle_day))
+    elif course_code in ['PHS11']:
+        day = ""
+        cycle_day = "11111"
+        output.append(create_master_course(
+                teacher_row, period, day, cycle_day))        
     else:
         for day,cycle_day in [("A","'01010"),("B","'10101")]:
             output.append(create_mapped_course(teacher_row,period,day,cycle_day))
@@ -211,7 +216,7 @@ def return_section_number(teacher_row,period,cycle=None):
     section = TeacherID*10+period
 
     if cycle:
-        return (10*period) + TeacherID + {"A":1,"B":2,"C":3,"D":4,"E":5}[cycle]
+        return (10*period) + TeacherID + {"A":1,"B":2,"C":3,"D":4,"E":5}.get(cycle,0)
         return (TeacherID*5+period*3-2*offset) + {"A":1,"B":2,"C":3,"D":4,"E":5}[cycle]
     else:
         if section == 0:
@@ -221,7 +226,7 @@ def return_section_number(teacher_row,period,cycle=None):
 def return_capacity(course_code, period):
     if course_code in ['PPS83']:
         return 35
-    if course_code in ['PHS21', 'GAS83']:
+    if course_code in ['PHS21', 'GAS83','PHS11']:
         return 34
     if course_code in ['PPS81',]:
         if period in [4,7]:
@@ -232,7 +237,10 @@ def return_capacity(course_code, period):
         return 25
 
 def return_course_code(course_code, day):
+    if day == '':
+        return course_code
     return course_code + 'Q' + day
+
 
 def return_mapped_course_code(course_code, day):
     return course_code

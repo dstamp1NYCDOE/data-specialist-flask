@@ -6,6 +6,8 @@ def main(student, student_transcript, student_iep):
     us_earned = student_transcript['HU_earned']
     govt_earned = student_transcript['HV_earned']
 
+    ss_course = ''
+
 
     if year_in_hs == 2:
         ss_course = 'HGS43'
