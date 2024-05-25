@@ -13,7 +13,7 @@ def main(administration_period):
         'EXRC',
         'SXRK',
         'MXRK',
-        'MXRC',
+        'MXRF',
         'SXRP',
         'MXRN',
         'HXRC',
