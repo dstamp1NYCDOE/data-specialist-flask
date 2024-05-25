@@ -67,6 +67,11 @@ def return_attendance_reports():
             "report_function": "scripts.return_daily_attd_predictor",
             "report_description": "Return Daily Attd Predictor",
         },
+        {
+            "report_title": "Cut Analysis",
+            "report_function": "scripts.return_cut_analysis",
+            "report_description": "Return Cut Analysis",
+        },        
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -305,6 +310,7 @@ def return_jupiter_attd_benchmark_analysis():
         return render_template("viewReport.html", data=data)
 
 
+import app.scripts.attendance.cut_analysis.main as cut_analysis
 @scripts.route("/attendance/class_report/", methods=["GET", "POST"])
 def generate_jupiter_attendance_class_report():
     if request.method == "GET":
@@ -337,3 +343,12 @@ def generate_jupiter_attendance_class_report():
             ]
         }
         return render_template("viewReport.html", data=data)
+
+
+import app.scripts.attendance.cut_analysis.main as cut_analysis
+@scripts.route("/attendance/return_cut_analysis")
+def return_cut_analysis():
+    f = cut_analysis.main()
+    return ''
+    download_name = f"CutAnalysis.xlsx"
+    return send_file(f, as_attachment=True, download_name=download_name)
