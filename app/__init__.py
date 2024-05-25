@@ -8,10 +8,13 @@ from app.config import Config
 
 
 from flask_executor import Executor
+
 executor = Executor()
 
 from flask_caching import Cache
+
 cache = Cache()
+
 
 def create_app(config_class=Config):
 
@@ -22,12 +25,20 @@ def create_app(config_class=Config):
     cache.init_app(app, config={"CACHE_TYPE": "SimpleCache"})
 
     from app.main.routes import main
+
     app.register_blueprint(main)
 
     from app.api_1_0 import api as api_1_0_blueprint
+
     app.register_blueprint(api_1_0_blueprint, url_prefix="/api")
 
     from app.scripts import scripts as scripts_blueprint
+
     app.register_blueprint(scripts_blueprint, url_prefix="/scripts")
 
-    return app
+    with app.app_context():
+        from app.scripts.attendance.dashboards.overall_daily import create_dashboard
+
+        app = create_dashboard(app)
+
+        return app
