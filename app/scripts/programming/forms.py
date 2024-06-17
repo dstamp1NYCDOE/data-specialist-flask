@@ -35,6 +35,14 @@ class InitialRequestInformLetters(FlaskForm):
         self.due_date.data = dt.datetime.today() + dt.timedelta(days=14)
         super().__init__(*args, **kwargs)
 
+class FinalRequestInformLetters(FlaskForm):
+    date_of_letter = DateField(validators=[InputRequired()])
+
+    def __init__(self, *args, **kwargs):
+        self.date_of_letter.data = dt.datetime.today()
+        
+        super().__init__(*args, **kwargs)
+
 
 class MajorReapplicationForm(FlaskForm):
     num_of_photography_seats = IntegerField(
@@ -92,3 +100,20 @@ class UploadAdvancedCourseSurveyForm(FlaskForm):
         "Upload combined excel file with student survey results",
         validators=[FileRequired()],
     )
+
+
+class AP_offers_Letter_Form(FlaskForm):
+
+    date_of_letter = DateField(validators=[InputRequired()])
+
+    due_date = DateField(validators=[InputRequired()])
+
+    ap_vetting_file = FileField(
+        "AP Vetting Spreadsheet",
+        validators=[FileRequired()],
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.date_of_letter.data = dt.datetime.today()
+        self.due_date.data = dt.datetime.today() + dt.timedelta(days=14)
+        super().__init__(*args, **kwargs)

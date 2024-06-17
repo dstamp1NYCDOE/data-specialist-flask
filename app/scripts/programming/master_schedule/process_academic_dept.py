@@ -12,7 +12,7 @@ def main(dept_name):
             course_code = teacher_row[period_col]
             course_code = course_code.replace("+", '')
             
-            if course_code:
+            if course_code and course_code[0]!='_':
                 if course_code not in ['GQS11', 'GAS81', 'GQS21', 'GQS22', 'GAS85']:
                     output_list.extend(create_courses(teacher_row,period))
 
@@ -285,68 +285,6 @@ def return_mapped_capacity(course_code):
 def return_adjusted_capacity(course_code,section=None):
     default_capacity = return_default_capacity(course_code,section)
     adjustment_dict = {
-    'HUS21QP': 0,
-    'HUS21': -6,
-    'HGS41': -2,
-    'HGS41QP': -3,
-    'HGS41QT': +1,
-
-    'HGS43': -3,
-    'HGS43QP': 0,
-    'HGS43QT': -2,
-    'HVS11': -3,
-    'HVS11QP': 0,
-
-    'MES21': -4,
-    'MES21QA': -6,
-    'MES21QP': -2,
-    'MGS21': -2,
-    'MGS21QP': -2,
-    'MGS21QT': +1,
-    'MRS21': +2,
-    'MRS21QP': -2,
-    'MQS21': 0,
-    'MCS21X': 0,
-    'MPS21': -5,
-
-    'MQS11QA' : +3,
-
-    'MQS11': +2,
-    'MQS11QT': -1,
-
-    'SES21': +1,
-    'SES21QP': -1,
-    'SES21QT': 0,
-
-    'SLS21': +2,
-    'SLS21QA': +1,
-    'SLS21QP': -2,
-    'SLS21QT':-2,
-    'SDS21': 0,
-    'SDS21QP': 0,
-    'SPS21':+4,
-
-    'SWS21': +1,
-    'SWS21QP': -1,
-    'SWS21QA': +2,
-    'SWS21QT': 0,
-
-    'SCS21H': 0,
-
-    'EES81': -2,
-    'EES81QP': -2,
-    'EES83QP':-2,
-    'EES85': -2,
-    'EES85QP': -1,
-    'EES85QET': 0,
-
-    'EES87QC': +2,
-    'EES87QCT': -2,
-    'EES87': -10,
-    
-    'EES87QD': 0,
-    'EES87QDT': 0,
-    'EES87QF': 0,
     }
 
     adjustment = adjustment_dict.get(course_code, 0)

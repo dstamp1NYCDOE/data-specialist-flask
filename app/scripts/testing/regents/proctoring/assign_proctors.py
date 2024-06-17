@@ -150,7 +150,7 @@ def convert_dept_to_code(dept):
 
 
 def return_proctor(proctors_to_pick_from, proctors_dict):
-    for num_of_assignments in np.arange(0, 100, 0.25):
+    for num_of_assignments in np.arange(0, 1000, 0.25):
         for proctor in proctors_to_pick_from:
             if proctors_dict.get(proctor, -1) < num_of_assignments:
                 return proctor

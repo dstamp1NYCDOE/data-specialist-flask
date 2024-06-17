@@ -42,8 +42,6 @@ def create_dashboard(server):
     RATR_df = utils.return_file_as_df(RATR_filename)
     student_attd_df = process_RATR(RATR_df)
 
-    print(student_attd_df)
-
     fig = px.histogram(student_attd_df, x="ytd_absence_%")
 
     # Create Layout

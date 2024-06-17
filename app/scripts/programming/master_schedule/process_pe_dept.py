@@ -10,7 +10,7 @@ def main(dept_name):
         for period in range(1,10):
             period_col = f'Period{period}'
             course_code = teacher_row[period_col]
-            if course_code:
+            if course_code and course_code[0]!='_':
                 output_list.extend(create_courses(teacher_row,period))
 
     return output_list

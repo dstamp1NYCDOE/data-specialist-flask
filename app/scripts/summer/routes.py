@@ -1,0 +1,22 @@
+import datetime as dt
+import pandas as pd
+from io import BytesIO
+import os
+
+from flask import render_template, request, send_file, session, current_app
+
+
+from app.scripts import scripts, files_df
+import app.scripts.utils as utils
+
+
+@scripts.route("/summer")
+def return_summer_school_routes():
+    reports = [
+        {
+            "report_title": "Summer School Testing",
+            "report_function": "scripts.return_summer_school_testing_routes",
+            "report_description": "Return summer school testing reports",
+        },
+    ]
+    return render_template("summer/templates/summer/index.html", reports=reports)

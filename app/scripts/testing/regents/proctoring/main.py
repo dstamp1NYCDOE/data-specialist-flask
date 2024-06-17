@@ -26,14 +26,14 @@ def main(form, request):
     proctor_assignments_df = assign_proctors.main(
         proctor_assignments_df, proctor_availability_df
     )
-    # proctor_schedule_df = proctor_schedule.main(
-    #     proctor_assignments_df, proctor_availability_df
-    # )
+    proctor_schedule_df = proctor_schedule.main(
+        proctor_assignments_df, proctor_availability_df
+    )
 
     f = BytesIO()
     writer = pd.ExcelWriter(f)
     proctor_assignments_df.to_excel(writer, sheet_name='ProctorAssignments', index=False)
-    # proctor_schedule_df.to_excel(writer, sheet_name='ProctorSchedule', index=False)
+    proctor_schedule_df.to_excel(writer, sheet_name='ProctorSchedule', index=False)
 
 
     for sheet in writer.sheets:

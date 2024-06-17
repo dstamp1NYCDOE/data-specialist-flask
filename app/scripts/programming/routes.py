@@ -11,7 +11,9 @@ from app.scripts.programming.forms import (
     StudentVettingForm,
     InitialRequestForm,
     InitialRequestInformLetters,
+    FinalRequestInformLetters,
     MajorReapplicationForm,
+    AP_offers_Letter_Form,
 )
 
 
@@ -20,7 +22,9 @@ def return_programming_reports():
     student_vetting_form = StudentVettingForm()
     initial_request_form = InitialRequestForm()
     initial_request_inform_letter_form = InitialRequestInformLetters()
+    final_request_inform_letter_form = FinalRequestInformLetters()
     upload_advanced_coursework_surveys = UploadAdvancedCourseSurveyForm()
+    ap_offer_letter_form = AP_offers_Letter_Form()
     form_cards = [
         {
             "Title": "Student Vetting",
@@ -41,12 +45,24 @@ def return_programming_reports():
             "route": "scripts.return_initial_request_inform",
         },
         {
+            "Title": "Final Fall Request Inform Letters",
+            "Description": "Return PDF of final notice letters for Fall Requests",
+            "form": final_request_inform_letter_form,
+            "route": "scripts.return_final_request_inform",
+        },        
+        {
+            "Title": "Return AP Class Offers",
+            "Description": "Return pdf of student offers for AP courses",
+            "form": ap_offer_letter_form,
+            "route": "scripts.return_ap_offer_letters",
+        },
+        {
             "Title": "Process Advanced Coursework Survey",
             "Description": "Return spreadsheet with student interest in advanced coursework combined with student vetting",
             "form": upload_advanced_coursework_surveys,
             "route": "scripts.return_processed_advanced_course_survey",
         },
-                {
+        {
             "Title": "Process Master Schedule",
             "Description": "Process Master Schedule Spreadsheet to upload to STARS",
             "form": initial_request_form,
@@ -82,7 +98,10 @@ def return_student_vetting_report():
         # mimetype="application/pdf",
     )
 
+
 from app.scripts.programming.forms import UploadAdvancedCourseSurveyForm
+
+
 @scripts.route("/programming/process_advanced_course_survey", methods=["GET", "POST"])
 def return_processed_advanced_course_survey():
     if request.method == "GET":
@@ -94,22 +113,22 @@ def return_processed_advanced_course_survey():
     else:
         form = UploadAdvancedCourseSurveyForm(request.form)
         data = {
-            'form':form,
-            'request':request,
+            "form": form,
+            "request": request,
         }
         f = vetting.merge_with_interest_forms(data)
 
         school_year = session["school_year"]
         term = session["term"]
 
-
-        download_name = f"{school_year+1}_{1}_student_vetting_for_advanced_coursework.xlsx"
+        download_name = (
+            f"{school_year+1}_{1}_student_vetting_for_advanced_coursework.xlsx"
+        )
         return send_file(
             f,
             as_attachment=True,
             download_name=download_name,
         )
-
 
 
 from app.scripts.programming.requests import main as requests
@@ -138,6 +157,30 @@ def return_initial_request_inform():
     f.seek(0)
 
     download_name = f"{school_year}_{term}_initial_request_inform_letters.pdf"
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        mimetype="application/pdf",
+    )
+
+import app.scripts.programming.request_inform.final_request_inform as final_request_inform
+@scripts.route("/programming/final_requests_letter", methods=["GET", "POST"])
+def return_final_request_inform():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    form = FinalRequestInformLetters(request.form)
+    data = {
+        "date_of_letter": form.date_of_letter.data,
+        
+    }
+
+    f = final_request_inform.main(data)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_final_request_inform_letters.pdf"
 
     return send_file(
         f,
@@ -176,6 +219,32 @@ def return_cte_major_reapplication():
 
 from app.scripts.programming.master_schedule import main as process_master_schedule
 
+
 @scripts.route("/programming/process_master_schedule", methods=["GET", "POST"])
 def return_processed_master_schedule():
     return process_master_schedule.main()
+
+
+import app.scripts.programming.ap_offers.main as ap_offers
+
+
+@scripts.route("/programming/ap_offer_letters", methods=["GET", "POST"])
+def return_ap_offer_letters():
+    if request.method == "GET":
+        form = AP_offers_Letter_Form()
+        return render_template(
+            "/programming/templates/programming/ap_offer_letters.html",
+            form=form,
+        )
+    else:
+        school_year = session["school_year"]
+        term = session["term"]
+        form = AP_offers_Letter_Form(request.form)
+        f = ap_offers.main(form, request)
+        download_name = f"{school_year}_{term}_AP_offers_letter.pdf"
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_testing_reports')}}">Testing</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_regents_reports')}}">Regents</a></li>
+    <li class="breadcrumb-item active">Day Of Organization</li>
+  </ol>
+</nav>
+
+<h1>Regents Day Of Organization Scripts</h1>
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+{% for regents_exam in regents_calendar %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{regents_exam['ExamTitle']}}</h5>
+      <div class="list-group">
+        {% for file in ['SAR','ExamLabels'] %}
+        <a href="{{url_for('scripts.return_regents_day_of_org_files',file=file,course=regents_exam['CourseCode'])}}" class="list-group-item list-group-item-action">
+            {{file}}
+        </a>
+        {% endfor %}
+    </div>
+    </div>
+    <div class="card-footer">
+      <small class="text-body-secondary">{{regents_exam['Day'].strftime('%Y-%m-%d')}} - {{regents_exam['Time']}}</small>
+    </div>
+  </div>
+{% endfor %}
+</div>
+
+
+
+</div>
+
+
+{% endblock %}
+

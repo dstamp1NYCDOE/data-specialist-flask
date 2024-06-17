@@ -2,8 +2,14 @@
     {% if form_card.Title == "Student Vetting" %}
         {{student_vetting_form(form_card.form,form_card.route)}}
 
+    {% elif form_card.Title == "Return AP Class Offers" %}
+        {{ap_offers_form(form_card.form,form_card.route)}}  
+
     {% elif form_card.Title == "Initial Fall Request Inform Letters" %}
         {{initial_request_inform_letter_form(form_card.form,form_card.route)}}  
+    
+    {% elif form_card.Title == "Final Fall Request Inform Letters" %}
+        {{final_request_inform_letter_form(form_card.form,form_card.route)}}  
 
     {% elif form_card.Title == "Process Advanced Coursework Survey" %}
         {{advanced_coursework_form(form_card.form,form_card.route)}}      
@@ -14,6 +20,33 @@
 {%- endmacro %}
 
 
+
+{% macro ap_offers_form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.date_of_letter.label }}
+        {{ form.date_of_letter(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.due_date.label }}
+        {{ form.due_date(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.ap_vetting_file.label }}
+        {{ form.ap_vetting_file(class_="form-control") }}
+    </div>    
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}
 
 {% macro initial_request_inform_letter_form(form, route) -%}
 
@@ -30,6 +63,23 @@
         {{ form.due_date(class_="form-control") }}
     </div>
 
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+{%- endmacro %}
+
+{% macro final_request_inform_letter_form(form, route) -%}
+
+<form action="{{url_for(route)}}" class="grid gap-3" method="post">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.date_of_letter.label }}
+        {{ form.date_of_letter(class_="form-control") }}
+    </div>
 
     <div class="form-group p-1 g-col-12 d-grid">
         <button type="submit" class="btn btn-primary">Submit</button>
@@ -68,7 +118,7 @@
 
 {% macro advanced_coursework_form(form, route) -%}
 
-<form action="{{url_for(route)}}" class="grid gap-3" method="post"enctype="multipart/form-data">
+<form action="{{url_for(route)}}" class="grid gap-3" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
 
 

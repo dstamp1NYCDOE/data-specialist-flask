@@ -1,8 +1,9 @@
 import datetime as dt
 import pandas as pd
 from io import BytesIO
+import os
 
-from flask import render_template, request, send_file, session
+from flask import render_template, request, send_file, session, current_app
 
 
 from app.scripts import scripts, files_df
@@ -172,10 +173,16 @@ def return_regents_reports():
             "report_description": "Return number of Glossaries Needed By Exam",
             "files_needed": ["1_08", "testing_accommodations_processed"],
         },
-                {
+        {
             "report_title": "Assign Proctors",
             "report_function": "scripts.return_regents_proctor_assignments",
             "report_description": "Upload exam book and proctor availability to assign regents proctors",
+            "files_needed": [],
+        },
+        {
+            "report_title": "Process Records for Special Appeal Candidates",
+            "report_function": "scripts.return_special_appeal_candidates",
+            "report_description": "Reviews regents results from June 2022 through August 2022 to identify students eligible for special appeal to graduates",
             "files_needed": [],
         },
     ]
@@ -379,8 +386,13 @@ def return_processed_enl_glossaries():
         # mimetype="application/pdf",
     )
 
+
 from app.scripts.testing.forms import AssignRegentsProctoringForm
-from app.scripts.testing.regents.proctoring import main as regents_proctoring_assignments
+from app.scripts.testing.regents.proctoring import (
+    main as regents_proctoring_assignments,
+)
+
+
 @scripts.route("/testing/regents/assign_proctors", methods=["GET", "POST"])
 def return_regents_proctor_assignments():
     if request.method == "GET":
@@ -392,14 +404,13 @@ def return_regents_proctor_assignments():
     else:
         form = AssignRegentsProctoringForm(request.form)
         data = {
-            'form':form,
-            'request':request,
+            "form": form,
+            "request": request,
         }
         f = regents_proctoring_assignments.main(form, request)
 
         school_year = session["school_year"]
         term = session["term"]
-
 
         download_name = f"{school_year}_{term}_proctor_assignments.xlsx"
         return send_file(
@@ -407,3 +418,64 @@ def return_regents_proctor_assignments():
             as_attachment=True,
             download_name=download_name,
         )
+
+
+from app.scripts.testing.special_appeals import (
+    main as process_special_appeal_candidates,
+)
+
+
+@scripts.route("/testing/regents/process_special_appeal_candidates")
+def return_special_appeal_candidates():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    df = process_special_appeal_candidates.main()
+    # return df.to_html()
+
+    f = BytesIO()
+    df.to_excel(f, index=False)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_special_appeal_candidates.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
+    )
+
+
+from app.scripts.testing.regents.day_of_org import (
+    main as regents_day_of_org,
+)
+
+
+@scripts.route("/testing/regents/day_of_org")
+def return_regents_day_of_org_index():
+    school_year = session["school_year"]
+    term = session["term"]
+    path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
+    regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
+    regents_calendar_df = regents_calendar_df.sort_values(by=["Day", "Time"])
+
+    return render_template(
+        "testing/templates/testing/regents/day_of_org.html",
+        regents_calendar=regents_calendar_df.to_dict("records"),
+    )
+
+
+@scripts.route("/testing/regents/day_of_org/<course>/<file>")
+def return_regents_day_of_org_files(course, file):
+    school_year = session["school_year"]
+    term = session["term"]
+    data = {"school_year": school_year, "term": term, "course": course, "file": file}
+    f = regents_day_of_org.main(data)
+
+    download_name = f"{school_year}_{term}_{course}_{file}.xlsx"
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
+    )

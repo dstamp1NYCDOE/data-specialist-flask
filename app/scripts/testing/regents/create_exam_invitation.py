@@ -60,7 +60,7 @@ def main():
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    section_properties_df = pd.read_excel(path, sheet_name="SectionProperties")
+    section_properties_df = pd.read_excel(path, sheet_name="SectionProperties").fillna('')
 
     cr_1_08_df = cr_1_08_df.merge(
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
