@@ -36,6 +36,11 @@ def create_app(config_class=Config):
 
     app.register_blueprint(scripts_blueprint, url_prefix="/scripts")
 
+    from app.scripts.graduation import graduation as graduation_blueprint
+
+    app.register_blueprint(graduation_blueprint, url_prefix="/graduation")
+
+    return app
     with app.app_context():
         from app.scripts.attendance.dashboards.overall_daily import create_dashboard
 

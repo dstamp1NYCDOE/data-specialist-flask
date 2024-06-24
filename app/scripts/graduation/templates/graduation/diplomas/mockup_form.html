@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('graduation.return_graduation_routes')}}">Graduation</a></li>
+    <li class="breadcrumb-item active"><a href="#">Diploma Mockup Form</a></li>
+  </ol>
+</nav>
+
+<h1>Diploma Mockup Upload Form</h1>
+
+<form action="{{url_for('graduation.return_diploma_mockup')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.grad_list_file.label }}
+        {{ form.grad_list_file(class_="form-control") }}
+    </div>    
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+
+</div>
+{% endblock %}

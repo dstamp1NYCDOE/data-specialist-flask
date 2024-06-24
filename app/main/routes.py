@@ -38,6 +38,7 @@ def return_index():
         "Progress Towards Graduation": "scripts.return_progress_towards_graduation_reports",
         "Official Class": "scripts.return_officialclass_reports",
         "Summer School": "scripts.return_summer_school_routes",
+        "Graduation Certification": "graduation.return_graduation_routes",
     }
     data = {"sections": dict(sorted(sections.items()))}
     return render_template("index.html", data=data)
