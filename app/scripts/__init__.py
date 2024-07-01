@@ -19,3 +19,4 @@ from app.scripts.officialclass import routes
 
 from app.scripts.summer import routes
 from app.scripts.summer.testing import routes
+from app.scripts.summer.programming import routes

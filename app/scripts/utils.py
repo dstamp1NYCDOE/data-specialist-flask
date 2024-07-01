@@ -9,6 +9,13 @@ from reportlab.platypus import Table, TableStyle
 
 period_regex = re.compile(r"\d{1,2}")
 
+StudentID_Regex = r"\d{9}"
+StudentIDRegex = re.compile(StudentID_Regex)
+
+
+DBN_Regex = r"\d{2}[A-Z]\d{3}"
+DBN_Regex = re.compile(DBN_Regex)
+
 
 def return_dataframe_of_gsheets():
     # gsheet_urls_csv_filepath = os.path.join(
@@ -19,9 +26,33 @@ def return_dataframe_of_gsheets():
     return gsheet_urls_df
 
 
+def return_dataframe_of_photos():
+    lst = []
+    file_lst = glob.glob("app/data/StudentPhotos/**/*.*")
+    for filename in file_lst:
+        mo = StudentIDRegex.search(filename)
+        StudentID = mo.group()
+
+        mo = DBN_Regex.search(filename)
+        DBN = mo.group()
+
+        file_dict = {
+            "photo_filename": filename,
+            "StudentID": int(StudentID),
+            "DBN": DBN,
+        }
+
+        lst.append(file_dict)
+
+    files_df = pd.DataFrame(lst)
+    return files_df
+
+
 def return_dataframe_of_files():
     lst = []
-    for filename in glob.glob("app/data/**/**/*.*"):
+    file_lst = glob.glob("app/data/**/**/*.*")
+    file_lst = [file for file in file_lst if not file.endswith(".jpg")]
+    for filename in file_lst:
 
         # file = filename.split("/")[4]s
         file = os.path.basename(filename)
@@ -62,13 +93,13 @@ def return_most_recent_report_by_semester(files_df, report, year_and_semester):
     return filename
 
 
-def return_file_as_df(filename,**kwargs):
+def return_file_as_df(filename, **kwargs):
     if "xlsx" in filename:
-        return pd.read_excel(filename,**kwargs)
+        return pd.read_excel(filename, **kwargs)
     if "csv" in filename:
-        return pd.read_csv(filename,**kwargs)
+        return pd.read_csv(filename, **kwargs)
     if "CSV" in filename:
-        return pd.read_csv(filename,**kwargs)
+        return pd.read_csv(filename, **kwargs)
 
 
 def return_cohort_year(GEC):
@@ -168,9 +199,9 @@ def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None, fontsize=
     return t
 
 
-def save_report_to_file(f,report_name,year,term):
+def save_report_to_file(f, report_name, year, term):
     year_and_semester = f"{year}-{term}"
-    
+
     filename = f"{year_and_semester}_9999-12-31_{report_name}"
 
     path = os.path.join(
@@ -179,7 +210,7 @@ def save_report_to_file(f,report_name,year,term):
     isExist = os.path.exists(path)
     if not isExist:
         os.makedirs(path)
-    
+
     f.save(os.path.join(path, filename))
-    
+
     return True

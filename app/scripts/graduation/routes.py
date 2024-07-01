@@ -26,6 +26,11 @@ def return_graduation_routes():
             "report_function": "graduation.return_diploma_mockup",
             "report_description": "Return diploma mockup from uploaded Graduate Certification",
         },
+        {
+            "report_title": "Final Transcript with Discharge Date",
+            "report_function": "graduation.return_final_transcripts_with_discharge_date",
+            "report_description": "Return final transcript with discharge date",
+        },        
     ]
     return render_template(
         "graduation/templates/graduation/index.html", reports=reports

@@ -24,7 +24,9 @@ def main():
     dbn_df["Sending school"] = dbn_df["dbn"]
     dbn_df = dbn_df[["Sending school", "school_name"]]
 
-    cr_s_01_df = cr_s_01_df.merge(dbn_df, on="Sending school", how="left")
+    cr_s_01_df = cr_s_01_df.merge(dbn_df, on="Sending school", how="left").fillna(
+        "NoSendingSchool"
+    )
 
     ## attach other demographics data
     filename = utils.return_most_recent_report(files_df, "3_07")
@@ -55,7 +57,7 @@ def main():
         left_on="Course",
         right_on="CourseCode",
     )
-
+    print(regents_signups_df)
     regents_signups_pvt = pd.pivot_table(
         regents_signups_df,
         index="StudentID",
@@ -63,9 +65,11 @@ def main():
         values="Section",
         aggfunc="count",
     )
-    regents_signups_pvt = regents_signups_pvt == 0
+    print(regents_signups_pvt)
+    regents_signups_pvt = regents_signups_pvt >= 0
 
     regents_signups_pvt = regents_signups_pvt.reset_index()
+    print(regents_signups_pvt)
 
     ## all students
     s_01_cols = [
@@ -143,7 +147,7 @@ def main():
         worksheet.freeze_panes(1, 5)
         worksheet.autofit()
         worksheet.data_validation(
-            "Q2",
+            "Q2:Q501",
             {
                 "validate": "list",
                 "source": "=HomeLangDropdown!$A$2:$A$209",

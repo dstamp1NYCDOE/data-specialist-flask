@@ -18,6 +18,7 @@ import app.scripts.utils as utils
 import app.scripts.update_from_jupiter as update_from_jupiter
 
 files_df = utils.return_dataframe_of_files()
+photos_df = utils.return_dataframe_of_photos()
 gsheets_df = utils.return_dataframe_of_gsheets()
 
 main = Blueprint("main", __name__, template_folder="templates", static_folder="static")

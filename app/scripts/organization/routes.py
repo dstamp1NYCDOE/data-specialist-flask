@@ -17,6 +17,7 @@ from app.scripts.organization.forms import (
     ClassListCountsFromSubsetForm,
     ClassRostersFromList,
     CareerDayReportsForm,
+    MailingLabelsByPeriod,
 )
 from app.scripts.organization import organize_student_documents_by_list
 from app.scripts.organization import class_list_counts_from_list
@@ -166,4 +167,30 @@ def return_career_day_reports():
             as_attachment=True,
             download_name=download_name,
             mimetype=mimetype,
+        )
+
+
+from app.scripts.organization import mailing_labels_by_period
+
+
+@scripts.route("/organization/mailing_labels_by_period", methods=["GET", "POST"])
+def return_mailing_labels_by_period():
+    if request.method == "GET":
+        form = MailingLabelsByPeriod()
+        return render_template(
+            "organization/templates/organization/mailing_labels_by_period.html",
+            form=form,
+        )
+    else:
+        form = MailingLabelsByPeriod(request.form)
+
+        f = mailing_labels_by_period.main(form, request)
+
+        download_name = "mailing_labels.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
         )

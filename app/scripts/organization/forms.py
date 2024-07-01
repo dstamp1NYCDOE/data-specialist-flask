@@ -1,7 +1,13 @@
 from flask import session
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import DateField, SelectField, StringField, SelectMultipleField, BooleanField
+from wtforms import (
+    DateField,
+    SelectField,
+    StringField,
+    SelectMultipleField,
+    BooleanField,
+)
 from wtforms.validators import DataRequired, Regexp, InputRequired
 from wtforms.widgets import TextArea
 
@@ -45,7 +51,6 @@ class ClassRostersFromList(FlaskForm):
     subset_lst = StringField("StudentID List", widget=TextArea())
     subset_title = StringField("Subgroup title")
 
-
     teacher = SelectField(
         "Teacher",
         choices=[
@@ -71,16 +76,12 @@ class ClassRostersFromList(FlaskForm):
             ("9", "P9"),
         ],
         validators=[InputRequired()],
-        default=['ALL'],
+        default=["ALL"],
     )
 
-    computer_labs_flag = BooleanField(
-        "Computer Labs Only",default=False
-    )
+    computer_labs_flag = BooleanField("Computer Labs Only", default=False)
 
-    include_counselors_flag = BooleanField(
-        "Include Counselors",default=False
-    )
+    include_counselors_flag = BooleanField("Include Counselors", default=False)
 
     inner_or_outer = SelectField(
         "Mode",
@@ -108,4 +109,25 @@ class CareerDayReportsForm(FlaskForm):
         "Output File",
         choices=[("xlsx", "Assignments as Spreadsheet"), ("pdf", "Assignment Letters")],
         validators=[InputRequired()],
+    )
+
+
+class MailingLabelsByPeriod(FlaskForm):
+
+    periods = SelectMultipleField(
+        "Periods",
+        choices=[
+            ("ALL", "ALL"),
+            ("1", "P1"),
+            ("2", "P2"),
+            ("3", "P3"),
+            ("4", "P4"),
+            ("5", "P5"),
+            ("6", "P6"),
+            ("7", "P7"),
+            ("8", "P8"),
+            ("9", "P9"),
+        ],
+        validators=[InputRequired()],
+        default=["ALL"],
     )
