@@ -22,6 +22,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm, inch
 from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, TableStyle
 from reportlab.platypus import SimpleDocTemplate
+from reportlab.platypus.flowables import BalancedColumns
 
 
 styles = getSampleStyleSheet()
@@ -127,7 +128,8 @@ def main():
     student_classes_df = student_classes_df.drop_duplicates(
         subset=["StudentID", "Course"]
     )
-    student_classes_df = student_classes_df.dropna(subset=["Room"])
+    student_classes_df = student_classes_df[student_classes_df["Course"].str[0] != "Z"]
+    student_classes_df = student_classes_df.fillna({"Room": 0})
     student_classes_df["Room"] = student_classes_df["Room"].apply(lambda x: int(x))
 
     flowables_lst = []
@@ -187,9 +189,22 @@ def main():
 
 def return_students_in_folder_flowables(students_df):
     flowables = []
-    cols = ["StudentID", "LastName", "FirstName", "DBN"]
-    T = return_df_as_table(students_df, cols=cols)
-    flowables.append(T)
+    cols = ["StudentID", "LastName", "FirstName"]
+
+    n = 25
+    list_df = [students_df[i : i + n] for i in range(0, len(students_df), n)]
+
+    lst_of_T = []
+    for df in list_df:
+        T = return_df_as_table(df, cols=cols)
+        lst_of_T.append(T)
+
+    B = BalancedColumns(
+        lst_of_T,  # the flowables we are balancing
+        nCols=2,  # the number of columns
+        # needed=72,  # the minimum space needed by the flowable
+    )
+    flowables.append(B)
     flowables.append(PageBreak())
     return flowables
 
@@ -252,6 +267,7 @@ def return_student_program_flowables(classes_df, flowables_dict):
     # flowables.append(T)
 
     exams_df = classes_df[classes_df["Course"].str[1:3] == "XR"]
+
     exams_df = exams_df.sort_values(by=["Day", "Time"])
     cols = ["Course Name", "Date", "Time"]
     exams_T = return_df_as_table(exams_df, cols=cols)
@@ -263,6 +279,9 @@ def return_student_program_flowables(classes_df, flowables_dict):
     class_table_paragraph = Paragraph(f"Class Schedule", styles["Heading4"])
     regents_exams_paragraph = Paragraph(f"Regents Exams Schedule", styles["Heading4"])
 
+    lunch_string = "Lunch: 11:53AM - 12:23 PM"
+    lunch_paragraph = Paragraph(lunch_string, styles["Heading5"])
+
     flowables.append(
         Table(
             [
@@ -271,6 +290,7 @@ def return_student_program_flowables(classes_df, flowables_dict):
                     [
                         class_table_paragraph,
                         class_schedule_T,
+                        lunch_paragraph,
                         regents_exams_paragraph,
                         exams_T,
                     ],
