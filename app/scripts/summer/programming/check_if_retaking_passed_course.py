@@ -20,6 +20,11 @@ def main():
     cr_4_01_df = utils.return_file_as_df(filename)
 
     filename = utils.return_most_recent_report_by_semester(
+        files_df, "1_01", year_and_semester
+    )
+    cr_1_01_df = utils.return_file_as_df(filename)
+
+    filename = utils.return_most_recent_report_by_semester(
         files_df, "s_01", year_and_semester
     )
     cr_s_01_df = utils.return_file_as_df(filename)
@@ -66,7 +71,7 @@ def main():
     passed_courses_df = passed_courses_df[passed_courses_df["Credits"] > 0]
     passed_courses_df = passed_courses_df[passed_courses_df["Course"].str[0] != "P"]
 
-    df = cr_4_01_df.merge(
+    df = cr_1_01_df.merge(
         passed_courses_df,
         left_on=["StudentID", "Course"],
         right_on=["StudentID", "SummerCode"],

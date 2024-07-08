@@ -18,10 +18,12 @@ def main(form, request):
     ]
     df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
 
+    sheets_to_ignore = ["Directions", "HomeLangDropdown"]
     dfs_lst = [
-        df for sheet_name, df in df_dict.items() if sheet_name != "HomeLangDropdown"
+        df for sheet_name, df in df_dict.items() if sheet_name not in sheets_to_ignore
     ]
     df = pd.concat(dfs_lst)
+    df = df.dropna(subset="StudentID")
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
@@ -29,10 +31,15 @@ def main(form, request):
     exams_in_order = regents_calendar_df.sort_values(by=["Day", "Time", "ExamTitle"])[
         "ExamTitle"
     ]
+    for exam in exams_in_order:
+        df[exam] = df[exam] == 1
+
+    df[exams_in_order] = df[exams_in_order].astype("bool")
+    df["ENL?"] = df["ENL?"].astype("bool")
+    df["large_print?"] = df["large_print?"].astype("bool")
 
     exam_dict_lst = []
     for exam in exams_in_order:
-
         exam_count_pvt = pd.pivot_table(
             df[df[exam]], index=exam, aggfunc="count", values="StudentID"
         )
@@ -67,5 +74,5 @@ def main(form, request):
         exam_dict = exam_dict | enl_count_pvt
         exam_dict_lst.append(exam_dict)
 
-    df = pd.DataFrame(exam_dict_lst)
+    df = pd.DataFrame(exam_dict_lst).fillna(0)
     return df

@@ -57,7 +57,7 @@ def main():
         left_on="Course",
         right_on="CourseCode",
     )
-    print(regents_signups_df)
+
     regents_signups_pvt = pd.pivot_table(
         regents_signups_df,
         index="StudentID",
@@ -65,11 +65,10 @@ def main():
         values="Section",
         aggfunc="count",
     )
-    print(regents_signups_pvt)
+
     regents_signups_pvt = regents_signups_pvt >= 0
 
     regents_signups_pvt = regents_signups_pvt.reset_index()
-    print(regents_signups_pvt)
 
     ## all students
     s_01_cols = [

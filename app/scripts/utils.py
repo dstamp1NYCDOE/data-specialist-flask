@@ -3,6 +3,15 @@ import pandas as pd
 import re
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+import pygsheets
+
+gc = pygsheets.authorize(service_account_env_var="GDRIVE_API_CREDENTIALS")
+
+
 from flask import current_app
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
@@ -91,6 +100,13 @@ def return_most_recent_report_by_semester(files_df, report, year_and_semester):
     files_df = files_df.sort_values(by=["download_date"])
     filename = files_df.iloc[-1, :]["filename"]
     return filename
+
+
+def return_gsheet_url_by_title(gsheet_df, title, year_and_semester=None):
+    gsheet_df = gsheet_df[gsheet_df["year_and_semester"] == year_and_semester]
+    gsheet_df = gsheet_df[gsheet_df["gsheet_category"] == title]
+    gsheet_url = gsheet_df.iloc[-1, :]["gsheet_url"]
+    return gsheet_url
 
 
 def return_file_as_df(filename, **kwargs):
@@ -213,4 +229,33 @@ def save_report_to_file(f, report_name, year, term):
 
     f.save(os.path.join(path, filename))
 
+    return True
+
+
+def return_google_sheet_as_dataframe(spreadsheet_id, sheet="Sheet1"):
+    if "https" in spreadsheet_id:
+        sh = gc.open_by_url(spreadsheet_id)
+    else:
+        sh = gc.open_by_key(spreadsheet_id)
+    try:
+        wks = sh.worksheet_by_title(sheet)
+    except pygsheets.exceptions.WorksheetNotFound:
+        wks = sh.sheet1
+    df = wks.get_as_df(include_tailing_empty=False)
+    if "Student ID" in df.columns:
+        df = df.rename(columns={"Student ID": "StudentID"})
+    return df
+
+
+def set_df_to_dataframe(output_df, spreadsheet_id, sheet="Output"):
+    if "https" in spreadsheet_id:
+        sh = gc.open_by_url(spreadsheet_id)
+    else:
+        sh = gc.open_by_key(spreadsheet_id)
+    try:
+        wks = sh.worksheet_by_title(sheet)
+    except:
+        wks = sh.add_worksheet(sheet)
+    wks.clear()
+    wks.set_dataframe(output_df.fillna(""), "A1")
     return True

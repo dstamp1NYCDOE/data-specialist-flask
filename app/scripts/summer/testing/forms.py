@@ -7,3 +7,17 @@ class RegentsOrderingForm(FlaskForm):
         "Upload XLSX file of regents registrations",
         validators=[FileRequired()],
     )
+
+
+class IdentifyExamOnlyForm(FlaskForm):
+    combined_regents_registration_spreadsheet = FileField(
+        "Upload XLSX file of regents registrations",
+        validators=[FileRequired()],
+    )
+
+
+class ProcessRegentsPreregistrationSpreadsheetForm(FlaskForm):
+    combined_regents_registration_spreadsheet = FileField(
+        "Upload XLSX file of regents registrations",
+        validators=[FileRequired()],
+    )
