@@ -5,3 +5,7 @@ from wtforms import SelectField
 
 class BathroomPassesForm(FlaskForm):
     teacher = SelectField()
+
+
+class TeacherSelectForm(FlaskForm):
+    teacher = SelectField()
