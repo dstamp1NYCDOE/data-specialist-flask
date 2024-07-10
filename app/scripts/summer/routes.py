@@ -28,5 +28,10 @@ def return_summer_school_routes():
             "report_function": "scripts.return_summer_school_organization_routes",
             "report_description": "Return summer school organization reports",
         },
+        {
+            "report_title": "Summer School Attendance",
+            "report_function": "scripts.return_summer_school_attendance_routes",
+            "report_description": "Return summer school attendance reports",
+        },        
     ]
     return render_template("summer/templates/summer/index.html", reports=reports)

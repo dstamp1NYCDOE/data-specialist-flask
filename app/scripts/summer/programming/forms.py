@@ -6,6 +6,9 @@ from wtforms.validators import DataRequired, Regexp, InputRequired
 
 from werkzeug.utils import secure_filename
 
+import datetime as dt
 
 class UpdateGradebooksForm(FlaskForm):
-    class_date = DateField()
+    class_date = DateField(
+        default=dt.datetime.today
+    )

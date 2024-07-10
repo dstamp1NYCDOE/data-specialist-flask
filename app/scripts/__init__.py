@@ -23,3 +23,4 @@ from app.scripts.summer import routes
 from app.scripts.summer.testing import routes
 from app.scripts.summer.programming import routes
 from app.scripts.summer.organization import routes
+from app.scripts.summer.attendance import routes
