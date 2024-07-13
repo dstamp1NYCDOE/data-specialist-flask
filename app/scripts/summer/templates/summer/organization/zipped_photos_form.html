@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+
+{% from 'programming/templates/programming/_forms.html' import render_programming_form %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_summer_school_routes')}}">Summer School</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_summer_school_organization_routes')}}">Organization</a></li>
+    <li class="breadcrumb-item active">Zip Photos Form</li>
+  </ol>
+</nav>
+
+<h1>Zip Photos Form</h1>
+
+<form action="{{url_for('scripts.return_summer_zipped_photos')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.mapping_file.label }}
+        {{ form.mapping_file(class_="form-control") }}
+    </div>    
+
+    <div class="row mb-3">
+        {{ form.batch_size.label(class_="col-sm-4 col-form-label") }}
+        <div class="col-sm-2">
+            {{ form.batch_size(class_="form-control") }}
+        </div>
+        {{ form.batch_number.label(class_="col-sm-4 col-form-label") }}
+        <div class="col-sm-2">
+            {{ form.batch_number(class_="form-control") }}
+        </div>
+        
+    </div>
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+
+</div>
+{% endblock %}

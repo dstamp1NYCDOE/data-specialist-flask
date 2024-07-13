@@ -76,6 +76,7 @@ class GsheetForm(FlaskForm):
         choices=[
             ("master_schedule_planning", "Master Schedule Planning"),
             ("summer_school_gradebooks_hub", "Summer School Gradebooks Hub"),
+            ("summer_school_attendance_hub", "Summer School Attendance Hub"),
         ],
     )
     gsheet_url = URLField(

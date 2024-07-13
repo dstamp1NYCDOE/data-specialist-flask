@@ -25,12 +25,17 @@ def return_summer_school_organization_routes():
             "report_title": "Generate Teacher Labels",
             "report_function": "scripts.return_summer_school_teacher_labels",
             "report_description": "Generate teacher labels to put on folders/envelopes",
-        },  
+        },
         {
             "report_title": "Generate Class Lists with Photos",
             "report_function": "scripts.return_summer_school_class_list_with_photos",
             "report_description": "Generate class lists with photos for all teachers or for single teacher",
-        },        
+        },
+        {
+            "report_title": "Zip Photos for SmartPass",
+            "report_function": "scripts.return_summer_zipped_photos",
+            "report_description": "Generate Zip Files to upload photos to SmartPass",
+        },
     ]
 
     return render_template(
@@ -68,7 +73,10 @@ def return_summer_school_bathroom_passes():
             download_name=download_name,
         )
 
+
 import app.scripts.summer.organization.generate_teacher_labels as generate_teacher_labels
+
+
 @scripts.route("/summer/organization/teacher_labels", methods=["GET", "POST"])
 def return_summer_school_teacher_labels():
     school_year = session["school_year"]
@@ -83,6 +91,7 @@ def return_summer_school_teacher_labels():
 
 
 import app.scripts.summer.organization.generate_class_list_with_photos as generate_class_list_with_photos
+
 
 @scripts.route("/summer/organization/class_list_with_photos", methods=["GET", "POST"])
 def return_summer_school_class_list_with_photos():
@@ -99,10 +108,28 @@ def return_summer_school_class_list_with_photos():
         form = TeacherSelectForm(request.form)
         school_year = session["school_year"]
         f, download_name = generate_class_list_with_photos.main(form, request)
-        
 
         return send_file(
             f,
             as_attachment=True,
             download_name=download_name,
         )
+
+
+from app.scripts.summer.organization.forms import ZippedPhotosForm
+import app.scripts.summer.organization.generate_zipped_photos as generate_zipped_photos
+
+
+@scripts.route("/summer/organization/zipped_photos", methods=["GET", "POST"])
+def return_summer_zipped_photos():
+    if request.method == "GET":
+        form = ZippedPhotosForm()
+        return render_template(
+            "/summer/templates/summer/organization/zipped_photos_form.html",
+            form=form,
+        )
+    else:
+
+        form = ZippedPhotosForm(request.form)
+        f, download_name = generate_zipped_photos.main(form, request)
+        return send_file(f, download_name=download_name, as_attachment=True)

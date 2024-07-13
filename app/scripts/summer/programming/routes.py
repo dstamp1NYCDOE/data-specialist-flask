@@ -28,6 +28,11 @@ def return_summer_school_programming_routes():
             "report_function": "scripts.return_update_summer_gradebooks",
             "report_description": "Update Summer School Gradebooks",
         },
+        {
+            "report_title": "Share Recommended Programs with Teacher Gradebooks",
+            "report_function": "scripts.return_summer_school_recommended_programs_with_teachers",
+            "report_description": "Update Summer School Gradebook to include SESIS recommended programs",
+        },
     ]
     return render_template(
         "summer/templates/summer/programming/index.html", reports=reports
@@ -87,3 +92,9 @@ def return_update_summer_gradebooks():
         form = UpdateGradebooksForm(request.form)
         f = update_gradebooks.main(form, request)
         return f
+
+import app.scripts.summer.programming.share_recommended_programs as share_recommended_programs
+@scripts.route("summer/programming/share_recommended_programs")
+def return_summer_school_recommended_programs_with_teachers():
+    share_recommended_programs.main()
+    return ''
