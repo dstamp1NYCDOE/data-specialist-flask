@@ -30,3 +30,10 @@ class ZippedPhotosForm(FlaskForm):
         widget=NumberInput(min=1, max=10, step=1),
         default=1,
     )
+
+
+class SmartPassKioskLabels(FlaskForm):
+    kiosk_file = FileField(
+        "Upload SmartPass Kiosk File as .csv (Include columns username & password)",
+        validators=[FileRequired()],
+    )

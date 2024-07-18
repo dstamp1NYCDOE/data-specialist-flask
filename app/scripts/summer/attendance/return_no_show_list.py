@@ -51,11 +51,10 @@ def main():
     for StudentID, absences_df in df.groupby("StudentID"):
         absences_df = absences_df.sort_values("Date", ascending=False)
         absences_lst = [int(x) for x in absences_df["value"]]
-        consecutive_absences = return_consective_absences(absences_lst)
-        if consecutive_absences == sum(absences_lst):
+        
+        if len(absences_lst) == sum(absences_lst):
             student_dict = {
                 "StudentID": StudentID,
-                "consecutive_absences": consecutive_absences,
                 "total_absences": sum(absences_lst),
             }
             students_lst.append(student_dict)

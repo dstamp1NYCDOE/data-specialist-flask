@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+
+{% from 'programming/templates/programming/_forms.html' import render_programming_form %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_summer_school_routes')}}">Summer School</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_summer_school_testing_routes')}}">Testing</a></li>
+    <li class="breadcrumb-item active">Return Regents Exam Labels</li>
+  </ol>
+</nav>
+
+<h1>Summer School Return Regents Exam Labels</h1>
+<p>Returns exam labels for all (or selected) exam from dropdown below</p>
+
+<form action="{{url_for('scripts.return_summer_school_exam_labels')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.exam_title.label }}
+        {{ form.exam_title(class_="form-control") }}
+    </div>    
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+
+</div>
+{% endblock %}

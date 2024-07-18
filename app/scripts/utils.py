@@ -16,6 +16,7 @@ from flask import current_app
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
 
+
 period_regex = re.compile(r"\d{1,2}")
 
 StudentID_Regex = r"\d{9}"
@@ -259,3 +260,11 @@ def set_df_to_dataframe(output_df, spreadsheet_id, sheet="Output"):
     wks.clear()
     wks.set_dataframe(output_df.fillna(""), "A1")
     return True
+
+
+def return_home_lang_code_table(files_df):
+    filename = return_most_recent_report(files_df, "TBLD150")
+    df = return_file_as_df(filename, skiprows=3)   
+    df = df.rename(columns={'Code':'HomeLangCode','Description':'HomeLang'})
+    
+    return df[['HomeLangCode','HomeLang']] 

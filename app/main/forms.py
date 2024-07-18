@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired, Regexp, InputRequired
 
 from werkzeug.utils import secure_filename
 
+import datetime as dt
 
 COHORT_YEAR_CHOICES = [
     ("4", "Cohort 2024/Class of 2028"),
@@ -89,12 +90,20 @@ class GsheetForm(FlaskForm):
     )
 
 
+def set_default_year_and_semester():
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+    return year_and_semester
+
+
 class FileForm(FlaskForm):
     file = FileField(validators=[FileRequired()])
-    download_date = DateField()
+    download_date = DateField(default=dt.datetime.today)
     year_and_semester = SelectField(
         "School Year and Semester",
         choices=school_year_and_semester_choices,
+        default=set_default_year_and_semester,
     )
 
 

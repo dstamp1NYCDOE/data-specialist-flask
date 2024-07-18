@@ -1,23 +1,56 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 
+from wtforms import DateField, SelectField
+from wtforms.validators import DataRequired, Regexp, InputRequired
 
-class RegentsOrderingForm(FlaskForm):
+class CombinedRegentsRegistrationForm(FlaskForm):
     combined_regents_registration_spreadsheet = FileField(
         "Upload XLSX file of regents registrations",
         validators=[FileRequired()],
     )
 
+class RegentsOrderingForm(CombinedRegentsRegistrationForm):
+    pass
 
-class IdentifyExamOnlyForm(FlaskForm):
-    combined_regents_registration_spreadsheet = FileField(
-        "Upload XLSX file of regents registrations",
-        validators=[FileRequired()],
+
+class IdentifyExamOnlyForm(CombinedRegentsRegistrationForm):
+    pass
+
+
+class ProcessRegentsPreregistrationSpreadsheetForm(CombinedRegentsRegistrationForm):
+    pass
+
+
+class SummerRegentsSchedulingForm(CombinedRegentsRegistrationForm):
+    pass
+
+
+exam_title_choices = [
+            ("ALL", "ALL"),
+            ("ELA","ELA"),
+            ("Global","Global History"),
+            ("USH","US History"),
+            ("Alg1","Algebra I"),
+            ("Geo","Geometry"),
+            ("Alg2","Algebra II/Trigonometry"),
+            ("LE","Living Environment"),
+            ("ES","Earth Science"),
+            ("Chem","Chemistry"),
+            ("Phys","Physics"),
+            ]
+
+
+class ReturnExamLabelsForm(FlaskForm):
+    exam_title = SelectField(
+        "Select Exam",
+        choices=exam_title_choices,
+        validators=[InputRequired()],
     )
 
-
-class ProcessRegentsPreregistrationSpreadsheetForm(FlaskForm):
-    combined_regents_registration_spreadsheet = FileField(
-        "Upload XLSX file of regents registrations",
-        validators=[FileRequired()],
-    )
+class ReturnENLrostersForm(FlaskForm):
+    exam_title = SelectField(
+        "Select Exam",
+        choices=exam_title_choices,
+        validators=[InputRequired()],
+    )    

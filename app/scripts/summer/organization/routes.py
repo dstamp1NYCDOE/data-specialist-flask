@@ -36,6 +36,11 @@ def return_summer_school_organization_routes():
             "report_function": "scripts.return_summer_zipped_photos",
             "report_description": "Generate Zip Files to upload photos to SmartPass",
         },
+        {
+            "report_title": "SmartPass Kiosk Labels",
+            "report_function": "scripts.return_smartpass_kiosk_labels",
+            "report_description": "Generate labels for SmartPass Kiosks",
+        },        
     ]
 
     return render_template(
@@ -132,4 +137,20 @@ def return_summer_zipped_photos():
 
         form = ZippedPhotosForm(request.form)
         f, download_name = generate_zipped_photos.main(form, request)
+        return send_file(f, download_name=download_name, as_attachment=True)
+
+from app.scripts.summer.organization.forms import SmartPassKioskLabels
+import app.scripts.summer.organization.generate_smart_pass_kiosk_labels as generate_smart_pass_kiosk_labels
+@scripts.route("/summer/organization/SmartPass/kiosk_labels", methods=["GET", "POST"])
+def return_smartpass_kiosk_labels():
+    if request.method == "GET":
+        form = SmartPassKioskLabels()
+        return render_template(
+            "/summer/templates/summer/organization/smart_pass_kiosk_label_form.html",
+            form=form,
+        )
+    else:
+
+        form = SmartPassKioskLabels(request.form)
+        f, download_name = generate_smart_pass_kiosk_labels.main(form, request)
         return send_file(f, download_name=download_name, as_attachment=True)

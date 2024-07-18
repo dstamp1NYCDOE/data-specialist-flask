@@ -25,6 +25,8 @@ def main():
         & (files_df["year_and_semester"] == year_and_semester)
     ]
 
+    
+
     lst_of_dfs = []
     for filename in RDAL_files["filename"]:
         df = utils.return_file_as_df(filename)
