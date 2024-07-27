@@ -25,7 +25,7 @@ def main(form, request):
     ]
     df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
 
-    sheets_to_ignore = ["Directions", "HomeLangDropdown"]
+    sheets_to_ignore = ["Directions", "HomeLangDropdown","YABC"]
     dfs_lst = [
         df for sheet_name, df in df_dict.items() if sheet_name not in sheets_to_ignore
     ]

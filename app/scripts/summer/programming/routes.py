@@ -8,10 +8,12 @@ from flask import render_template, request, send_file, session, current_app
 
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
+import app.scripts.summer.utils as summer_utils
 
 
 @scripts.route("/summer/programming")
 def return_summer_school_programming_routes():
+    print(summer_utils.return_sending_school_list())
     reports = [
         {
             "report_title": "Check If Taking Prior Passed Course",
@@ -32,6 +34,16 @@ def return_summer_school_programming_routes():
             "report_title": "Share Recommended Programs with Teacher Gradebooks",
             "report_function": "scripts.return_summer_school_recommended_programs_with_teachers",
             "report_description": "Update Summer School Gradebook to include SESIS recommended programs",
+        },
+        {
+            "report_title": "Share August Regents Registrations with Teachers",
+            "report_function": "scripts.return_summer_school_regents_registrations_with_teachers",
+            "report_description": "Update Summer School Gradebook to include August Regents Registrations",
+        },
+        {
+            "report_title": "Return Summer School Progress Reports",
+            "report_function": "scripts.return_summer_school_progress_reports",
+            "report_description": "Return Summer School Progress Reports",
         },
     ]
     return render_template(
@@ -93,8 +105,54 @@ def return_update_summer_gradebooks():
         f = update_gradebooks.main(form, request)
         return f
 
+
 import app.scripts.summer.programming.share_recommended_programs as share_recommended_programs
+
+
 @scripts.route("summer/programming/share_recommended_programs")
 def return_summer_school_recommended_programs_with_teachers():
     share_recommended_programs.main()
-    return ''
+    return ""
+
+
+import app.scripts.summer.programming.share_regents_registrations as share_regents_registrations
+
+
+@scripts.route("summer/programming/share_regents_registrations")
+def return_summer_school_regents_registrations_with_teachers():
+    share_regents_registrations.main()
+    return ""
+
+
+import app.scripts.summer.programming.progress_reports as progress_reports
+
+from app.scripts.summer.programming.forms import SendingSchoolForm
+
+
+@scripts.route("summer/programming/progress_reports", methods=["GET", "POST"])
+def return_summer_school_progress_reports():
+    if request.method == "GET":
+        form = SendingSchoolForm()
+        form.sending_school.choices = summer_utils.return_sending_school_list()
+        form.sending_school.choices.insert(0, ("ALL", "ALL"))
+
+        return render_template(
+            "/summer/templates/summer/programming/progress_reports_form.html",
+            form=form,
+        )
+    else:
+        form = SendingSchoolForm(request.form)
+        sending_school = form.data["sending_school"]
+
+        f = progress_reports.main(form, request)
+        school_year = session["school_year"]
+        if sending_school == "ALL":
+            download_name = f"Summer{school_year+1}ProgressReports.pdf"
+        else:
+            download_name = f"Summer{school_year+1}ProgressReports{sending_school}.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )

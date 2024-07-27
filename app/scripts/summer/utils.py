@@ -1,4 +1,3 @@
-
 from flask import current_app, session
 from dotenv import load_dotenv
 
@@ -22,7 +21,7 @@ def return_summer_class_lists():
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
-    
+
     ## process current class list
     filename = utils.return_most_recent_report_by_semester(
         files_df, "MasterSchedule", year_and_semester
@@ -67,10 +66,35 @@ def return_summer_class_lists():
     cr_1_01_df = cr_1_01_df.merge(
         cr_s_01_df[["StudentID", "school_name"]], on=["StudentID"], how="left"
     )
-    cr_1_01_df = cr_1_01_df.merge(
-        photos_df, on=["StudentID"], how="left"
-    )
+    cr_1_01_df = cr_1_01_df.merge(photos_df, on=["StudentID"], how="left")
 
-    cr_1_01_df = cr_1_01_df.drop_duplicates(subset=['StudentID','Course'])
-    cr_1_01_df = cr_1_01_df[cr_1_01_df['Course'].str[0]!='Z']
+    cr_1_01_df = cr_1_01_df.drop_duplicates(subset=["StudentID", "Course"])
+    cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"].str[0] != "Z"]
     return cr_1_01_df
+
+
+def return_sending_school_list():
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
+    ## process current class list
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "s_01", year_and_semester
+    )
+    cr_s_01_df = utils.return_file_as_df(filename)
+
+    path = os.path.join(current_app.root_path, f"data/DOE_High_School_Directory.csv")
+    dbn_df = pd.read_csv(path)
+    dbn_df["Sending school"] = dbn_df["dbn"]
+    dbn_df = dbn_df[["Sending school", "school_name"]]
+
+    cr_s_01_df = cr_s_01_df.merge(dbn_df, on="Sending school", how="left").fillna(
+        "NoSendingSchool"
+    )
+    cr_s_01_df = cr_s_01_df[cr_s_01_df["school_name"] != "NoSendingSchool"]
+
+    sending_schools_df = cr_s_01_df[["Sending school", "school_name"]].drop_duplicates()
+    sending_schools_df = sending_schools_df.sort_values(by="school_name")
+    lst_of_tuples = list(sending_schools_df.itertuples(index=False, name=None))
+    return lst_of_tuples

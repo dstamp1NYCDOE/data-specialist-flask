@@ -25,7 +25,7 @@ def main(form, request):
     ]
     df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
 
-    sheets_to_ignore = ["Directions", "HomeLangDropdown"]
+    sheets_to_ignore = ["Directions", "HomeLangDropdown", "YABC"]
     dfs_lst = [
         df for sheet_name, df in df_dict.items() if sheet_name not in sheets_to_ignore
     ]
@@ -43,7 +43,6 @@ def main(form, request):
     walkins_df["GradeLevel"] = ""
     walkins_df["OfficialClass"] = ""
     walkins_df["Section"] = 1
-    walkins_df["Action"] = "Add"
 
     exams = [
         ("ELA", "EXRCG"),
@@ -70,16 +69,41 @@ def main(form, request):
     ]
 
     for exam, exam_code in exams:
-        to_register_df = walkins_df[walkins_df[exam] == True]
-        to_register_df["Course"] = exam_code
-        to_register_df = to_register_df[output_cols_needed]
-        output_df_lst.append(to_register_df)
+        for status, action in [(True, "Add"), (False, "Drop")]:
+            to_register_df = walkins_df[walkins_df[exam] == status]
+            to_register_df["Course"] = exam_code
+            to_register_df["Action"] = action
+            to_register_df = to_register_df[output_cols_needed]
+            output_df_lst.append(to_register_df)
 
     to_register_df = pd.concat(output_df_lst)
 
+    filename = utils.return_most_recent_report(files_df, "1_01")
+    cr_1_01_df = utils.return_file_as_df(filename)
+    to_register_df = to_register_df.merge(
+        cr_1_01_df[["StudentID", "Course", "Period"]],
+        on=["StudentID", "Course"],
+        how="left",
+    ).fillna(-1)
+
+    to_register_df["is_change_needed"] = to_register_df.apply(is_change_needed, axis=1)
+    to_register_df = to_register_df[to_register_df["is_change_needed"]]
+
     f = BytesIO()
     writer = pd.ExcelWriter(f)
-    to_register_df.to_excel(writer)
+    to_register_df[output_cols_needed].to_excel(writer)
     writer.close()
     f.seek(0)
     return f
+
+
+def is_change_needed(row):
+    action = row["Action"]
+    already_registered = row["Period"] != -1
+
+    if action == "Add" and already_registered == False:
+        return True
+    if action == "Drop" and already_registered == True:
+        return True
+
+    return False

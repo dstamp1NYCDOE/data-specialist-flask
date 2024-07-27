@@ -70,6 +70,19 @@ def main():
         cr_s_01_df[["StudentID", "school_name"]], on=["StudentID"], how="left"
     )
 
+    exams_df = cr_1_01_df[cr_1_01_df['Course'].str[1] == 'X']
+    
+
+    exams_pvt = pd.pivot_table(exams_df,index='StudentID',columns='Course Name',values='Section',aggfunc='max')
+    exams_pvt = exams_pvt >= 1
+    exams_pvt = exams_pvt.replace({True:'Y',False:'N'})
+    
+    
+    exams_pvt = exams_pvt.reset_index()
+    print(exams_pvt)
+    
+    cr_1_01_df = cr_1_01_df.merge(exams_pvt, on='StudentID',how='left').fillna('N')
+
     teacher_cols = [
         "StudentID",
         "LastName",
@@ -81,14 +94,10 @@ def main():
         "Cycle",
         "school_name",
         "Student DOE Email",
-        "ParentLN",
-        "ParentFN",
-        "Phone",
-        "Math Functional Level",
-        "ELA Functional Level",
-        "Programs",
-        "Testing Accommodation(s)",
-        "Assistive Technologies",
+        'ALGEBRA I REG AUG', 'CC ALGEBRA II REG AUG', 'CC ELA REG AUG',
+        'CC GEOMETRY REG AUG', 'CHEMISTRY REG AUG', 'FRAMEWORK US HIST REG AUG',
+       'GLOBAL II REG AUG', 'LIVING ENV REG AUG', 'PHSET ES REG AUG',
+       'PHYSICS REG AUG'
     ]
 
     ## get gsheet
@@ -110,9 +119,9 @@ def main():
 
         sh = gc.open_by_url(gradebook_url)
         try:
-            wks = sh.worksheet_by_title("RecommendedPrograms")
+            wks = sh.worksheet_by_title("AugustRegentsRegistrations")
         except:
-            wks = sh.add_worksheet("RecommendedPrograms")
+            wks = sh.add_worksheet("AugustRegentsRegistrations")
         wks.clear()
         wks.set_dataframe(df.fillna(""), "A1")
         wks.frozen_rows = 1

@@ -8,7 +8,10 @@ from werkzeug.utils import secure_filename
 
 import datetime as dt
 
+
 class UpdateGradebooksForm(FlaskForm):
-    class_date = DateField(
-        default=dt.datetime.today
-    )
+    class_date = DateField(default=dt.datetime.today)
+
+
+class SendingSchoolForm(FlaskForm):
+    sending_school = SelectField()
