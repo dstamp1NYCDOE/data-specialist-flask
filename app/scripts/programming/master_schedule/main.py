@@ -28,7 +28,7 @@ def main():
     output_list.extend(process_functional_dept.main())
 
     ## Exam Book
-    output_list.extend(exam_book.main('January'))
+    output_list.extend(exam_book.main())
 
     ## Hard Coded
     output_list.extend(process_functional_dept.return_hard_coded())
@@ -63,8 +63,3 @@ def to_count(course_row):
 
     return is_tuesday and is_not_mapped
     
-
-    
-
-if __name__ == "__main__":
-   main()

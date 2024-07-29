@@ -1,6 +1,8 @@
 import app.scripts.programming.master_schedule.utils as utils
 import app.scripts.programming.master_schedule.spreadsheet_ids as spreadsheet_ids
 
+from flask import session
+
 def main(dept_name):
     df = utils.return_master_schedule_by_sheet(dept_name)
 
@@ -43,9 +45,14 @@ def create_courses(teacher_row,period):
         return [create_master_course(teacher_row,period),create_cte_double_period(teacher_row,period)]
 
 def create_master_course(teacher_row,period):
-    SchoolDBN = spreadsheet_ids.SchoolDBN
-    SchoolYear = spreadsheet_ids.SchoolYear
-    TermID = spreadsheet_ids.TermID
+    school_year = session["school_year"]
+    term = session["term"]
+    school_year_str = f"{int(school_year)}-{int(school_year)+1}"
+    TermID = str(term)
+
+    SchoolDBN = '02M600'
+    SchoolYear = school_year_str
+    
 
     course_code = teacher_row[f"Period{period}"]
     cycle_day = "'11111"
@@ -71,9 +78,14 @@ def create_master_course(teacher_row,period):
     return temp_dict
 
 def create_cte_double_period(teacher_row,period):
-    SchoolDBN = spreadsheet_ids.SchoolDBN
-    SchoolYear = spreadsheet_ids.SchoolYear
-    TermID = spreadsheet_ids.TermID
+    school_year = session["school_year"]
+    term = session["term"]
+    school_year_str = f"{int(school_year)}-{int(school_year)+1}"
+    TermID = str(term)
+
+    SchoolDBN = '02M600'
+    SchoolYear = school_year_str
+    
 
     course_code = teacher_row[f"Period{period}"]
     cycle_day = "'11111"
@@ -101,13 +113,13 @@ def create_cte_double_period(teacher_row,period):
 
 def return_capacity(course_code):
     sequence_dict = {}
-    default_seats = sequence_dict.get(course_code, 28)
+    default_seats = sequence_dict.get(course_code, 25)
     adjusted_seats = adjust_seat_capcity(course_code, default_seats)
     return adjusted_seats
 
 def adjust_seat_capcity(course_code, default_seats):
     adjustment_dict = {
-
+        'ANS11':+5,
     }
 
     return default_seats + adjustment_dict.get(course_code,0)

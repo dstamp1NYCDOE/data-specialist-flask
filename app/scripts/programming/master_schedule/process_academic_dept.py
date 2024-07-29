@@ -1,6 +1,8 @@
 import app.scripts.programming.master_schedule.utils as utils
 import app.scripts.programming.master_schedule.spreadsheet_ids as spreadsheet_ids
 
+from flask import current_app, session
+
 def main(dept_name):
     df = utils.return_master_schedule_by_sheet(dept_name)
     
@@ -32,9 +34,14 @@ def create_courses(teacher_row,period):
 
 
 def create_mapped_elective_course_pair(teacher_row, period):
-    SchoolDBN = spreadsheet_ids.SchoolDBN
-    SchoolYear = spreadsheet_ids.SchoolYear
-    TermID = spreadsheet_ids.TermID
+    school_year = session["school_year"]
+    term = session["term"]
+    school_year_str = f"{int(school_year)}-{int(school_year)+1}"
+    TermID = str(term)
+
+    SchoolDBN = '02M600'
+    SchoolYear = school_year_str
+    
 
     course_code = teacher_row[f"Period{period}"]
     cycle_day = "'11111"
@@ -104,9 +111,13 @@ def return_elective_mapped_course_code(teacher_row, period):
     return elective_mapped_course_code
 
 def create_mapped_course(teacher_row,period):
-    SchoolDBN = spreadsheet_ids.SchoolDBN
-    SchoolYear = spreadsheet_ids.SchoolYear
-    TermID = spreadsheet_ids.TermID
+    school_year = session["school_year"]
+    term = session["term"]
+    school_year_str = f"{int(school_year)}-{int(school_year)+1}"
+    TermID = str(term)
+
+    SchoolDBN = '02M600'
+    SchoolYear = school_year_str
 
     course_code = teacher_row[f"Period{period}"]
     cycle_day = "'11111"
@@ -134,9 +145,13 @@ def create_mapped_course(teacher_row,period):
     return temp_dict
 
 def create_master_course(teacher_row,period):
-    SchoolDBN = spreadsheet_ids.SchoolDBN
-    SchoolYear = spreadsheet_ids.SchoolYear
-    TermID = spreadsheet_ids.TermID
+    school_year = session["school_year"]
+    term = session["term"]
+    school_year_str = f"{int(school_year)}-{int(school_year)+1}"
+    TermID = str(term)
+
+    SchoolDBN = '02M600'
+    SchoolYear = school_year_str
 
     course_code = teacher_row[f"Period{period}"]
     offset = course_code.count("+")

@@ -29,8 +29,6 @@ def main(students_df):
         path, sheet_name="SummerSectionProperties"
     ).dropna()
 
-    print(section_properties_df)
-    print(regents_calendar_df)
 
     sections_df = pd.pivot_table(
         students_df,
@@ -53,10 +51,12 @@ def main(students_df):
     )
 
     sections_df["Room"] = sections_df.apply(return_room_number, axis=1)
+    sections_df["TeacherName"] = sections_df.apply(return_exam_teacher_name, axis=1)
     output_cols = [
         "Course",
         "Section",
         "ExamTitle",
+        "TeacherName",
         "Day",
         "Time",
         "Type",
@@ -160,15 +160,33 @@ QR_room_dict = {
     },
 }
 
+def return_exam_teacher_name(section_row):
+    section_num = int(section_row["Section"])
+    section_type = section_row["Type"]
+    section_time = section_row["Time"]
+    exam_num = section_row["exam_num"]
+
+    AM_or_AM_PM_conflict = return_if_AM_or_AM_PM_conflict(section_num)
+
+    AM_PM_CONFLICT_DICT = {1:'AM',2:'PM',3:'PM'}
+
+    if section_num == 15:
+        return AM_PM_CONFLICT_DICT.get(exam_num)
+    if section_num >= 30 and section_num <= 39:
+        return AM_PM_CONFLICT_DICT.get(exam_num)
+    return section_time  
 
 def return_room_number(section_row):
     try:
         section_num = int(section_row["Section"])
+        
         section_type = section_row["Type"]
+        
         section_time = section_row["Time"]
         exam_num = section_row["exam_num"]
 
         AM_or_AM_PM_conflict = return_if_AM_or_AM_PM_conflict(section_num)
+        AM_conflict = return_if_am_conflict(section_type)
 
         if section_num < 3:
             return 202
@@ -178,30 +196,26 @@ def return_room_number(section_row):
 
         if section_num == 15:
             return GENED_AM_CONFLICT_ROOM
+
+        if AM_or_AM_PM_conflict:
+            section_time = "AM"
+        if AM_conflict:
+            exam_num = 1
+
         ## 1.5x room 1 + CONFLICT
         if section_num in [20, 30, 31, 40, 41]:
-            if AM_or_AM_PM_conflict:
-                section_time = "AM"
             return time_and_half_room_dict[section_time][exam_num][0]
         ## 1.5x room 2 + ENL/ENL Conflict
         if section_num in [21, 22, 23, 32, 33, 42, 43]:
-            if AM_or_AM_PM_conflict:
-                section_time = "AM"
             return time_and_half_room_dict[section_time][exam_num][1]
         ## QR 1.5x
         if section_num in [26, 27, 36, 37, 46, 47, 56, 57]:
-            if AM_or_AM_PM_conflict:
-                section_time = "AM"
             return QR_room_dict[section_time][exam_num][0]
         ## QR 2x
         if section_num in [28, 29, 38, 39, 48, 49, 58, 59]:
-            if AM_or_AM_PM_conflict:
-                section_time = "AM"
             return QR_room_dict[section_time][exam_num][1]
         ## 2X
         if section_num in [24, 25, 34, 35, 44, 45]:
-            if AM_or_AM_PM_conflict:
-                section_time = "AM"
             return double_time_room_dict[section_time][exam_num][0]
         if (section_num >= 50) and section_num <= 59:
             return 127
@@ -214,3 +228,6 @@ def return_room_number(section_row):
 
 def return_if_AM_or_AM_PM_conflict(section_num):
     return (section_num >= 30) and (section_num <= 49)
+
+def return_if_am_conflict(section_type):
+    return section_type.find('_AM_conflict') > 0

@@ -90,6 +90,7 @@ def main(form, request):
         "7/22",
         "7/23",
         "7/24",
+        "7/25"
     ]
 
     attendance_output_cols = [

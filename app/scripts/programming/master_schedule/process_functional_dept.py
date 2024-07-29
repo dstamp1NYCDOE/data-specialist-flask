@@ -1,6 +1,8 @@
 import app.scripts.programming.master_schedule.utils as utils
 import app.scripts.programming.master_schedule.spreadsheet_ids as spreadsheet_ids
 
+from flask import session 
+
 def main():
     functional_course_list = [
     ('ZA',1),
@@ -47,10 +49,14 @@ def main():
     return output_list
 
 def create_course(course_code,period, cycle_day = "'11111"):
-    SchoolDBN = spreadsheet_ids.SchoolDBN
-    SchoolYear = spreadsheet_ids.SchoolYear
-    TermID = spreadsheet_ids.TermID
+    school_year = session["school_year"]
+    term = session["term"]
+    school_year_str = f"{int(school_year)}-{int(school_year)+1}"
+    TermID = str(term)
 
+    SchoolDBN = '02M600'
+    SchoolYear = school_year_str
+    
 
     temp_dict = {
     'SchoolDBN':SchoolDBN,

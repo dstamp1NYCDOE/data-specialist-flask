@@ -64,7 +64,7 @@ def main(form, request):
 
     testing_accommodations_df = return_student_accommodations(request, form)
 
-    print(testing_accommodations_df)
+    
 
     registrations_df = registrations_df.merge(
         testing_accommodations_df, on=["StudentID"], how="left"
@@ -121,6 +121,8 @@ def main(form, request):
     dff = section_properties_df.drop_duplicates(subset=["Type"])
     dff = dff[dff["Section"] > 2]
     df = registrations_df.merge(dff, on=merge_cols, how="left").fillna(1)
+
+    
 
     ## apply special assignment rules
     df["Section"] = df.apply(assign_scribe_kids, axis=1)
@@ -332,12 +334,13 @@ def return_student_accommodations(request, form):
     ]
     df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
 
-    sheets_to_ignore = ["Directions", "HomeLangDropdown"]
+    sheets_to_ignore = ["Directions", "HomeLangDropdown","YABC"]
     dfs_lst = [
         df for sheet_name, df in df_dict.items() if sheet_name not in sheets_to_ignore
     ]
     df = pd.concat(dfs_lst)
     df = df.dropna(subset="StudentID")
+    df = df.drop_duplicates(subset=['StudentID'])
 
     ## what has exams registered for
     exam_cols = ["Alg1", "ELA", "Alg2", "Global", "Chem", "ES", "USH", "Geo", "LE"]
@@ -348,7 +351,7 @@ def return_student_accommodations(request, form):
         df, index="school_name", values="StudentID", aggfunc="count"
     ).reset_index()
 
-    print(pvt_tbl.sort_values(by="StudentID"))
+    
     cols = [
         "StudentID",
         "SWD?",
