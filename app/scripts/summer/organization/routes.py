@@ -32,6 +32,11 @@ def return_summer_school_organization_routes():
             "report_description": "Generate class lists with photos for all teachers or for single teacher",
         },
         {
+            "report_title": "Organize PDF by Teacher",
+            "report_function": "scripts.return_summer_school_documents_organized_by_teacher",
+            "report_description": "Organize PDF of student documents by last teacher of the day",
+        },             
+        {
             "report_title": "Zip Photos for SmartPass",
             "report_function": "scripts.return_summer_zipped_photos",
             "report_description": "Generate Zip Files to upload photos to SmartPass",
@@ -154,3 +159,28 @@ def return_smartpass_kiosk_labels():
         form = SmartPassKioskLabels(request.form)
         f, download_name = generate_smart_pass_kiosk_labels.main(form, request)
         return send_file(f, download_name=download_name, as_attachment=True)
+
+
+from app.scripts.summer.organization.forms import OrganizeStudentRecordsForm
+import app.scripts.summer.organization.organize_pdf_by_teacher as organize_pdf_by_teacher
+@scripts.route("/summer/organization/documents_by_teacher", methods=["GET", "POST"])
+def return_summer_school_documents_organized_by_teacher():
+
+    if request.method == "GET":
+        form = OrganizeStudentRecordsForm()
+        return render_template(
+            "/summer/templates/summer/organization/organize_student_records_form.html",
+            form=form,
+        )
+    else:
+        form = OrganizeStudentRecordsForm(request.form)
+        f = organize_pdf_by_teacher.main(form, request)
+
+        download_name = f"organized_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )

@@ -171,6 +171,8 @@ def upload_files():
             os.makedirs(path)
         f.save(os.path.join(path, filename))
         flash(f"{filename} successfully uploaded", category="success")
+        global files_df 
+        files_df = utils.return_dataframe_of_files()
         return redirect(url_for("main.upload_files"))
 
     return render_template("upload.html", form=form)

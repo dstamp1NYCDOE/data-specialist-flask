@@ -16,17 +16,9 @@ def main(form, request):
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
 
-    dataframe_dict = {}
-
-    if term == 1:
-        month = "January"
-    if term == 2:
-        month = "June"
-    if term == 7:
-        month = "August"
-
     filename = utils.return_most_recent_report(files_df, "1_08")
     registrations_df = utils.return_file_as_df(filename)
+    registrations_check_df = utils.return_file_as_df(filename)
     cols = [
         "StudentID",
         "LastName",
@@ -36,7 +28,32 @@ def main(form, request):
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
+    regents_calendar_df["exam_num"] = (
+        regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
+    )
     section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
+    rooms_list = [
+        "AM1_ROOM",
+        "AM2_ROOM",
+        "PM1_ROOM",
+        "PM2_ROOM",
+        "AM3_ROOM",
+        "PM3_ROOM",
+    ]
+    replacement_dict = {room: 202 for room in rooms_list}
+    section_properties_df = section_properties_df.fillna(replacement_dict)
+    rooms_df = section_properties_df[
+        [
+            "Section",
+            "AM1_ROOM",
+            "AM2_ROOM",
+            "PM1_ROOM",
+            "PM2_ROOM",
+            "AM3_ROOM",
+            "PM3_ROOM",
+        ]
+    ]
+    rooms_df = rooms_df.rename(columns={"Section": "FinalSection"})
 
     ## drop inactivies
     registrations_df = registrations_df[registrations_df["Status"] == True]
@@ -47,7 +64,15 @@ def main(form, request):
         files_df, "s_01", year_and_semester
     )
     cr_s_01_df = utils.return_file_as_df(filename)
-    cr_s_01_df = cr_s_01_df[["StudentID", "Sending school"]]
+    path = os.path.join(current_app.root_path, f"data/DOE_High_School_Directory.csv")
+    dbn_df = pd.read_csv(path)
+    dbn_df["Sending school"] = dbn_df["dbn"]
+    dbn_df = dbn_df[["Sending school", "school_name"]]
+
+    cr_s_01_df = cr_s_01_df.merge(dbn_df, on="Sending school", how="left").fillna(
+        "NoSendingSchool"
+    )
+    cr_s_01_df = cr_s_01_df[["StudentID", "Sending school", "school_name"]]
 
     registrations_df = registrations_df.merge(cr_s_01_df, on=["StudentID"], how="left")
 
@@ -62,14 +87,33 @@ def main(form, request):
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
     )
 
-    testing_accommodations_df = return_student_accommodations(request, form)
+    registrations_df["exam_id"] = registrations_df["Time"] + registrations_df[
+        "exam_num"
+    ].astype(str)
 
-    
+    testing_accommodations_df = return_student_accommodations(request, form)
 
     registrations_df = registrations_df.merge(
         testing_accommodations_df, on=["StudentID"], how="left"
     ).fillna(False)
 
+    exam_sequence_by_student_by_day_pvt = pd.pivot_table(
+        registrations_df.sort_values(by=["Time", "exam_num"]),
+        index=["StudentID", "Day"],
+        values="exam_id",
+        aggfunc=lambda x: "_".join(str(v) for v in x),
+    )
+    exam_sequence_by_student_by_day_pvt["exam_id"] = (
+        exam_sequence_by_student_by_day_pvt["exam_id"].apply(
+            lambda x: x if x.count("_") > 0 else "_"
+        )
+    )
+    exam_sequence_by_student_by_day_pvt = (
+        exam_sequence_by_student_by_day_pvt.reset_index()
+    )
+    exam_sequence_by_student_by_day_pvt["exam_id"] = (
+        exam_sequence_by_student_by_day_pvt["exam_id"]
+    ).apply(remove_exam3_from_exam_str)
     ## attach number of exams students are taking per day and flag potential conflicts
 
     num_of_exams_by_student_by_day = pd.pivot_table(
@@ -79,6 +123,7 @@ def main(form, request):
         values="Course",
         aggfunc="count",
     ).fillna(0)
+
     num_of_exams_by_student_by_day["Total"] = num_of_exams_by_student_by_day.sum(axis=1)
     num_of_exams_by_student_by_day.columns = [
         f"{col}_#_of_exams_on_day" for col in num_of_exams_by_student_by_day.columns
@@ -92,6 +137,12 @@ def main(form, request):
     registrations_df = registrations_df.merge(
         num_of_exams_by_student_by_day, on=["StudentID", "Day"], how="left"
     ).fillna(0)
+
+    registrations_df = (
+        registrations_df.drop(columns=["exam_id"])
+        .merge(exam_sequence_by_student_by_day_pvt, on=["StudentID", "Day"], how="left")
+        .fillna("")
+    )
 
     ## attach conflict flags
 
@@ -117,16 +168,21 @@ def main(form, request):
         "AM_Conflict?",
         "PM_Conflict?",
         "AM_PM_Conflict?",
+        "exam_id",
     ]
-    dff = section_properties_df.drop_duplicates(subset=["Type"])
-    dff = dff[dff["Section"] > 2]
-    df = registrations_df.merge(dff, on=merge_cols, how="left").fillna(1)
+    dff = section_properties_df.drop_duplicates(subset=["Type", "exam_id"])
+    dff = dff[dff["Section"] >= 2]
 
-    
+    dff = dff.drop(
+        columns=["AM1_ROOM", "AM2_ROOM", "PM1_ROOM", "PM2_ROOM", "AM3_ROOM", "PM3_ROOM"]
+    )
+    df = registrations_df.merge(dff, on=merge_cols, how="left").fillna(1)
 
     ## apply special assignment rules
     df["Section"] = df.apply(assign_scribe_kids, axis=1)
     df["Section"] = df.apply(reassign_gen_ed, axis=1)
+    df["Section"] = df.apply(reassign_gen_ed_am_pm_conflicts, axis=1)
+
     df["Type"] = df["Type"].apply(
         lambda x: "GenEd" if x == "GenEd_AM_PM_Conflict" else x
     )
@@ -148,10 +204,14 @@ def main(form, request):
         on=["Course", "Section"],
     ).fillna(1)
 
-    students_df["FinalSection"] = students_df.apply(set_final_section, axis=1)
+    students_df["FinalSection"] = students_df.apply(set_final_section, axis=1).fillna(
+        202
+    )
+    students_df = students_df.merge(rooms_df, on="FinalSection", how="left")
+
     students_df["GradeLevel"] = ""
     students_df["OfficialClass"] = ""
-    students_df["Action"] = "Update"
+    students_df["Action"] = "Replace"
     output_cols_needed = [
         "StudentID",
         "LastName",
@@ -165,6 +225,42 @@ def main(form, request):
 
     exambook_df, room_check_df = return_exambook.main(students_df)
 
+    ## flag students with more than >2 exams on one day or 2+ exams in PM
+    overenrolled_df = students_df[
+        (students_df["PM_#_of_exams_on_day"] >= 2)
+        | (students_df["Total_#_of_exams_on_day"] > 2)
+    ]
+    overenrolled_output_cols = [
+        "school_name",
+        "StudentID",
+        "LastName",
+        "FirstName",
+        "Day",
+        "Time",
+        "Course",
+        "ExamTitle",
+        "PM_#_of_exams_on_day",
+        "Total_#_of_exams_on_day",
+    ]
+    overenrolled_df = overenrolled_df[overenrolled_output_cols].sort_values(
+        by=["school_name", "LastName", "FirstName"]
+    )
+
+    ## flag double time students taking two exams on one day
+    two_exam_double_time_df = students_df[
+        (students_df["double_time?"] == True)
+        & (students_df["Total_#_of_exams_on_day"] >= 2)
+    ]
+    two_exam_double_time_df = two_exam_double_time_df[
+        overenrolled_output_cols
+    ].sort_values(by=["school_name", "LastName", "FirstName"])
+
+    ## identify students who need a section change
+    registrations_check_df['OldSection'] = registrations_check_df['Section']
+    registrations_check_df = registrations_check_df[['StudentID','Course','OldSection']]
+    df = students_df.merge(registrations_check_df, on=['StudentID','Course'])
+    df = df[df['OldSection']!=df['FinalSection']]
+
     # return room_check_df
 
     f = BytesIO()
@@ -174,22 +270,52 @@ def main(form, request):
     students_df[students_df["FinalSection"] == 1].to_excel(
         writer, sheet_name="Check", index=False
     )
-    students_df[output_cols_needed].to_excel(
+    df[output_cols_needed].sort_values(by=['Course','FinalSection']).to_excel(
         writer, sheet_name="StudentFileEdit", index=False
     )
+    overenrolled_df.to_excel(writer, sheet_name="Overenrolled", index=False)
+    two_exam_double_time_df.to_excel(
+        writer, sheet_name="MultipleDoubleTimeExams", index=False
+    )
+
+    students_df[students_df["special_notes"] != False].sort_values(by=['school_name','StudentID']).to_excel(
+        writer, sheet_name="IEP_CHECK", index=False
+    )
+
+    students_df.to_excel(writer, sheet_name="StudentsDataDump", index=False)
     writer.close()
     f.seek(0)
 
     return f
 
 
+def remove_exam3_from_exam_str(exam_str):
+    if "3" in exam_str:
+        ## CHEM = 3, ES = 2, USH = 1
+        swap_dict = {
+            "AM1_AM3": "AM1_AM2",
+            # "AM1_AM3_PM2": "",
+            "AM3_PM1": "AM1_PM1",
+            # "AM3_PM1_PM2": "",
+            "AM3_PM2": "AM2_PM2",
+        }
+        return swap_dict.get(exam_str, exam_str)
+    else:
+        return exam_str
+
+
 def set_final_section(student_row):
     NumberOfSections = student_row["NumberOfSections"]
     section = student_row["Section"]
+    index = student_row["index"]
+
     if NumberOfSections == 1:
         return section
-
-    index = student_row["index"]
+    if section == 19:
+        index = student_row["index"] - 8
+        if index <= 0:
+            return section
+    
     offset = (index) % NumberOfSections
 
     return section + offset
@@ -203,12 +329,12 @@ def determine_number_of_sections(course_section):
     GEN_ED_TARGET = 34
     SPED_TARGET = 15
 
-    if section < 20:
+    if section < 14:
         SECTION_TYPE = "GENED"
         CURRENT_TARGET = GEN_ED_TARGET
         CAP = 45
-        if section < 15:
-            MAX_NUMBER_OF_SECTIONS = 12
+        if section < 11:
+            MAX_NUMBER_OF_SECTIONS = 9
         else:
             MAX_NUMBER_OF_SECTIONS = 1
     else:
@@ -216,7 +342,7 @@ def determine_number_of_sections(course_section):
         CURRENT_TARGET = SPED_TARGET
         CAP = 25
         MAX_NUMBER_OF_SECTIONS = 1
-        if section in [20, 30, 40]:
+        if section in [19,20]:
             MAX_NUMBER_OF_SECTIONS = 2
 
     BASE_SHOWUP_RATE = 0.6
@@ -243,7 +369,7 @@ def determine_capacity(course_section):
     GEN_ED_TARGET = 34
     SPED_TARGET = 15
 
-    if section < 20:
+    if section < 11:
         SECTION_TYPE = "GENED"
         CURRENT_TARGET = GEN_ED_TARGET
         CAP = 45
@@ -276,19 +402,30 @@ def assign_scribe_kids(student_row):
     if not is_scribe:
         return student_row["Section"]
     elif student_row["AM_Conflict?"]:
-        return 61
+        return 16
     elif student_row["AM_PM_Conflict?"]:
-        return 62
+        return 17
     elif student_row["PM_Conflict?"]:
-        return 63
-    return 60
+        return 18
+    return 15
+
+
+def reassign_gen_ed_am_pm_conflicts(student_row):
+    current_section = student_row["Section"]
+    if (
+        student_row["AM_#_of_exams_on_day"] < 2
+        and student_row["PM_#_of_exams_on_day"] < 2
+    ):
+        if student_row["SWD?"] == False and student_row["ENL?"] == False:
+            return 2
+    return current_section
 
 
 def reassign_gen_ed(student_row):
     current_section = student_row["Section"]
     dbn = student_row["Sending school"]
-    if current_section == 17:
-        return 3
+    if current_section == 13:
+        return 2
     return current_section
 
 
@@ -334,13 +471,13 @@ def return_student_accommodations(request, form):
     ]
     df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
 
-    sheets_to_ignore = ["Directions", "HomeLangDropdown","YABC"]
+    sheets_to_ignore = ["Directions", "HomeLangDropdown", "YABC"]
     dfs_lst = [
         df for sheet_name, df in df_dict.items() if sheet_name not in sheets_to_ignore
     ]
     df = pd.concat(dfs_lst)
     df = df.dropna(subset="StudentID")
-    df = df.drop_duplicates(subset=['StudentID'])
+    df = df.drop_duplicates(subset=["StudentID"])
 
     ## what has exams registered for
     exam_cols = ["Alg1", "ELA", "Alg2", "Global", "Chem", "ES", "USH", "Geo", "LE"]
@@ -351,7 +488,6 @@ def return_student_accommodations(request, form):
         df, index="school_name", values="StudentID", aggfunc="count"
     ).reset_index()
 
-    
     cols = [
         "StudentID",
         "SWD?",

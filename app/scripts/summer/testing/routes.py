@@ -8,7 +8,7 @@ from flask import render_template, request, send_file, session, current_app
 
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
-
+import app.scripts.summer.utils as summer_utils
 
 @scripts.route("/summer/testing")
 def return_summer_school_testing_routes():
@@ -44,19 +44,29 @@ def return_summer_school_testing_routes():
             "report_description": "Process CR 1.08 + exam registrations spreadsheet (for testing accommodations) to schedule students into sections",
         },
         {
+            "report_title": "Process STARS Master Schedule to Return Exam Book + Proctor Need",
+            "report_function": "scripts.return_processed_summer_school_exam_book",
+            "report_description": "Process Master Schedule file to return Exam Book + Proctor Needs",
+        },
+        {
             "report_title": "August Regents Exam Invitations",
             "report_function": "scripts.return_summer_school_exam_invitations",
             "report_description": "Process CR 1.08 to return exam invitations in alphabetical order",
         },
         {
-            "report_title": "August Regents Exam Labels",
-            "report_function": "scripts.return_summer_school_exam_labels",
-            "report_description": "Process CR 1.08 to return Regents Exam Labels",
-        },
-        {
             "report_title": "August Regents ENL Rosters",
             "report_function": "scripts.return_summer_school_enl_rosters",
             "report_description": "Process CR 1.08 & CR 3.07 to return Regents ENL Rosters by section",
+        },
+        {
+            "report_title": "August Regents Organization for Printing",
+            "report_function": "scripts.return_summer_school_regents_organization",
+            "report_description": "Process CR 1.08 and Regents Calendar Spreadsheet to produce labels and rosters",
+        },
+        {
+            "report_title": "August Regents ES Organization",
+            "report_function": "scripts.return_summer_school_earth_science_practical",
+            "report_description": "Process CR 1.08 and CR 1.01 to schedule earth science lab practical",
         },
     ]
     return render_template(
@@ -171,38 +181,36 @@ def return_summer_regents_scheduling():
 
 
 import app.scripts.summer.testing.regents_scheduling.return_exam_invitations as return_exam_invitations
-
-
-@scripts.route("/summer/testing/regents/exam_invitations")
+from app.scripts.summer.programming.forms import SendingSchoolForm
+@scripts.route("/summer/testing/regents/exam_invitations", methods=["GET", "POST"])
 def return_summer_school_exam_invitations():
-    school_year = session["school_year"]
-    f = return_exam_invitations.main()
-
-    download_name = f"Exam_Invitations_August{school_year+1}_by_alpha.pdf"
-
-    return send_file(
-        f,
-        as_attachment=True,
-        download_name=download_name,
-    )
-
-
-from app.scripts.summer.testing.forms import ReturnExamLabelsForm
-import app.scripts.summer.testing.regents_scheduling.return_exam_labels as return_exam_labels
-
-
-@scripts.route("/summer/testing/regents/exam_labels", methods=["GET", "POST"])
-def return_summer_school_exam_labels():
     if request.method == "GET":
-        form = ReturnExamLabelsForm()
+        form = SendingSchoolForm()
+        form.sending_school.choices = summer_utils.return_sending_school_list()
+        form.sending_school.choices.insert(0, ("ALL", "ALL"))
+
         return render_template(
-            "/summer/templates/summer/testing/regents_exam_labels_form.html",
+            "/summer/templates/summer/testing/regents/exam_invitation_form.html",
             form=form,
         )
     else:
-        form = ReturnExamLabelsForm(request.form)
-        f, download_name = return_exam_labels.main(form, request)
-        return send_file(f, as_attachment=True, download_name=download_name)
+        form = SendingSchoolForm(request.form)
+        sending_school = form.data["sending_school"]
+
+        f = return_exam_invitations.main(form, request)
+        school_year = session["school_year"]
+        if sending_school == "ALL":
+            download_name = f"Summer{school_year+1}ExamInvitations.pdf"
+        else:
+            download_name = f"Summer{school_year+1}ExamInvitations{sending_school}.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
+
 
 
 from app.scripts.summer.testing.forms import ReturnENLrostersForm
@@ -232,6 +240,25 @@ def return_summer_school_add_to_zqtest():
     f = add_zqtest.main()
 
     download_name = f"AddZQTEST.xlsx"
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )
+
+
+import app.scripts.summer.testing.regents_scheduling.process_exambook_and_proctors as process_exambook_and_proctors
+
+
+@scripts.route("/summer/testing/regents/process_exam_book")
+def return_processed_summer_school_exam_book():
+    school_year = session["school_year"]
+    f = process_exambook_and_proctors.main()
+
+    # return f.to_html()
+
+    download_name = f"{school_year}_7_ExamBook_and_proctor_need.xlsx"
 
     return send_file(
         f,

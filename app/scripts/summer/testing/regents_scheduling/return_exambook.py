@@ -12,59 +12,28 @@ def main(students_df):
     school_year = session["school_year"]
     term = session["term"]
 
-    if term == 1:
-        month = "January"
-    if term == 2:
-        month = "June"
-    if term == 7:
-        month = "August"
-
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
-    regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    regents_calendar_df["exam_num"] = (
-        regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
-    )
+    section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
+    section_properties_df = section_properties_df[["Section", "Type"]]
 
-    section_properties_df = pd.read_excel(
-        path, sheet_name="SummerSectionProperties"
-    ).dropna()
-
-
-    sections_df = pd.pivot_table(
-        students_df,
-        index=["Course", "FinalSection"],
-        values="StudentID",
-        aggfunc="count",
-    ).reset_index()
-    sections_df.columns = ["Course", "Section", "#_of_students"]
-
-    sections_df = sections_df.merge(
-        section_properties_df[["Section", "Type"]],
-        on="Section",
-        how="left",
-    )
-    sections_df = sections_df.merge(
-        regents_calendar_df,
-        left_on="Course",
-        right_on="CourseCode",
-        how="left",
-    )
-
-    sections_df["Room"] = sections_df.apply(return_room_number, axis=1)
-    sections_df["TeacherName"] = sections_df.apply(return_exam_teacher_name, axis=1)
     output_cols = [
         "Course",
         "Section",
         "ExamTitle",
-        "TeacherName",
         "Day",
         "Time",
-        "Type",
-        "#_of_students",
         "Room",
     ]
+    students_df["Room"] = students_df.apply(return_room, axis=1)
+    students_df = students_df.drop(columns=["Section"])
+    students_df = students_df.rename(columns={"FinalSection": "Section"})
 
-    sections_df = sections_df[output_cols]
+    sections_df = pd.pivot_table(
+        students_df, index=output_cols, values="StudentID", aggfunc="count"
+    ).reset_index()
+
+    sections_df = sections_df.rename(columns={"StudentID": "#_of_students"})
+    sections_df = sections_df.merge(section_properties_df, on=["Section"], how="left")
 
     room_check_df = pd.pivot_table(
         sections_df,
@@ -77,157 +46,25 @@ def main(students_df):
         values="#_of_students",
         aggfunc="sum",
     ).fillna(0)
-
     return sections_df, room_check_df
 
 
-GENED_ROOMS_DICT = {
-    1: [840, 826, 824, 822, 802, 801, 845, 906, 902, 921],
-    2: [940, 925, 923, 921, 902, 906, 845, 801, 802, 822],
-    3: [646, 645, 640, 629],
-}
+def return_room(row):
+    AM1_ROOM = row["AM1_ROOM"]
+    AM2_ROOM = row["AM2_ROOM"]
+    PM1_ROOM = row["PM1_ROOM"]
+    PM2_ROOM = row["PM2_ROOM"]
+    AM3_ROOM = row["AM3_ROOM"]
+    PM3_ROOM = row["PM3_ROOM"]
 
-GENED_AM_CONFLICT_ROOM = 219
+    TIME = row["Time"]
+    exam_num = row["exam_num"]
 
-## room order (1.5x, 1.5x, ENL, 2x, 1.5x/QR, 2x/QR)
+    org_dict = {
+        "AM": {1: AM1_ROOM, 2: AM2_ROOM, 3: AM3_ROOM},
+        "PM": {1: PM1_ROOM, 2: PM2_ROOM, 3: PM3_ROOM},
+    }
+    if org_dict.get(TIME).get(exam_num) == 202 and exam_num == 3:
+        return org_dict.get(TIME).get(2)
 
-AM1_1_5X_ROOM_1 = 701
-AM1_1_5X_ROOM_2 = 702
-AM1_2X_ROOM_3 = 722
-AM1_QR_ROOM_4 = 724
-AM1_QR_ROOM_5 = 743
-
-AM2_1_5X_ROOM_1 = 742
-AM2_1_5X_ROOM_2 = 740
-AM2_2X_ROOM_3 = 726
-AM2_QR_ROOM_4 = 725
-AM2_QR_ROOM_5 = 744
-
-PM1_1_5X_ROOM_1 = 522
-PM1_1_5X_ROOM_2 = 523
-PM1_2X_ROOM_3 = 524
-PM1_QR_ROOM_4 = 525
-PM1_QR_ROOM_5 = 527
-
-PM2_1_5X_ROOM_1 = 545
-PM2_1_5X_ROOM_2 = 544
-PM2_2X_ROOM_3 = 542
-PM2_QR_ROOM_4 = 540
-PM2_QR_ROOM_5 = 529
-
-AM_PM_3_1_5X_ROOM_1 = 427
-AM_PM_3_2X_ROOM_2 = 427
-AM_PM_3_QR_ROOM_3 = 421
-AM_PM_3_QR_ROOM_4 = 421
-
-
-time_and_half_room_dict = {
-    "AM": {
-        1: [AM1_1_5X_ROOM_1, AM1_1_5X_ROOM_2],
-        2: [AM2_1_5X_ROOM_1, AM2_1_5X_ROOM_2],
-        3: [AM_PM_3_1_5X_ROOM_1, AM_PM_3_1_5X_ROOM_1],
-    },
-    "PM": {
-        1: [PM1_1_5X_ROOM_1, PM1_1_5X_ROOM_2],
-        2: [PM2_1_5X_ROOM_1, PM2_1_5X_ROOM_2],
-        3: [AM_PM_3_1_5X_ROOM_1, AM_PM_3_1_5X_ROOM_1],
-    },
-}
-
-double_time_room_dict = {
-    "AM": {
-        1: [AM1_2X_ROOM_3],
-        2: [AM2_2X_ROOM_3],
-        3: [AM_PM_3_2X_ROOM_2],
-    },
-    "PM": {
-        1: [PM1_2X_ROOM_3],
-        2: [PM2_2X_ROOM_3],
-        3: [AM_PM_3_2X_ROOM_2],
-    },
-}
-
-QR_room_dict = {
-    "AM": {
-        1: [AM1_QR_ROOM_4, AM1_QR_ROOM_5],
-        2: [AM2_QR_ROOM_4, AM2_QR_ROOM_5],
-        3: [AM_PM_3_QR_ROOM_3, AM_PM_3_QR_ROOM_4],
-    },
-    "PM": {
-        1: [PM1_QR_ROOM_4, PM1_QR_ROOM_5],
-        2: [PM2_QR_ROOM_4, PM2_QR_ROOM_5],
-        3: [AM_PM_3_QR_ROOM_3, AM_PM_3_QR_ROOM_4],
-    },
-}
-
-def return_exam_teacher_name(section_row):
-    section_num = int(section_row["Section"])
-    section_type = section_row["Type"]
-    section_time = section_row["Time"]
-    exam_num = section_row["exam_num"]
-
-    AM_or_AM_PM_conflict = return_if_AM_or_AM_PM_conflict(section_num)
-
-    AM_PM_CONFLICT_DICT = {1:'AM',2:'PM',3:'PM'}
-
-    if section_num == 15:
-        return AM_PM_CONFLICT_DICT.get(exam_num)
-    if section_num >= 30 and section_num <= 39:
-        return AM_PM_CONFLICT_DICT.get(exam_num)
-    return section_time  
-
-def return_room_number(section_row):
-    try:
-        section_num = int(section_row["Section"])
-        
-        section_type = section_row["Type"]
-        
-        section_time = section_row["Time"]
-        exam_num = section_row["exam_num"]
-
-        AM_or_AM_PM_conflict = return_if_AM_or_AM_PM_conflict(section_num)
-        AM_conflict = return_if_am_conflict(section_type)
-
-        if section_num < 3:
-            return 202
-        if section_num < 15:
-            index = section_num - 3
-            return GENED_ROOMS_DICT[exam_num][index]
-
-        if section_num == 15:
-            return GENED_AM_CONFLICT_ROOM
-
-        if AM_or_AM_PM_conflict:
-            section_time = "AM"
-        if AM_conflict:
-            exam_num = 1
-
-        ## 1.5x room 1 + CONFLICT
-        if section_num in [20, 30, 31, 40, 41]:
-            return time_and_half_room_dict[section_time][exam_num][0]
-        ## 1.5x room 2 + ENL/ENL Conflict
-        if section_num in [21, 22, 23, 32, 33, 42, 43]:
-            return time_and_half_room_dict[section_time][exam_num][1]
-        ## QR 1.5x
-        if section_num in [26, 27, 36, 37, 46, 47, 56, 57]:
-            return QR_room_dict[section_time][exam_num][0]
-        ## QR 2x
-        if section_num in [28, 29, 38, 39, 48, 49, 58, 59]:
-            return QR_room_dict[section_time][exam_num][1]
-        ## 2X
-        if section_num in [24, 25, 34, 35, 44, 45]:
-            return double_time_room_dict[section_time][exam_num][0]
-        if (section_num >= 50) and section_num <= 59:
-            return 127
-        if (section_num >= 60) and section_num <= 63:
-            return 329
-
-    except IndexError:
-        return 199
-
-
-def return_if_AM_or_AM_PM_conflict(section_num):
-    return (section_num >= 30) and (section_num <= 49)
-
-def return_if_am_conflict(section_type):
-    return section_type.find('_AM_conflict') > 0
+    return org_dict.get(TIME).get(exam_num)

@@ -37,3 +37,20 @@ class SmartPassKioskLabels(FlaskForm):
         "Upload SmartPass Kiosk File as .csv (Include columns username & password)",
         validators=[FileRequired()],
     )
+
+
+
+class OrganizeStudentRecordsForm(FlaskForm):
+    student_records_pdf = FileField(
+        "Student Records as PDF",
+        validators=[FileRequired()],
+    )
+
+    student_records_pdf_orientation = SelectField(
+        "Student Records PDF Page Orientation",
+        choices=[("landscape", "Landscape"), ("portrait", "Portrait")],
+        validators=[InputRequired()],
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)    

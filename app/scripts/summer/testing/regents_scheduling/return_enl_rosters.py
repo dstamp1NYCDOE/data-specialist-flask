@@ -75,40 +75,43 @@ def main(form, request):
 
     filename = utils.return_most_recent_report(files_df, "1_08")
     cr_1_08_df = utils.return_file_as_df(filename)
-    cr_1_08_df = cr_1_08_df.fillna({'Room':'202'})
+    cr_1_08_df = cr_1_08_df.fillna({"Room": 202})
+    cr_1_08_df["Room"] = cr_1_08_df["Room"].astype(int)
 
     filename = utils.return_most_recent_report(files_df, "3_07")
-    cr_3_07_df = utils.return_file_as_df(filename)    
+    cr_3_07_df = utils.return_file_as_df(filename)
     cr_1_08_df = cr_1_08_df.merge(
-        cr_3_07_df[['StudentID','HomeLangCode']], on='StudentID', how="left"
+        cr_3_07_df[["StudentID", "HomeLangCode"]], on="StudentID", how="left"
     )
-  
+
     home_lang_codes_df = utils.return_home_lang_code_table(files_df)
-    cr_1_08_df = cr_1_08_df.merge(home_lang_codes_df, on='HomeLangCode',how='left')
-    
+    cr_1_08_df = cr_1_08_df.merge(home_lang_codes_df, on="HomeLangCode", how="left")
+
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
     section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
     cr_1_08_df = cr_1_08_df.merge(
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
     )
-     
+
     cr_1_08_df = cr_1_08_df.merge(
         section_properties_df, left_on=["Section"], right_on=["Section"], how="left"
     )
-    
+
     cr_1_08_df["Day"] = cr_1_08_df["Day"].dt.strftime("%A, %B %e")
-    cr_1_08_df["Exam Title"] = cr_1_08_df["ExamTitle"].apply(regents_utils.return_full_exam_title)
-    cr_1_08_df['ExamAdministration'] = f"{month} {school_year+1}"
+    cr_1_08_df["Exam Title"] = cr_1_08_df["ExamTitle"].apply(
+        regents_utils.return_full_exam_title
+    )
+    cr_1_08_df["ExamAdministration"] = f"{month} {school_year+1}"
 
-    enl_exam_registrations_df = cr_1_08_df[cr_1_08_df['ENL?']==0].head(10)
-
-    if form.exam_title.data == 'ALL':
-        filename = f"{month}_{school_year+1}_Exam_Labels.pdf"
+    if form.exam_title.data == "ALL":
+        filename = f"{month}_{school_year+1}_ENL_Rosters.pdf"
     else:
         exam_to_merge = form.exam_title.data
-        filename = f"{month}_{school_year+1}_{exam_to_merge}_Labels.pdf"
-        cr_1_08_df = cr_1_08_df[cr_1_08_df['ExamTitle']==exam_to_merge]
+        filename = f"{month}_{school_year+1}_{exam_to_merge}_ENL_Rosters.pdf"
+        cr_1_08_df = cr_1_08_df[cr_1_08_df["ExamTitle"] == exam_to_merge]
+
+    enl_exam_registrations_df = cr_1_08_df[cr_1_08_df["ENL?"] == 1].head(10)
 
     exam_flowables = []
     for (
@@ -119,7 +122,6 @@ def main(form, request):
         ["Day", "Time", "Exam Title"]
     ):
 
-        
         for room, exam_room_registrations_df in exam_registrations_df.groupby("Room"):
             summary_pvt = pd.pivot_table(
                 exam_room_registrations_df,
@@ -181,6 +183,7 @@ def main(form, request):
     f.seek(0)
     return f, filename
 
+
 def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None):
     if cols:
         table_data = df[cols].values.tolist()
@@ -205,4 +208,3 @@ def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None):
         )
     )
     return t
-

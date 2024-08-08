@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_summer_school_routes')}}">Summer School</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_summer_school_testing_routes')}}">Testing</a></li>
+    <li class="breadcrumb-item active">Exam Invitations</li>
+  </ol>
+</nav>
+
+<h1>Return Exam Invitations by DBN</h1>
+<p>Select All to return all exam invitations sorted by student's last class of the day</p>
+<form action="{{url_for('scripts.return_summer_school_exam_invitations')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.sending_school.label }}
+        {{ form.sending_school(class_="form-control") }}
+    </div>    
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+
+</div>
+{% endblock %}
