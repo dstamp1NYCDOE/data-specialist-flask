@@ -16,15 +16,55 @@ def main(form, request):
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
 
-    filename = utils.return_most_recent_report(files_df, "1_08")
-    registrations_df = utils.return_file_as_df(filename)
-    registrations_check_df = utils.return_file_as_df(filename)
+    student_exam_registration = request.files[
+        form.combined_regents_registration_spreadsheet.name
+    ]
+    walkins_df = pd.read_excel(student_exam_registration, sheet_name="YABC")
+
+    walkins_df = walkins_df.dropna(subset=["StudentID"])
+    walkins_df["GradeLevel"] = ""
+    walkins_df["OfficialClass"] = ""
+    walkins_df["Section"] = 1
+
+    exams = [
+        ("ELA", "EXRCG"),
+        ("Alg1", "MXRFG"),
+        ("Global", "HXRCG"),
+        ("Alg2", "MXRNG"),
+        ("USH", "HXRKG"),
+        ("ES", "SXRUG"),
+        ("Chem", "SXRXG"),
+        ("Geo", "MXRKG"),
+        ("LE", "SXRKG"),
+    ]
+
+    output_df_lst = []
+    output_cols_needed = [
+        "StudentID",
+        "LastName",
+        "FirstName",
+        "GradeLevel",
+        "OfficialClass",
+        "Course",
+        "Section",
+    ]
+
+    for exam, exam_code in exams:
+        to_register_df = walkins_df[walkins_df[exam] == True]
+        to_register_df["Course"] = exam_code
+        to_register_df["Section"] = 1
+
+        to_register_df = to_register_df[output_cols_needed]
+        output_df_lst.append(to_register_df)
+
     cols = [
         "StudentID",
         "LastName",
         "FirstName",
         "Course",
     ]
+
+    registrations_df = pd.concat(output_df_lst)[cols]
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
@@ -55,10 +95,6 @@ def main(form, request):
     ]
     rooms_df = rooms_df.rename(columns={"Section": "FinalSection"})
 
-    ## drop inactivies
-    registrations_df = registrations_df[registrations_df["Status"] == True]
-    registrations_df = registrations_df[cols]
-
     ## attach DBN
     filename = utils.return_most_recent_report_by_semester(
         files_df, "s_01", year_and_semester
@@ -70,7 +106,7 @@ def main(form, request):
     dbn_df = dbn_df[["Sending school", "school_name"]]
 
     cr_s_01_df = cr_s_01_df.merge(dbn_df, on="Sending school", how="left").fillna(
-        "NoSendingSchool"
+        "YABC"
     )
     cr_s_01_df = cr_s_01_df[["StudentID", "Sending school", "school_name"]]
 
@@ -255,14 +291,6 @@ def main(form, request):
         overenrolled_output_cols
     ].sort_values(by=["school_name", "LastName", "FirstName"])
 
-    ## identify students who need a section change
-    registrations_check_df["OldSection"] = registrations_check_df["Section"]
-    registrations_check_df = registrations_check_df[
-        ["StudentID", "Course", "OldSection"]
-    ]
-    df = students_df.merge(registrations_check_df, on=["StudentID", "Course"])
-    df = df[df["OldSection"] != df["FinalSection"]]
-
     # return room_check_df
 
     f = BytesIO()
@@ -272,14 +300,10 @@ def main(form, request):
     students_df[students_df["FinalSection"] == 1].to_excel(
         writer, sheet_name="Check", index=False
     )
-    df[output_cols_needed].sort_values(by=["Course", "FinalSection"]).to_excel(
-        writer, sheet_name="StudentFileEdit", index=False
-    )
     overenrolled_df.to_excel(writer, sheet_name="Overenrolled", index=False)
     two_exam_double_time_df.to_excel(
         writer, sheet_name="MultipleDoubleTimeExams", index=False
     )
-
     students_df[students_df["special_notes"] != False].sort_values(
         by=["school_name", "StudentID"]
     ).to_excel(writer, sheet_name="IEP_CHECK", index=False)
@@ -310,26 +334,13 @@ def set_final_section(student_row):
     NumberOfSections = student_row["NumberOfSections"]
     section = student_row["Section"]
     index = student_row["index"]
-    exam_code = student_row["Course"]
 
     if NumberOfSections == 1:
         return section
-
     if section == 19:
-        extra_space = 8
-        index = student_row["index"] - extra_space
+        index = student_row["index"] - 8
         if index <= 0:
             return section
-    if section == 2:
-        extra_space = 5
-        if exam_code in ["EXRCG", "HXRKG"]:
-            extra_space = 15
-        if exam_code in ["HXRCG"]:
-            extra_space = 10
-
-        if student_row["index"] < extra_space * NumberOfSections:
-            offset = (index) % (NumberOfSections - 1)
-            return section + offset + 1
 
     offset = (index) % NumberOfSections
 
@@ -484,13 +495,7 @@ def return_student_accommodations(request, form):
     student_exam_registration = request.files[
         form.combined_regents_registration_spreadsheet.name
     ]
-    df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
-
-    sheets_to_ignore = ["Directions", "HomeLangDropdown", "YABC"]
-    dfs_lst = [
-        df for sheet_name, df in df_dict.items() if sheet_name not in sheets_to_ignore
-    ]
-    df = pd.concat(dfs_lst)
+    df = pd.read_excel(student_exam_registration, sheet_name="YABC")
     df = df.dropna(subset="StudentID")
     df = df.drop_duplicates(subset=["StudentID"])
 

@@ -10,6 +10,7 @@ from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 import app.scripts.summer.utils as summer_utils
 
+
 @scripts.route("/summer/testing")
 def return_summer_school_testing_routes():
     reports = [
@@ -41,6 +42,11 @@ def return_summer_school_testing_routes():
         {
             "report_title": "August Regents Scheduling",
             "report_function": "scripts.return_summer_regents_scheduling",
+            "report_description": "Process CR 1.08 + exam registrations spreadsheet (for testing accommodations) to schedule students into sections",
+        },
+        {
+            "report_title": "August YABC Regents Scheduling",
+            "report_function": "scripts.return_summer_yabc_regents_scheduling",
             "report_description": "Process CR 1.08 + exam registrations spreadsheet (for testing accommodations) to schedule students into sections",
         },
         {
@@ -182,6 +188,8 @@ def return_summer_regents_scheduling():
 
 import app.scripts.summer.testing.regents_scheduling.return_exam_invitations as return_exam_invitations
 from app.scripts.summer.programming.forms import SendingSchoolForm
+
+
 @scripts.route("/summer/testing/regents/exam_invitations", methods=["GET", "POST"])
 def return_summer_school_exam_invitations():
     if request.method == "GET":
@@ -209,8 +217,6 @@ def return_summer_school_exam_invitations():
             as_attachment=True,
             download_name=download_name,
         )
-
-
 
 
 from app.scripts.summer.testing.forms import ReturnENLrostersForm
@@ -265,3 +271,28 @@ def return_processed_summer_school_exam_book():
         as_attachment=True,
         download_name=download_name,
     )
+
+
+from app.scripts.summer.testing.forms import YABCRegentsRegistration
+import app.scripts.summer.testing.regents_scheduling.scheduled_yabc as scheduled_yabc
+
+
+@scripts.route("/summer/testing/regents/yabc_scheduling", methods=["GET", "POST"])
+def return_summer_yabc_regents_scheduling():
+    if request.method == "GET":
+        form = YABCRegentsRegistration()
+        return render_template(
+            "/summer/templates/summer/testing/regents_yabc_scheduling_form.html",
+            form=form,
+        )
+    else:
+
+        form = YABCRegentsRegistration(request.form)
+        f = scheduled_yabc.main(form, request)
+
+        # return f.to_html()
+
+        school_year = session["school_year"]
+        download_name = f"Regents_Sections{school_year+1}.xlsx"
+
+        return send_file(f, as_attachment=True, download_name=download_name)
