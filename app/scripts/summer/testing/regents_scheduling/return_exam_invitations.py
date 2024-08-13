@@ -1,6 +1,3 @@
-from reportlab.graphics import shapes
-from reportlab_qrcode import QRCodeImage
-
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.pagesizes import letter, landscape
@@ -30,6 +27,7 @@ from app.scripts import scripts, files_df, photos_df
 
 styles = getSampleStyleSheet()
 
+
 def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
@@ -45,20 +43,20 @@ def main(form, request):
     filename = utils.return_most_recent_report(files_df, "1_08")
     cr_1_08_df = utils.return_file_as_df(filename)
     cr_1_08_df = cr_1_08_df[cr_1_08_df["Status"] == True]
-    cr_1_08_df = cr_1_08_df.fillna({'Room':202})
-    cr_1_08_df['Room'] = cr_1_08_df['Room'].astype(str)
+    cr_1_08_df = cr_1_08_df.fillna({"Room": 202})
+    cr_1_08_df["Room"] = cr_1_08_df["Room"].astype(str)
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties").fillna('')
+    section_properties_df = pd.read_excel(
+        path, sheet_name="SummerSectionProperties"
+    ).fillna("")
 
     cr_1_08_df = cr_1_08_df.merge(
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
     )
     cr_1_08_df = cr_1_08_df.merge(section_properties_df, on=["Section"], how="left")
-    cr_1_08_df = cr_1_08_df.merge(
-        photos_df, on=["StudentID"], how="left"
-    )
+    cr_1_08_df = cr_1_08_df.merge(photos_df, on=["StudentID"], how="left")
 
     ## attach DBN
     filename = utils.return_most_recent_report_by_semester(
@@ -69,7 +67,7 @@ def main(form, request):
 
     cr_1_08_df = cr_1_08_df.merge(cr_s_01_df, on=["StudentID"], how="left")
 
-    sending_school = form.data["sending_school"]  
+    sending_school = form.data["sending_school"]
     if sending_school != "ALL":
         cr_1_08_df = cr_1_08_df[cr_1_08_df["Sending school"] == sending_school]
 
@@ -78,10 +76,10 @@ def main(form, request):
     # reformat_date
     cr_1_08_df["Day"] = pd.to_datetime(cr_1_08_df["Day"])
     cr_1_08_df = cr_1_08_df.sort_values(by=["Day"])
-    
+
     cr_1_08_df["Day"] = cr_1_08_df["Day"].dt.strftime("%A, %B %e")
     cr_1_08_df["Exam Title"] = cr_1_08_df["ExamTitle"].apply(return_full_exam_title)
-    cr_1_08_df = cr_1_08_df.drop_duplicates(subset=['StudentID','Course'])
+    cr_1_08_df = cr_1_08_df.drop_duplicates(subset=["StudentID", "Course"])
 
     cols = [
         "StudentID",
@@ -98,16 +96,21 @@ def main(form, request):
     ]
 
     cr_1_08_df = cr_1_08_df[cols]
-    
 
     return generate_letters(cr_1_08_df)
+
 
 def generate_letters_by_dbn(cr_1_08_df):
     output = []
 
     flowables = []
-    for (sending_school, LastName, FirstName, StudentID), exams_df in cr_1_08_df.groupby(
-        ['Sending school',"LastName", "FirstName", "StudentID"]
+    for (
+        sending_school,
+        LastName,
+        FirstName,
+        StudentID,
+    ), exams_df in cr_1_08_df.groupby(
+        ["Sending school", "LastName", "FirstName", "StudentID"]
     ):
         student_flowables = generate_student_letter(exams_df)
         flowables.extend(student_flowables)
@@ -158,7 +161,7 @@ def return_exam_report_time(Time):
     if Time == "AM":
         return "7:45 AM"
     if Time == "PM":
-        return "11:45 PM"
+        return "11:45 AM"
 
 
 exam_cols = ["Exam Title", "Day", "Report Time", "Room", "Section", "Type"]
@@ -194,7 +197,7 @@ def generate_student_letter(exams_df):
     flowables.append(paragraph)
 
     try:
-        
+
         photo_path = exams_df.iloc[0, :]["photo_filename"]
         I = Image(photo_path)
         I.drawHeight = 2.75 * inch
@@ -296,7 +299,7 @@ def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None):
 
 
 def return_full_exam_title(ExamTitle):
-    
+
     exam_title_dict = {
         "ELA": "ELA",
         "Global": "Global History",

@@ -116,6 +116,21 @@ def main():
         proctor_df, on=["Day", "Room"], how="left"
     ).sort_values(by=["Day", "ExamTitle", "Room"])
 
+    proctors_pvt_tbl = (
+        pd.pivot_table(
+            proctor_df,
+            index=["Day", "Time", "Room", "ExamTitle", "HubLocation"],
+            values=["Active", "Type", "Section"],
+            aggfunc={
+                "Section": combine_lst_of_section_properties,
+                "Type": combine_lst_of_section_properties,
+                "Active": "sum",
+            },
+        )
+        .reset_index()
+        .sort_values(by=["Day", "Room", "Time"])
+    )
+
     ## generate hub pvt
     hub_pvt = pd.pivot_table(
         exam_book_df,
@@ -127,7 +142,7 @@ def main():
 
     f = BytesIO()
     writer = pd.ExcelWriter(f)
-
+    proctors_pvt_tbl.to_excel(writer, sheet_name="ProctorNumbers")
     hub_pvt.to_excel(writer, sheet_name="HubNumbers")
     ##folders_to_prep_per_hub
     for hub_location, hub_sections_list in exam_book_df.groupby(["HubLocation"]):

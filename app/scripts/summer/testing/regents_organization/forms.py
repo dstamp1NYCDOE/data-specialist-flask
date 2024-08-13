@@ -34,3 +34,18 @@ class EarthSciencePracticalForm(FlaskForm):
     practical_date = DateField(default=dt.datetime.today)
     practical_times = TextAreaField()
     exam_title = TextAreaField()
+
+
+class ProctorOrganizationForm(FlaskForm):
+    proctor_assignments_csv = FileField(
+        "Upload Proctor Assignment Spreadsheet as .csv",
+        validators=[InputRequired()],
+    )
+    report = SelectField(
+        "Select Report",
+        choices=[
+            ("checkin_roster", "Check In Roster + Hub Rosters"),
+            ("timecard_labels", "Timecard Labels"),
+        ],
+        validators=[InputRequired()],
+    )

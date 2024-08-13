@@ -3,7 +3,15 @@ import pandas as pd
 from io import BytesIO
 import os
 
-from flask import render_template, request, send_file, session, current_app, redirect, url_for
+from flask import (
+    render_template,
+    request,
+    send_file,
+    session,
+    current_app,
+    redirect,
+    url_for,
+)
 
 
 from app.scripts import scripts, files_df
@@ -42,15 +50,16 @@ def return_summer_school_regents_organization():
 
 
 import app.scripts.summer.testing.regents_organization.return_exam_labels as return_exam_labels
+
+
 @scripts.route("/summer/testing/regents/organization/labels", methods=["GET", "POST"])
 def return_summer_school_regents_organization_labels():
     if request.method == "GET":
-        return redirect(url_for('scripts.return_summer_school_regents_organization'))
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
     else:
         form = RegentsOrganizationExamSelectForm(request.form)
         f, download_name = return_exam_labels.main(form, request)
         return send_file(f, as_attachment=True, download_name=download_name)
-    
 
 
 import app.scripts.summer.testing.regents_organization.return_non_labels as return_non_labels
@@ -61,13 +70,11 @@ import app.scripts.summer.testing.regents_organization.return_non_labels as retu
 )
 def return_summer_school_regents_organization_non_labels():
     if request.method == "GET":
-        return redirect(url_for('scripts.return_summer_school_regents_organization'))
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
     else:
         form = RegentsOrganizationExamSelectForm(request.form)
         f, download_name = return_non_labels.main(form, request)
         return send_file(f, as_attachment=True, download_name=download_name)
-
-
 
 
 import app.scripts.summer.testing.regents_organization.return_student_exam_grid as return_student_exam_grid
@@ -78,12 +85,11 @@ import app.scripts.summer.testing.regents_organization.return_student_exam_grid 
 )
 def return_summer_school_student_exam_grid():
     if request.method == "GET":
-        return redirect(url_for('scripts.return_summer_school_regents_organization'))
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
     else:
         form = RegentsOrganizationExamSelectForm(request.form)
         f, download_name = return_student_exam_grid.main(form, request)
         return send_file(f, as_attachment=True, download_name=download_name)
-
 
 
 import app.scripts.summer.testing.proctor_directions.return_proctor_directions as return_proctor_directions
@@ -94,14 +100,11 @@ import app.scripts.summer.testing.proctor_directions.return_proctor_directions a
 )
 def return_summer_school_proctor_directions():
     if request.method == "GET":
-        return redirect(url_for('scripts.return_summer_school_regents_organization'))
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
     else:
         form = RegentsOrganizationExamSelectForm(request.form)
         f, download_name = return_proctor_directions.main(form, request)
         return send_file(f, as_attachment=True, download_name=download_name)
-
-
-
 
 
 import app.scripts.summer.testing.regents_organization.organize_es_practical as organize_es_practical
@@ -120,5 +123,27 @@ def return_summer_school_earth_science_practical():
     else:
         form = EarthSciencePracticalForm(request.form)
         f, download_name = organize_es_practical.main(form, request)
+
+        return send_file(f, as_attachment=True, download_name=download_name)
+
+
+import app.scripts.summer.testing.regents_organization.proctor_roster as proctor_roster
+import app.scripts.summer.testing.regents_organization.proctor_timecard_stickers as proctor_timecard_stickers
+
+
+@scripts.route("/summer/testing/regents/organization/proctors", methods=["GET", "POST"])
+def return_summer_regents_proctor_documents():
+    if request.method == "GET":
+        form = ProctorOrganizationForm()
+        return render_template(
+            "/summer/templates/summer/testing/regents/proctor_organization.html",
+            form=form,
+        )
+    else:
+        form = ProctorOrganizationForm(request.form)
+        if form.report.data == "checkin_roster":
+            f, download_name = proctor_roster.main(form, request)
+        if form.report.data == "timecard_labels":
+            f, download_name = proctor_timecard_stickers.main(form, request)
 
         return send_file(f, as_attachment=True, download_name=download_name)

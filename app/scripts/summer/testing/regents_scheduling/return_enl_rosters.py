@@ -86,6 +86,7 @@ def main(form, request):
 
     home_lang_codes_df = utils.return_home_lang_code_table(files_df)
     cr_1_08_df = cr_1_08_df.merge(home_lang_codes_df, on="HomeLangCode", how="left")
+    cr_1_08_df["HomeLang"] = cr_1_08_df["HomeLang"].str[0:10]
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
@@ -111,7 +112,7 @@ def main(form, request):
         filename = f"{month}_{school_year+1}_{exam_to_merge}_ENL_Rosters.pdf"
         cr_1_08_df = cr_1_08_df[cr_1_08_df["ExamTitle"] == exam_to_merge]
 
-    enl_exam_registrations_df = cr_1_08_df[cr_1_08_df["ENL?"] == 1].head(10)
+    enl_exam_registrations_df = cr_1_08_df[cr_1_08_df["ENL?"] == 1]
 
     exam_flowables = []
     for (
@@ -144,7 +145,7 @@ def main(form, request):
             exam_flowables.append(paragraph)
 
             pvt_T = return_df_as_table(summary_pvt)
-            roster_T_cols = ["StudentID", "LastName", "FirstName", "HomeLang", "Type"]
+            roster_T_cols = ["LastName", "FirstName", "HomeLang", "Type"]
             roster_T = return_df_as_table(
                 exam_room_registrations_df, cols=roster_T_cols
             )
@@ -159,7 +160,7 @@ def main(form, request):
             exam_flowables.append(
                 Table(
                     [[roster_T, pvt_T]],
-                    colWidths=[5.5 * inch, 1.5 * inch],
+                    colWidths=[5.75 * inch, 1.25 * inch],
                     style=chart_style,
                 )
             )
@@ -174,8 +175,8 @@ def main(form, request):
         f,
         pagesize=letter,
         topMargin=0.50 * inch,
-        leftMargin=0.5 * inch,
-        rightMargin=0.5 * inch,
+        leftMargin=0.25 * inch,
+        rightMargin=0.25 * inch,
         bottomMargin=0.5 * inch,
     )
     my_doc.build(exam_flowables)
@@ -197,7 +198,7 @@ def return_df_as_table(df, cols=None, colWidths=None, rowHeights=None):
             [
                 ("ALIGN", (0, 0), (100, 100), "CENTER"),
                 ("VALIGN", (0, 0), (100, 100), "MIDDLE"),
-                ("FONTSIZE", (0, 0), (-1, -1), 11),
+                ("FONTSIZE", (0, 0), (-1, -1), 10),
                 ("LEFTPADDING", (0, 0), (-1, -1), 5),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 5),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 2),

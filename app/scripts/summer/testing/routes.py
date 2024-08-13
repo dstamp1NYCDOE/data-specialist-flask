@@ -70,6 +70,11 @@ def return_summer_school_testing_routes():
             "report_description": "Process CR 1.08 and Regents Calendar Spreadsheet to produce labels and rosters",
         },
         {
+            "report_title": "August Regents Proctor Organization",
+            "report_function": "scripts.return_summer_regents_proctor_documents",
+            "report_description": "Process Proctor Spreadsheet",
+        },
+        {
             "report_title": "August Regents ES Organization",
             "report_function": "scripts.return_summer_school_earth_science_practical",
             "report_description": "Process CR 1.08 and CR 1.01 to schedule earth science lab practical",

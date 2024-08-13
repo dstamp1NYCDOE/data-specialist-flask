@@ -82,8 +82,7 @@ def main(form, request):
     regents_calendar_df["exam_num"] = (
         regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
     )
-    section_properties_df = pd.read_excel(
-        path, sheet_name="SummerSectionProperties")
+    section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
 
     ## attach Exam Info
     cr_1_08_df = cr_1_08_df.merge(
@@ -117,43 +116,55 @@ def main(form, request):
 
     flowables = []
 
+    cr_1_08_df = cr_1_08_df.drop_duplicates(subset=["StudentID", "Course"])
+    for (hub, day), students_by_hub_df in cr_1_08_df.groupby(["HubLocation", "Day"]):
 
-
-    cr_1_08_df = cr_1_08_df.drop_duplicates(subset=['StudentID','Course'])
-    for (hub,day), students_by_hub_df in cr_1_08_df.groupby(["HubLocation","Day"]):
-
-
-        
-    
         paragraph = Paragraph(
             f"Testing Hub {int(hub)} - Documents - {day}",
             styles["Heading2"],
         )
         flowables.append(paragraph)
-        hub_rooms_pvt = pd.pivot_table(
-            students_by_hub_df,
-            index=["Day", "Time", "Room", "ExamTitle"],
-            values=["StudentID", "Type", "Section"],
-            aggfunc={
-                "Section": combine_lst_of_section_properties,
-                "Type": combine_lst_of_section_properties,
-                "StudentID": "count",
-            },
-        ).reset_index().rename(columns={'StudentID':'#_of_students'})
-        hub_rooms_pvt = hub_rooms_pvt[['Time','Room','ExamTitle','Section','Type','#_of_students']].sort_values(by=['Time','ExamTitle','Room'])
-        for time in ['AM','PM']:
+        hub_rooms_pvt = (
+            pd.pivot_table(
+                students_by_hub_df,
+                index=["Day", "Time", "Room", "ExamTitle"],
+                values=["StudentID", "Type", "Section"],
+                aggfunc={
+                    "Section": combine_lst_of_section_properties,
+                    "Type": combine_lst_of_section_properties,
+                    "StudentID": "count",
+                },
+            )
+            .reset_index()
+            .rename(columns={"StudentID": "#_of_students"})
+        )
+        hub_rooms_pvt["Assigned Proctor (write in name)"] = ""
+        hub_rooms_pvt = hub_rooms_pvt[
+            [
+                "Time",
+                "Room",
+                "ExamTitle",
+                "Section",
+                "Type",
+                "#_of_students",
+                "Assigned Proctor (write in name)",
+            ]
+        ].sort_values(by=["Time", "ExamTitle", "Room"])
+        for time in ["AM", "PM"]:
             paragraph = Paragraph(
                 f"{time}",
                 styles["Heading3"],
             )
             flowables.append(paragraph)
-            T = return_testing_rooms_by_hub(hub_rooms_pvt[hub_rooms_pvt['Time']==time])
+            T = return_testing_rooms_by_hub(
+                hub_rooms_pvt[hub_rooms_pvt["Time"] == time]
+            )
             flowables.append(T)
         flowables.append(PageBreak())
         for (time, room), students_in_room_df in students_by_hub_df.groupby(
             ["Time", "Room"]
         ):
-            exam_title = students_in_room_df.iloc[0]["ExamTitle"]            
+            exam_title = students_in_room_df.iloc[0]["ExamTitle"]
             paragraph = Paragraph(
                 f"{day} - {time} {int(room)} - {exam_title}",
                 styles["Heading2"],
@@ -176,13 +187,15 @@ def main(form, request):
     f.seek(0)
     return f, filename
 
+
 def combine_lst_of_section_properties(x):
     x = x.unique()
     output = "\n".join(str(v) for v in x)
     return output
 
+
 def return_testing_rooms_by_hub(hub_rooms_pvt):
-    
+
     table_data = hub_rooms_pvt.values.tolist()
     cols = hub_rooms_pvt.columns
     table_data.insert(0, cols)
@@ -203,4 +216,3 @@ def return_testing_rooms_by_hub(hub_rooms_pvt):
         )
     )
     return t
-    
