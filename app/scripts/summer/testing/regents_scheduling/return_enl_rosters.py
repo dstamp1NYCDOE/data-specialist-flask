@@ -115,6 +115,21 @@ def main(form, request):
     enl_exam_registrations_df = cr_1_08_df[cr_1_08_df["ENL?"] == 1]
 
     exam_flowables = []
+
+    ## overall numbers by exam and then room
+    enl_pvt_tbl = pd.pivot_table(
+        enl_exam_registrations_df,
+        index=["ExamTitle", "Room", "HomeLang"],
+        # columns=["HomeLang"],
+        values="StudentID",
+        aggfunc="count",
+    ).fillna("")
+    enl_pvt_tbl = enl_pvt_tbl.reset_index()
+    print(enl_pvt_tbl)
+    T = return_df_as_table(enl_pvt_tbl)
+    exam_flowables.append(T)
+    exam_flowables.append(PageBreak())
+
     for (
         day,
         time,

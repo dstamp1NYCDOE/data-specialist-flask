@@ -147,3 +147,11 @@ def return_summer_regents_proctor_documents():
             f, download_name = proctor_timecard_stickers.main(form, request)
 
         return send_file(f, as_attachment=True, download_name=download_name)
+
+
+from app.scripts.summer.testing.regents_organization import exam_box_labels as regents_exam_box_labels
+@scripts.route("/summer/testing/regents/organization/box_labels", methods=["GET", "POST"])
+def return_summer_regents_box_labels():
+    form = ''
+    f, download_name = regents_exam_box_labels.main(form, request)
+    return send_file(f, as_attachment=True, download_name=download_name)

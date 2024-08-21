@@ -58,12 +58,16 @@ def main(form, request):
         proctor_assignments_pvt_df, on=["Name", "File#"], how="left"
     ).fillna("")
 
+    proctors_df = proctors_df.sort_values(by=["Name"])
+
     labels_to_make = []
-    for (day, time), proctors_dff in proctors_df.groupby(["Day", "Time"]):
-        labels_to_make.extend(proctors_dff.to_dict("records"))
-        remainder = len(labels_to_make) % 30
-        for i in range(30 - remainder):
-            labels_to_make.append({})
+    # for (day, time), proctors_dff in proctors_df.groupby(["Day", "Time"]):
+    #     labels_to_make.extend(proctors_dff.to_dict("records"))
+    #     remainder = len(labels_to_make) % 30
+    #     for i in range(30 - remainder):
+    #         labels_to_make.append({})
+
+    labels_to_make.extend(proctors_df.to_dict("records"))
 
     f = BytesIO()
     sheet = labels.Sheet(specs, draw_label, border=True)

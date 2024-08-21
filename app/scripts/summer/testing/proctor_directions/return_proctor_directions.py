@@ -23,8 +23,11 @@ from reportlab.platypus import (
 )
 from reportlab.platypus import SimpleDocTemplate
 
-from app.scripts.summer.testing.regents_organization import utils as regents_organization_utils
+from app.scripts.summer.testing.regents_organization import (
+    utils as regents_organization_utils,
+)
 import app.scripts.summer.testing.proctor_directions.return_proctor_direction_flowables as return_proctor_direction_flowables
+
 
 def main(form, request):
     school_year = session["school_year"]
@@ -38,22 +41,24 @@ def main(form, request):
     if term == 7:
         month = "August"
 
-    filename = f"{month}_{school_year+1}_Proctor_Directions_By_Hub.pdf"
+    filename = f"{month}_{school_year+1}_Proctor_Directions_By_Exam.pdf"
 
     cr_1_08_df = regents_organization_utils.return_processed_registrations()
 
-    exam_book_df = cr_1_08_df.drop_duplicates(subset=['Course','Section'])
-    
-    rooms_df = exam_book_df.drop_duplicates(subset=['Course','Room'])
-    
+    exam_book_df = cr_1_08_df.drop_duplicates(subset=["Course", "Section"])
 
-    rooms_df['flowables'] = rooms_df.apply(return_proctor_direction_flowables.main, args=(exam_book_df,), axis=1)
+    rooms_df = exam_book_df.drop_duplicates(subset=["Course", "Room"])
 
+    rooms_df["flowables"] = rooms_df.apply(
+        return_proctor_direction_flowables.main, args=(exam_book_df,), axis=1
+    )
 
     flowables = []
 
-    for (hub_location, day, time), df in rooms_df.groupby(['hub_location','Day','Time']):
-        temp_flowables = df['flowables'].explode()
+    # for (hub_location, day, time), df in rooms_df.groupby(['hub_location','Day','Time']):
+    for exam, df in rooms_df.groupby("ExamTitle"):
+        df = df.sort_values(by=["Room"])
+        temp_flowables = df["flowables"].explode()
         flowables.extend(temp_flowables)
 
     f = BytesIO()
