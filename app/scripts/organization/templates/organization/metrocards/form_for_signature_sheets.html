@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_metrocard_reports')}}">MetroCards</a></li>
+    <li class="breadcrumb-item active"><a href="#">Return Signature Sheets</a></li>
+  </ol>
+</nav>
+
+<h1>Return Signature Sheets for Metrocards</h1>
+<p>To return Metrocard report, you will need to upload from ATS RTPL and RDR. You'll upload here a file with how to organize the Metrocards by Student with "TeacherName" and "RoomNumber"</p>
+
+<form action="{{url_for('scripts.return_metrocard_signature_sheets')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+  {{ form.hidden_tag() }}
+
+  <div class="form-group p-1 g-col-12">
+    {{ form.starting_serial_number.label }}
+    {{ form.starting_serial_number(class_="form-control") }}
+  </div> 
+
+  <div class="form-group p-1 g-col-12">
+      {{ form.metrocard_student_organization_file.label }}
+      {{ form.metrocard_student_organization_file(class_="form-control") }}
+  </div>    
+
+  <div class="form-group p-1 g-col-12 d-grid">
+      <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
+</div>
+{% endblock %}

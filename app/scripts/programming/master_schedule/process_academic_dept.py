@@ -3,34 +3,45 @@ import app.scripts.programming.master_schedule.spreadsheet_ids as spreadsheet_id
 
 from flask import current_app, session
 
+
 def main(dept_name):
     df = utils.return_master_schedule_by_sheet(dept_name)
-    
 
     output_list = []
     for index, teacher_row in df.iterrows():
-        for period in range(1,10):
-            period_col = f'Period{period}'
+        for period in range(1, 10):
+            period_col = f"Period{period}"
             course_code = teacher_row[period_col]
-            course_code = course_code.replace("+", '')
-            
-            if course_code and course_code[0]!='_':
-                if course_code not in ['GQS11', 'GAS81', 'GQS21', 'GQS22', 'GAS85']:
-                    output_list.extend(create_courses(teacher_row,period))
+            course_code = course_code.replace("+", "")
+
+            if course_code and course_code[0] != "_":
+                if course_code not in ["GQS11", "GAS81", "GQS21", "GQS22", "GAS85"]:
+                    output_list.extend(create_courses(teacher_row, period))
 
     return output_list
 
-def create_courses(teacher_row,period):
-    period_col = f'Period{period}'
+
+def create_courses(teacher_row, period):
+    period_col = f"Period{period}"
     course_code = teacher_row[period_col]
-    course_code = course_code.replace("+",'').replace("-", '')
-    if len(course_code) == 5 and course_code[0] not in ['F'] and course_code[0:2] not in ['ES','GQ']:
-        if course_code not in ['MQS21','MQS22','MGS11','MES11']:
-            return [create_master_course(teacher_row,period),create_mapped_course(teacher_row,period)]
-    if course_code[0:4] in ['MQS1']:
+    course_code = course_code.replace("+", "").replace("-", "")
+    if (
+        len(course_code) == 5
+        and course_code[0] not in ["F"]
+        and course_code[0:2] not in ["ES", "GQ"]
+    ):
+        if course_code not in ["MQS21", "MQS22", "MGS11", "MES11"]:
+            return [
+                create_master_course(teacher_row, period),
+                create_mapped_course(teacher_row, period),
+            ]
+    if course_code[0:4] in ["MQS1"]:
         return create_mapped_elective_course_pair(teacher_row, period)
-    
-    return [create_master_course(teacher_row,period)]
+
+    if course_code in ["ZJS11Q1", "ZJS11Q9"]:
+        return create_mapped_elective_course_pair(teacher_row, period)
+
+    return [create_master_course(teacher_row, period)]
 
 
 def create_mapped_elective_course_pair(teacher_row, period):
@@ -39,53 +50,52 @@ def create_mapped_elective_course_pair(teacher_row, period):
     school_year_str = f"{int(school_year)}-{int(school_year)+1}"
     TermID = str(term)
 
-    SchoolDBN = '02M600'
+    SchoolDBN = "02M600"
     SchoolYear = school_year_str
-    
 
     course_code = teacher_row[f"Period{period}"]
     cycle_day = "'11111"
     offset = course_code.count("+")
-    course_code = course_code.replace("+", '').replace("-", '')
+    course_code = course_code.replace("+", "").replace("-", "")
 
     temp_codes = []
     temp_dict = {
-        'SchoolDBN': SchoolDBN,
-        'SchoolYear': SchoolYear,
-        'TermID': TermID,
-        'CourseCode': return_course_code(course_code),
-        'SectionID': return_section_number(teacher_row, period),
-        'Course Name': '',
-        'PeriodID': f"{period}",
-        'Cycle Day': cycle_day,
-        'Capacity': return_mapped_capacity(course_code),
-        'Remaining Capacity': return_mapped_capacity(course_code),
-        'Gender': '0',
-        'Teacher Name': return_teacher_name(teacher_row),
-        'Room': '',
-        'Mapped Course': return_elective_mapped_course_code(teacher_row, period),
-        'Mapped Section': return_section_number(teacher_row, period),
-        'Bell Schedule': 'A',
+        "SchoolDBN": SchoolDBN,
+        "SchoolYear": SchoolYear,
+        "TermID": TermID,
+        "CourseCode": return_course_code(course_code),
+        "SectionID": return_section_number(teacher_row, period),
+        "Course Name": "",
+        "PeriodID": f"{period}",
+        "Cycle Day": cycle_day,
+        "Capacity": return_mapped_capacity(course_code),
+        "Remaining Capacity": return_mapped_capacity(course_code),
+        "Gender": "0",
+        "Teacher Name": return_teacher_name(teacher_row),
+        "Room": "",
+        "Mapped Course": return_elective_mapped_course_code(teacher_row, period),
+        "Mapped Section": return_section_number(teacher_row, period),
+        "Bell Schedule": "A",
     }
     temp_codes.append(temp_dict)
 
     temp_dict = {
-        'SchoolDBN': SchoolDBN,
-        'SchoolYear': SchoolYear,
-        'TermID': TermID,
-        'CourseCode': return_elective_mapped_course_code(teacher_row, period),
-        'SectionID': return_section_number(teacher_row, period),
-        'Course Name': '',
-        'PeriodID': f"{period}",
-        'Cycle Day': cycle_day,
-        'Capacity': return_mapped_capacity(course_code),
-        'Remaining Capacity': return_mapped_capacity(course_code),
-        'Gender': '0',
-        'Teacher Name': return_teacher_name(teacher_row),
-        'Room': '',
-        'Mapped Course': '',
-        'Mapped Section': '',
-        'Bell Schedule': 'A',
+        "SchoolDBN": SchoolDBN,
+        "SchoolYear": SchoolYear,
+        "TermID": TermID,
+        "CourseCode": return_elective_mapped_course_code(teacher_row, period),
+        "SectionID": return_section_number(teacher_row, period),
+        "Course Name": "",
+        "PeriodID": f"{period}",
+        "Cycle Day": cycle_day,
+        "Capacity": return_mapped_capacity(course_code),
+        "Remaining Capacity": return_mapped_capacity(course_code),
+        "Gender": "0",
+        "Teacher Name": return_teacher_name(teacher_row),
+        "Room": "",
+        "Mapped Course": "",
+        "Mapped Section": "",
+        "Bell Schedule": "A",
     }
     temp_codes.append(temp_dict)
 
@@ -97,213 +107,304 @@ def return_elective_mapped_course_code(teacher_row, period):
     elective_mapped_course_code = course_code
     teacher_name = return_teacher_name(teacher_row)
 
-
-    if course_code[0:5] == 'MQS11':
-        if teacher_name in ['LATANZA E']:
-            return 'MQS11QG'
-        if teacher_name in ['DYE S']:
-            return 'MQS11QGT'
-        if teacher_name in ['MATELUS J']:
-            return 'MQS11QF'
-        if teacher_name in ['WALKER B']:
-            return 'MQS11QFT'
+    if course_code[0:5] == "MQS11":
+        if teacher_name in ["LATANZA E"]:
+            return "MQS11QG"
+        if teacher_name in ["DYE S"]:
+            return "MQS11QGT"
+        if teacher_name in ["MATELUS J","NG D"]:
+            return "MQS11QF"
+        if teacher_name in ["WALKER B"]:
+            return "MQS11QFT"
+    if course_code in ["ZJS11Q1", "ZJS11Q9"]:
+        return "ZJS11QA"
 
     return elective_mapped_course_code
 
-def create_mapped_course(teacher_row,period):
+
+def create_mapped_course(teacher_row, period):
     school_year = session["school_year"]
     term = session["term"]
     school_year_str = f"{int(school_year)}-{int(school_year)+1}"
     TermID = str(term)
 
-    SchoolDBN = '02M600'
+    SchoolDBN = "02M600"
     SchoolYear = school_year_str
 
     course_code = teacher_row[f"Period{period}"]
     cycle_day = "'11111"
     offset = course_code.count("+")
-    course_code = course_code.replace("+",'').replace("-", '')
+    course_code = course_code.replace("+", "").replace("-", "")
 
     temp_dict = {
-    'SchoolDBN':SchoolDBN,
-    'SchoolYear':SchoolYear,
-    'TermID':TermID,
-    'CourseCode':return_mapped_course_code(course_code),
-    'SectionID':return_section_number(teacher_row,period),
-    'Course Name':'',
-    'PeriodID':f"{period}",
-    'Cycle Day':cycle_day,
-    'Capacity':return_mapped_capacity(course_code),
-    'Remaining Capacity':return_mapped_capacity(course_code),
-    'Gender':'0',
-    'Teacher Name':return_teacher_name(teacher_row),
-    'Room':'',
-    'Mapped Course':return_course_code(course_code),
-    'Mapped Section':return_section_number(teacher_row,period),
-    'Bell Schedule':'A',
+        "SchoolDBN": SchoolDBN,
+        "SchoolYear": SchoolYear,
+        "TermID": TermID,
+        "CourseCode": return_mapped_course_code(course_code),
+        "SectionID": return_section_number(teacher_row, period),
+        "Course Name": "",
+        "PeriodID": f"{period}",
+        "Cycle Day": cycle_day,
+        "Capacity": return_mapped_capacity(course_code),
+        "Remaining Capacity": return_mapped_capacity(course_code),
+        "Gender": "0",
+        "Teacher Name": return_teacher_name(teacher_row),
+        "Room": "",
+        "Mapped Course": return_course_code(course_code),
+        "Mapped Section": return_section_number(teacher_row, period),
+        "Bell Schedule": "A",
     }
     return temp_dict
 
-def create_master_course(teacher_row,period):
+
+def create_master_course(teacher_row, period):
     school_year = session["school_year"]
     term = session["term"]
     school_year_str = f"{int(school_year)}-{int(school_year)+1}"
     TermID = str(term)
 
-    SchoolDBN = '02M600'
+    SchoolDBN = "02M600"
     SchoolYear = school_year_str
 
     course_code = teacher_row[f"Period{period}"]
     offset = course_code.count("+")
-    course_code = course_code.replace("+",'').replace("-", '')
+    course_code = course_code.replace("+", "").replace("-", "")
     cycle_day = "'11111"
 
     temp_dict = {
-    'SchoolDBN':SchoolDBN,
-    'SchoolYear':SchoolYear,
-    'TermID':TermID,
-    'CourseCode':return_course_code(course_code),
-    'SectionID':f'{return_section_number(teacher_row,period)}',
-    'Course Name':'',
-    'PeriodID':f"{period}",
-    'Cycle Day':cycle_day,
-    'Capacity':return_capacity(course_code,return_section_number(teacher_row,period)),
-    'Remaining Capacity':return_capacity(course_code,return_section_number(teacher_row,period)),
-    'Gender':'0',
-    'Teacher Name':return_teacher_name(teacher_row),
-    'Room':'',
-    'Mapped Course':'',
-    'Mapped Section':'',
-    'Bell Schedule':'A',
+        "SchoolDBN": SchoolDBN,
+        "SchoolYear": SchoolYear,
+        "TermID": TermID,
+        "CourseCode": return_course_code(course_code),
+        "SectionID": f"{return_section_number(teacher_row,period)}",
+        "Course Name": "",
+        "PeriodID": f"{period}",
+        "Cycle Day": cycle_day,
+        "Capacity": return_capacity(
+            course_code, return_section_number(teacher_row, period)
+        ),
+        "Remaining Capacity": return_capacity(
+            course_code, return_section_number(teacher_row, period)
+        ),
+        "Gender": "0",
+        "Teacher Name": return_teacher_name(teacher_row),
+        "Room": "",
+        "Mapped Course": "",
+        "Mapped Section": "",
+        "Bell Schedule": "A",
     }
     return temp_dict
+
 
 def return_teacher_name(teacher_row):
-    first_name = teacher_row['first_name']
-    
-    last_name = teacher_row['last_name']
-    if len(first_name) > 0:
-        return last_name.replace(' ','').replace('-','').upper() +' '+ first_name[0].upper()
-    else:
-        return last_name.replace(' ','').replace('-','').upper()
+    first_name = teacher_row["first_name"]
 
-def return_section_number(teacher_row,period,cycle=None):
-    TeacherID = teacher_row['TeacherID']
+    last_name = teacher_row["last_name"]
+    if len(first_name) > 0:
+        return (
+            last_name.replace(" ", "").replace("-", "").upper()
+            + " "
+            + first_name[0].upper()
+        )
+    else:
+        return last_name.replace(" ", "").replace("-", "").upper()
+
+
+def return_section_number(teacher_row, period, cycle=None):
+    TeacherID = teacher_row["TeacherID"]
     course_code = teacher_row[f"Period{period}"]
     offset = course_code.count("+")
 
-    section = TeacherID*10+period + offset
+    section = TeacherID * 10 + period + offset
 
     offset = course_code.count("-")
     section -= offset
 
-    if course_code in ['HGS43X','HGS43X']:
+    if course_code in ["HGS43X", "HGS43X"]:
         if period == 2:
             return section - 1
-    if course_code in ['HUS21X','HUS22X']:
+    if course_code in ["HUS21X", "HUS22X"]:
         if period == 2:
             return section - 1
     if cycle:
-        return (TeacherID+period)*10 + {"A":1,"B":2,"C":3,"D":4,"E":5}[cycle]+offset
+        return (
+            (TeacherID + period) * 10
+            + {"A": 1, "B": 2, "C": 3, "D": 4, "E": 5}[cycle]
+            + offset
+        )
     else:
         if section == 0:
             section = 1
         return section
 
-def return_capacity(course_code, section=None):
-    return return_adjusted_capacity(course_code,section)
 
-def return_default_capacity(course_code,section=None):
-    if course_code == 'EES87QD' and section == 47:
+def return_capacity(course_code, section=None):
+    return return_adjusted_capacity(course_code, section)
+
+
+def return_default_capacity(course_code, section=None):
+    if course_code == "EES87QD" and section == 47:
         return 34
-    if course_code in ['MQS21','MQS22']:
-        return 39
+    if course_code in ["MQS21", "MQS22"]:
+        return 36
     if len(course_code) > 5:
-        if course_code[5] in ['X','H']:
+        if course_code in ["SCS21H", "SCS22H"]:
+            return 40
+        if course_code[5] in ["X", "H"]:
             return 34
-    if course_code[0:2] == 'ES':
+    if len(course_code) == 5 and course_code == "MQS11":
+        return 30
+    if course_code[0:2] == "ES":
         return 34
-    
-    if course_code in ['AUS11QE']:
+
+    if course_code in ["AUS11QE"]:
         return 32
-    if course_code[0:2] == 'PP':
+    if course_code[0:2] == "PP":
         return 50
-    if course_code[0:2] == 'GQ':
+    if course_code[0:2] == "GQ":
         return 34
-    if course_code[0:2] == 'PH':
+    if course_code[0:2] == "PH":
         return 33
-    if course_code[0:2] == 'ZL':
+    if course_code[0:2] == "ZL":
         return 450
-    if course_code[0:2] == 'ZA':
+    if course_code[0:2] == "ZA":
         return 9999
-    if course_code in ['EES81QE','EES82QE','EES83QE','EES84QE','EES85QE','EES86QE']:
+    if course_code in [
+        "EES81QE",
+        "EES82QE",
+        "EES83QE",
+        "EES84QE",
+        "EES85QE",
+        "EES86QE",
+    ]:
         return 22
-    if course_code[0:5] in ['EES87','EES88']:
-        if course_code[-1] == 'T':
+    if course_code[0:5] in ["EES87", "EES88"]:
+        if course_code[-1] == "T":
             return 12
-        if course_code[-1] == 'M':
+        if course_code[-1] == "M":
             return 15
-        if course_code[-2:] == 'QP':
+        if course_code[-2:] == "QP":
             return 2
-        if course_code[-2:] == 'QD':
+        if course_code[-2:] == "QD":
             return 22
-        if course_code[-2:] == 'QC':
+        if course_code[-2:] == "QC":
             return 22
-        if course_code[-2:] in ['QF','QW']:
+        if course_code[-2:] in ["QF", "QW"]:
             return 35
         return 32
-    if course_code[0:2] == 'AF':
+    if course_code[0:2] == "AF":
         return 28
-    if course_code[0:2] in ['BM','BN']:
+    if course_code[0:2] in ["BM", "BN"]:
         return 32
-    if course_code[0:2] == 'FS':
+    if course_code[0:2] == "FS":
         return 34
-    if course_code[-2:] == 'QE':
+    if course_code[-2:] == "QE":
         return 4
-    if course_code[-2:] == 'QM':
+    if course_code[-2:] == "QM":
         return 15
-    if course_code[-3:] == 'QEM':
+    if course_code[-3:] == "QEM":
         return 15
-    if course_code[-2:] == 'QT':
+    if course_code[-2:] == "QT":
         return 12
-    if course_code[-3:] == 'QET':
+    if course_code[-3:] == "QET":
         return 12
-    if course_code[-2:] == 'QA':
+    if course_code[-2:] == "QA":
         return 20
-    if course_code[-3:] == 'QEA':
+    if course_code[-3:] == "QEA":
         return 20
-    if course_code[-2:] == 'QP':
+    if course_code[-2:] == "QP":
         return 4
-    if course_code[-1] in ['H','X']:
+    if course_code[-1] in ["H", "X"]:
         return 32
     return 30
 
+
 def return_course_code(course_code):
-    if course_code[0] in ['P','G','A','B','T','Z']:
+    if course_code[0] in ["P", "G", "A", "B", "T", "Z"]:
         return course_code
     if len(course_code) == 7:
-        if course_code[5] != 5 and course_code[-2:] == 'QA':
+        if course_code[5] != 5 and course_code[-2:] == "QA":
             return course_code[0:5]
     return course_code
 
+
 def return_mapped_course_code(course_code):
     if len(course_code) == 5:
-        return course_code[0:5] + 'QP'
+        return course_code[0:5] + "QP"
     return course_code
 
 
 def return_mapped_capacity(course_code):
     if len(course_code) == 5:
-        course_code = course_code +'QP'
+        course_code = course_code + "QP"
     return return_adjusted_capacity(course_code)
 
-def return_adjusted_capacity(course_code,section=None):
-    default_capacity = return_default_capacity(course_code,section)
+
+def return_adjusted_capacity(course_code, section=None):
+    default_capacity = return_default_capacity(course_code, section)
     adjustment_dict = {
+        "EES81": -1,
+        "EES81QA": -1,
+
+        # "EES83": +1,
+        "EES83QP": -1,
+
+        "EES85": -2,
+        "EES85QA": -4,
+
+        "EES87QDT": +1,
+        "EQS11": +4,
+
+        "HGS41": -1,
+        "HGS43": +3,
+        "HGS43QP": -2,
+        "HGS43QT": -1,
+
+
+        "HUS21": -1,
+        "HUS21QA": -1,
+        "HUS21QP": -1,
+
+        "HVS11": +2,
+        "HVS11QP": -2,
+
+        "MES21": -1,
+        "MES21QA": -1,
+        "MES21QT": -1,
+
+        "MGS21": -2,
+        "MGS21QA": -1,
+        "MGS21QT": -1,        
+
+        "MPS21": +2,
+        "MPS21QA": +1,
+        "MPS21QP": -2,
+        "MPS21QT": -2,
+
+        
+        
+        "MRS21QT": +1,
+        "MRS21QP": -3,
+        "MRS21": +3,
+
+
+        "SBS21": -1,
+        "SBS21QA": -1,
+        "SBS21QT": -1,
+        "SBS21QP": +1,
+
+        "SJS21": -2,
+        "SJS21QA": -2,
+        "SJS21QT": -1,
+
+        "SCS21": +2,
+        "SCS21QP": -2,
+        "SPS21": +4,
+        "SWS21": +2,
     }
 
     adjustment = adjustment_dict.get(course_code, 0)
-    if adjustment < 0:
-        adjustment += 1
+    # if adjustment < 0:
+    #     adjustment += 1
 
     return default_capacity + adjustment

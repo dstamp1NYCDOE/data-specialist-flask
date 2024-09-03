@@ -49,6 +49,13 @@ def return_organization_reports():
             "report_function": "scripts.return_career_day_reports",
             "report_description": "Generate career day assignments as spreadsheet or letters",
         },
+        {
+            "report_title": "MetroCard Organization",
+            "report_function": "scripts.return_metrocard_reports",
+            "report_description": "Generate MetroCard labels and Signature Sheets",
+        },
+
+        
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports

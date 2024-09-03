@@ -16,6 +16,8 @@ from app.scripts.programming.forms import (
     AP_offers_Letter_Form,
 )
 
+from app.scripts.programming.jupiter.forms import JupiterMasterScheduleForm
+
 
 @scripts.route("/programming")
 def return_programming_reports():
@@ -25,6 +27,7 @@ def return_programming_reports():
     final_request_inform_letter_form = FinalRequestInformLetters()
     upload_advanced_coursework_surveys = UploadAdvancedCourseSurveyForm()
     ap_offer_letter_form = AP_offers_Letter_Form()
+    jupiter_master_schedule_form = JupiterMasterScheduleForm()
     form_cards = [
         {
             "Title": "Student Vetting",
@@ -49,7 +52,7 @@ def return_programming_reports():
             "Description": "Return PDF of final notice letters for Fall Requests",
             "form": final_request_inform_letter_form,
             "route": "scripts.return_final_request_inform",
-        },        
+        },
         {
             "Title": "Return AP Class Offers",
             "Description": "Return pdf of student offers for AP courses",
@@ -68,7 +71,15 @@ def return_programming_reports():
             "form": initial_request_form,
             "route": "scripts.return_processed_master_schedule",
         },
+        {
+            "Title": "Return Jupiter Master Schedule",
+            "Description": "Process Master Schedule to Return File to Upload To Jupiter",
+            "form": jupiter_master_schedule_form,
+            "route": "scripts.return_jupiter_master_schedule",
+        },
+
     ]
+
 
     return render_template(
         "/programming/templates/programming/index.html", form_cards=form_cards
@@ -165,7 +176,10 @@ def return_initial_request_inform():
         mimetype="application/pdf",
     )
 
+
 import app.scripts.programming.request_inform.final_request_inform as final_request_inform
+
+
 @scripts.route("/programming/final_requests_letter", methods=["GET", "POST"])
 def return_final_request_inform():
     school_year = session["school_year"]
@@ -174,7 +188,6 @@ def return_final_request_inform():
     form = FinalRequestInformLetters(request.form)
     data = {
         "date_of_letter": form.date_of_letter.data,
-        
     }
 
     f = final_request_inform.main(data)
@@ -248,3 +261,20 @@ def return_ap_offer_letters():
             download_name=download_name,
             mimetype="application/pdf",
         )
+
+
+import app.scripts.programming.finalization.check_if_retaking_course as check_if_retaking_course
+
+
+@scripts.route("/programming/check_if_enrolled_in_passed_course")
+def return_check_if_passed_course():
+    school_year = session["school_year"]
+    f = check_if_retaking_course.main()
+
+    download_name = f"PassedPriorCourse_Fall_{school_year}.xlsx"
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )

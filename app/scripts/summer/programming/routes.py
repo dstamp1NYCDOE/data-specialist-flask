@@ -13,7 +13,6 @@ import app.scripts.summer.utils as summer_utils
 
 @scripts.route("/summer/programming")
 def return_summer_school_programming_routes():
-    print(summer_utils.return_sending_school_list())
     reports = [
         {
             "report_title": "Check If Taking Prior Passed Course",
