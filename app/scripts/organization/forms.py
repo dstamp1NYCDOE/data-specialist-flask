@@ -34,9 +34,14 @@ class OrganizeStudentRecordsForm(FlaskForm):
 
     student_list_source = SelectField(
         "StudentID Column",
-        choices=[("STARS_Classlist_Report", "STARS Classlist Report")],
+        choices=[
+            ("STARS_Classlist_Report", "STARS Classlist Report"),
+            ("teacher_and_room_list", "Teacher + Room List"),
+        ],
         validators=[InputRequired()],
     )
+
+    include_classlist_boolean = BooleanField("Include Classlist")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

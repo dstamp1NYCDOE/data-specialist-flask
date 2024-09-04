@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 
-from wtforms import DateField, SelectField, IntegerField
+from wtforms import DateField, SelectField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired, Regexp, InputRequired
 
 
@@ -11,7 +11,4 @@ class MetroCardOrganizationFileUploadForm(FlaskForm):
         validators=[FileRequired()],
     )
 
-    starting_serial_number = IntegerField(
-        "Starting Serial Number",
-        validators=[InputRequired()]
-    )
+    metrocard_tbl = TextAreaField(default="StartingSerialNumber\t#_of_cards")

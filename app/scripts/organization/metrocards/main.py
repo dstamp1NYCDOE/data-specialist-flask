@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from io import BytesIO
+from io import StringIO
 
 import labels
 from reportlab.graphics import shapes
@@ -24,7 +25,20 @@ def return_processed_data(form, request):
         metrocard_student_organization_file
     ).fillna("")
 
-    starting_serial_number = form.starting_serial_number.data
+    metrocard_tbl = form.metrocard_tbl.data
+    string_data = StringIO(metrocard_tbl)
+    metrocard_tbl_df = pd.read_csv(string_data, sep="\t")
+
+    metrocard_tbl_df = metrocard_tbl_df.sort_values(by=["StartingSerialNumber"])
+
+    metrocard_lst = []
+    for index, serial_number_row in metrocard_tbl_df.iterrows():
+        starting_serial_number = serial_number_row["StartingSerialNumber"]
+        num_of_cards = serial_number_row["#_of_cards"]
+        for i in range(num_of_cards):
+            metrocard_lst.append({"MetroCard #": str(starting_serial_number + i)})
+
+    metrocard_tbl_df = pd.DataFrame(metrocard_lst)
 
     metrocard_student_organization_df = metrocard_student_organization_df.sort_values(
         by=["TeacherName", "LastName", "FirstName"]
@@ -32,11 +46,12 @@ def return_processed_data(form, request):
     metrocard_student_organization_df["Nickname"] = (
         metrocard_student_organization_df.apply(convert_name, axis=1)
     )
+    metrocard_student_organization_df = metrocard_student_organization_df.reset_index()
 
-    metrocard_student_organization_df["MetroCard #"] = (
-        metrocard_student_organization_df.reset_index().index + starting_serial_number
+    metrocard_student_organization_df = pd.concat(
+        [metrocard_student_organization_df, metrocard_tbl_df], axis=1
     )
-
+    print(metrocard_student_organization_df)
     return metrocard_student_organization_df
 
 
