@@ -136,3 +136,25 @@ class MailingLabelsByPeriod(FlaskForm):
         validators=[InputRequired()],
         default=["ALL"],
     )
+
+
+class FolderLabelsByTeacherForm(FlaskForm):
+
+    student_list = FileField(
+        "Student List as Spreadsheet",
+        description="File must be saved as .xlsx",
+        validators=[FileRequired()],
+    )
+
+    student_list_source = SelectField(
+        "StudentID Column",
+        choices=[
+            ("STARS_Classlist_Report", "STARS Classlist Report"),
+            ("teacher_and_room_list", "Teacher + Room List"),
+        ],
+        validators=[InputRequired()],
+    )
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

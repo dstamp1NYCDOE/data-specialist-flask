@@ -28,7 +28,10 @@ def main(form, request):
     StudentID_dict = {}
 
     for page_num, page in enumerate(num_of_pages):
-        page_text = page.extract_text()
+        try:
+            page_text = page.extract_text()
+        except AttributeError:
+            continue
         page_text = page_text.replace(" ", "")
 
         mo = StudentIDRegex.search(page_text)
@@ -46,14 +49,16 @@ def main(form, request):
 
     sort_by_data = request.files[form.student_list.name]
 
-    sort_by_df = pd.read_excel(sort_by_data)
-
+    try:
+        sort_by_df = pd.read_excel(sort_by_data)
+    except ValueError:
+        sort_by_df = pd.read_csv(sort_by_data)
     sort_by_df["___________"] = ""
 
     if form.student_list_source.data == "STARS_Classlist_Report":
         sort_by_df = sort_by_df.rename(columns={"PeriodId || '/'": "Period"})
         sort_by_df = sort_by_df.astype(str)
-        sort_by_df = sort_by_df.merge(photos_df, on=["Student Id"])
+        sort_by_df = sort_by_df.merge(photos_df, on=["Student Id"], how='left')
         group_by = ["TeacherName", "Period", "CourseCode", "SectionId"]
         sort_by_df["sort_by_col"] = (
             sort_by_df["TeacherName"]
@@ -69,7 +74,7 @@ def main(form, request):
         student_roster_table_cols = ["StudentName", "___________"]
 
     if form.student_list_source.data == "teacher_and_room_list":
-        sort_by_df = sort_by_df.merge(photos_df, on=["StudentID"])
+        sort_by_df = sort_by_df.merge(photos_df, on=["StudentID"], how='left')
 
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Room"]

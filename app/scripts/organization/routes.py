@@ -18,6 +18,7 @@ from app.scripts.organization.forms import (
     ClassRostersFromList,
     CareerDayReportsForm,
     MailingLabelsByPeriod,
+    FolderLabelsByTeacherForm
 )
 from app.scripts.organization import organize_student_documents_by_list
 from app.scripts.organization import class_list_counts_from_list
@@ -34,6 +35,11 @@ def return_organization_reports():
             "report_function": "scripts.return_student_records_organized_by_class_list",
             "report_description": "Organize PDF by class list",
         },
+        {
+            "report_title": "Make Bag Labels for Student Materials",
+            "report_function": "scripts.return_bag_labels_for_student_documents_by_class_list",
+            "report_description": "Upload class list to create teacher bag labels for material distribution",
+        },        
         {
             "report_title": "Class List Counts from StudentID List",
             "report_function": "scripts.return_class_list_counts_from_list",
@@ -76,6 +82,28 @@ def return_student_records_organized_by_class_list():
         f = organize_student_documents_by_list.main(form, request)
 
         download_name = f"organized_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )
+
+from app.scripts.organization.folder_mailing_labels_by_teacher import main as folder_mailing_labels_by_teacher
+@scripts.route("/organization/teacher_bag_labels", methods=["GET", "POST"])
+def return_bag_labels_for_student_documents_by_class_list():
+    if request.method == "GET":
+        form = FolderLabelsByTeacherForm()
+        return render_template(
+            "organization/templates/organization/return_teacher_bag_labels.html",
+            form=form,
+        )
+    else:
+        form = FolderLabelsByTeacherForm(request.form)
+        f = folder_mailing_labels_by_teacher(form, request)
+
+        download_name = f"teacher_bag_labels_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
 
         return send_file(
             f,

@@ -29,7 +29,7 @@ def return_processed_data(form, request):
     string_data = StringIO(metrocard_tbl)
     metrocard_tbl_df = pd.read_csv(string_data, sep="\t")
 
-    metrocard_tbl_df = metrocard_tbl_df.sort_values(by=["StartingSerialNumber"])
+    
 
     metrocard_lst = []
     for index, serial_number_row in metrocard_tbl_df.iterrows():
@@ -215,12 +215,12 @@ def draw_label(label, width, height, obj):
 def return_label_dict(student):
     metrocard_num = student["MetroCard #"]
     nickname = student["Nickname"]
-    OP_room = student["Room"]
-    StudentID = str(student["StudentID"])
+    OP_room = int(student["Room"])
+    StudentID = str(int(student["StudentID"]))
 
     temp_dict = {
-        "MetroCard #": "X" * 10 + str(metrocard_num)[-4:],
-        "StudentID": f"ID: XXXX{StudentID[-5:]}",
+        "MetroCard #": "X" * 10 + str(metrocard_num)[-6:],
+        "StudentID": f"ID: XXX-XXX-{StudentID[-3:]}",
         "Nickname": nickname,
         "OP_room": OP_room,
     }
@@ -232,7 +232,7 @@ def return_teacher_row(Teacher, Room):
         "MetroCard #": "MetroCards",
         "StudentID": "",
         "Nickname": Teacher,
-        "OP_room": Room,
+        "OP_room": int(Room),
     }
     return temp_dict
 
