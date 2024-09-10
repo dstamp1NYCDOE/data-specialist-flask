@@ -4,7 +4,13 @@ from app.scripts import scripts, files_df
 
 from io import BytesIO
 
+from flask import session
+
 def main(form, request):
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
     student_subset_title = form.subset_title.data
 
     student_lst_str = form.subset_lst.data
@@ -14,24 +20,34 @@ def main(form, request):
         student_lst = [int(x) for x in student_lst]
         
 
-    filename = utils.return_most_recent_report(files_df, "1_49")
+    course_lst_str = form.course_lst.data
+    course_lst = []
+    if course_lst_str != '':
+        course_lst = course_lst_str.split("\r\n")
+        print(course_lst)
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_49", year_and_semester=year_and_semester)
+    
     counselors_df = utils.return_file_as_df(filename)
     counselors_df = counselors_df[['StudentID','Counselor']]
 
-    filename = utils.return_most_recent_report(files_df, "3_07")
+    filename = utils.return_most_recent_report_by_semester(files_df, "3_07", year_and_semester=year_and_semester)
     student_info_df = utils.return_file_as_df(filename)
     student_info_df = student_info_df[['StudentID','LastName','FirstName','Student DOE Email']]
 
     student_info_df = student_info_df.merge(counselors_df, on='StudentID', how='inner')
 
-    filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
     rosters_df = utils.return_file_as_df(filename)
     rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
+    if course_lst_str != '':
+        rosters_df = rosters_df[rosters_df['Course'].isin(course_lst)]
+
     rosters_df[student_subset_title] = rosters_df["StudentID"].apply(
         lambda x: x in student_lst
     )
 
-    filename = utils.return_most_recent_report(files_df, "jupiter_master_schedule")
+    filename = utils.return_most_recent_report_by_semester(files_df, "jupiter_master_schedule", year_and_semester=year_and_semester)
     master_schedule = utils.return_file_as_df(filename).fillna('')
     master_schedule = master_schedule[
         ["Course", "Section", "Room", "Teacher1","Teacher2", "Period"]

@@ -84,6 +84,8 @@ class ClassRostersFromList(FlaskForm):
         default=["ALL"],
     )
 
+    course_lst = StringField("Course List - Leave blank to include all courses", widget=TextArea())
+
     computer_labs_flag = BooleanField("Computer Labs Only", default=False)
 
     include_counselors_flag = BooleanField("Include Counselors", default=False)
@@ -154,7 +156,6 @@ class FolderLabelsByTeacherForm(FlaskForm):
         ],
         validators=[InputRequired()],
     )
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

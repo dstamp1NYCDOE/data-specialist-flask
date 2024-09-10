@@ -71,11 +71,19 @@ class SemesterSelectForm(FlaskForm):
         self.report.data = "scripts.programming.class_lists"
 
 
+def set_default_year_and_semester():
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+    return year_and_semester
+
+
 class GsheetForm(FlaskForm):
     gsheet_category = SelectField(
         "Google Sheet Category",
         choices=[
             ("master_schedule_planning", "Master Schedule Planning"),
+            ("student_info_by_teacher", "Student Info By Teacher"),
             ("summer_school_gradebooks_hub", "Summer School Gradebooks Hub"),
             ("summer_school_attendance_hub", "Summer School Attendance Hub"),
         ],
@@ -87,14 +95,8 @@ class GsheetForm(FlaskForm):
     year_and_semester = SelectField(
         "School Year and Semester",
         choices=school_year_and_semester_choices,
+        default=set_default_year_and_semester,
     )
-
-
-def set_default_year_and_semester():
-    school_year = session["school_year"]
-    term = session["term"]
-    year_and_semester = f"{school_year}-{term}"
-    return year_and_semester
 
 
 class FileForm(FlaskForm):
@@ -111,6 +113,7 @@ class JupiterUpdateForm(FlaskForm):
     year_and_semester = SelectField(
         "School Year and Semester",
         choices=school_year_and_semester_choices,
+        default=set_default_year_and_semester,
     )
     report = SelectField(
         "Jupiter File",

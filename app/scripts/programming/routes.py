@@ -77,7 +77,12 @@ def return_programming_reports():
             "form": jupiter_master_schedule_form,
             "route": "scripts.return_jupiter_master_schedule",
         },
-
+        {
+            "Title": "Return Jupiter Student Upload",
+            "Description": "Process Student Upload to Return File to Upload To Jupiter",
+            "form": jupiter_master_schedule_form,
+            "route": "scripts.return_jupiter_student_upload",
+        },
     ]
 
 

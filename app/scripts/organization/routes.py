@@ -18,7 +18,7 @@ from app.scripts.organization.forms import (
     ClassRostersFromList,
     CareerDayReportsForm,
     MailingLabelsByPeriod,
-    FolderLabelsByTeacherForm
+    FolderLabelsByTeacherForm,
 )
 from app.scripts.organization import organize_student_documents_by_list
 from app.scripts.organization import class_list_counts_from_list
@@ -31,6 +31,11 @@ from app.scripts.organization import career_day
 def return_organization_reports():
     reports = [
         {
+            "report_title": "Update Google Sheet Class lists",
+            "report_function": "scripts.return_updated_google_sheet_classlists",
+            "report_description": "Update student class lists on Google Sheet",
+        },
+        {
             "report_title": "Organize Student Records ",
             "report_function": "scripts.return_student_records_organized_by_class_list",
             "report_description": "Organize PDF by class list",
@@ -39,7 +44,7 @@ def return_organization_reports():
             "report_title": "Make Bag Labels for Student Materials",
             "report_function": "scripts.return_bag_labels_for_student_documents_by_class_list",
             "report_description": "Upload class list to create teacher bag labels for material distribution",
-        },        
+        },
         {
             "report_title": "Class List Counts from StudentID List",
             "report_function": "scripts.return_class_list_counts_from_list",
@@ -60,8 +65,11 @@ def return_organization_reports():
             "report_function": "scripts.return_metrocard_reports",
             "report_description": "Generate MetroCard labels and Signature Sheets",
         },
-
-        
+        {
+            "report_title": "Locker Organization",
+            "report_function": "scripts.return_lockers_reports",
+            "report_description": "Generate Locker reports",
+        },
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports
@@ -90,7 +98,12 @@ def return_student_records_organized_by_class_list():
             mimetype="application/pdf",
         )
 
-from app.scripts.organization.folder_mailing_labels_by_teacher import main as folder_mailing_labels_by_teacher
+
+from app.scripts.organization.folder_mailing_labels_by_teacher import (
+    main as folder_mailing_labels_by_teacher,
+)
+
+
 @scripts.route("/organization/teacher_bag_labels", methods=["GET", "POST"])
 def return_bag_labels_for_student_documents_by_class_list():
     if request.method == "GET":
@@ -103,7 +116,9 @@ def return_bag_labels_for_student_documents_by_class_list():
         form = FolderLabelsByTeacherForm(request.form)
         f = folder_mailing_labels_by_teacher(form, request)
 
-        download_name = f"teacher_bag_labels_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+        download_name = (
+            f"teacher_bag_labels_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
+        )
 
         return send_file(
             f,

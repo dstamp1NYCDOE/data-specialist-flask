@@ -19,6 +19,12 @@ def return_programming_jupiter_reports():
             "form": jupiter_master_schedule_form,
             "route": "scripts.return_student_vetting_report",
         },
+        {
+            "Title": "Return Jupiter Student Upload",
+            "Description": "Return spreadsheet to upload to Jupiter",
+            "form": jupiter_master_schedule_form,
+            "route": "scripts.return_jupiter_student_upload",
+        },
     ]
 
     return render_template(
@@ -32,11 +38,15 @@ def return_jupiter_master_schedule():
         pass
     else:
         form = JupiterMasterScheduleForm(request.form)
-        return return_master_schedule.return_student_jupiter(request, form)
+
         return return_master_schedule.main(request, form)
-        f, download_name = return_master_schedule.main(request, form)
-        return send_file(
-            f,
-            as_attachment=True,
-            download_name=download_name,
-        )
+
+    
+import app.scripts.programming.jupiter.return_master_schedule as return_master_schedule
+@scripts.route("/programming/jupiter/return_student_upload", methods=['GET','POST'])
+def return_jupiter_student_upload():
+    if request.method == 'GET':
+        pass
+    else:
+        form = JupiterMasterScheduleForm(request.form)
+        return return_master_schedule.return_student_jupiter(request, form)
