@@ -101,7 +101,7 @@ def return_student_letter_flowables(student_row):
     flowables.extend(reportlab_letter_head)
 
     paragraph = Paragraph(
-        f"Dear {StudentName},",
+        f"Dear {StudentName} ({StudentID}),",
         styles["BodyText"],
     )
     flowables.append(paragraph)

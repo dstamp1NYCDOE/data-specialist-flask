@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_attendance_reports')}}">Attendance</a></li>
+    <li class="breadcrumb-item active">RDAL Analysis</li>
+  </ol>
+</nav>
+
+<h1>RDAL Analysis</h1>
+
+
+<form action="{{url_for('scripts.return_rdal_analysis_spreadsheet')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+  {{ form.hidden_tag() }}
+
+  <div class="form-group p-1 g-col-12">
+      {{ form.rdal_file.label }}
+      {{ form.rdal_file(class_="form-control") }}
+  </div>    
+
+  <div class="form-group p-1 g-col-12">
+      {{ form.class_date.label }}
+      {{ form.class_date(class_="form-control") }}
+  </div>   
+
+  <div class="form-group p-1 g-col-12 d-grid">
+      <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
+</div>
+{% endblock %}

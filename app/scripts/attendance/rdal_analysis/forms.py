@@ -6,10 +6,9 @@ from wtforms import DateField
 
 import datetime as dt
 
+
 class RDALUploadForm(FlaskForm):
-    class_date = DateField(
-        default=dt.datetime.today
-    )
+    class_date = DateField(default=dt.datetime.today)
     rdal_file = FileField(
         "Save the RDAL file as a .CSV before uploading",
         validators=[FileRequired()],

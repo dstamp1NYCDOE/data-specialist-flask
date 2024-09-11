@@ -62,6 +62,7 @@ class ClassRostersFromList(FlaskForm):
             ("BOTH", "BOTH"),
             ("Teacher1", "Teacher1"),
             ("Teacher2", "Teacher2"),
+            ("NoTeacherPages", "None"),
         ],
         validators=[InputRequired()],
     )

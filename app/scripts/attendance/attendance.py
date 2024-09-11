@@ -33,6 +33,11 @@ def return_attendance_reports():
             "report_description": "Analyze student daily attendance using ATS report RATR",
         },
         {
+            "report_title": "RDAL Analysis",
+            "report_function": "scripts.return_rdal_analysis_spreadsheet",
+            "report_description": "Analysis daily RDAL file and return file to upload",
+        },
+        {
             "report_title": "Student Attendance Tiers",
             "report_function": "scripts.return_attd_tiers_from_RATR",
             "report_description": "Return Student Attendance Tiers using ATS report RATR",
@@ -71,7 +76,7 @@ def return_attendance_reports():
             "report_title": "Cut Analysis",
             "report_function": "scripts.return_cut_analysis",
             "report_description": "Return Cut Analysis",
-        },        
+        },
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -311,6 +316,8 @@ def return_jupiter_attd_benchmark_analysis():
 
 
 import app.scripts.attendance.cut_analysis.main as cut_analysis
+
+
 @scripts.route("/attendance/class_report/", methods=["GET", "POST"])
 def generate_jupiter_attendance_class_report():
     if request.method == "GET":
@@ -346,9 +353,11 @@ def generate_jupiter_attendance_class_report():
 
 
 import app.scripts.attendance.cut_analysis.main as cut_analysis
+
+
 @scripts.route("/attendance/return_cut_analysis")
 def return_cut_analysis():
     f = cut_analysis.main()
-    return ''
+    return ""
     download_name = f"CutAnalysis.xlsx"
     return send_file(f, as_attachment=True, download_name=download_name)

@@ -98,6 +98,8 @@ def main(form, request):
         'Counselor',
         student_subset_title		
             ]
+    
+    teachers_lst = []
     if teacher_flag == 'BOTH':
         teachers_lst = pd.unique(df[["Teacher1", "Teacher2"]].values.ravel("K"))
     if teacher_flag == 'Teacher1':    
@@ -109,7 +111,8 @@ def main(form, request):
     
 
     ## all students with course info
-    df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_rosters')
+    if teacher_flag != 'NoTeacherPages':
+            df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_rosters')
     
     ## all students with counselor info
     df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_students')
@@ -125,7 +128,8 @@ def main(form, request):
 
         
         students_df = students_df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName'])
-        students_df.to_excel(writer, index=False, sheet_name=teacher)
+        if teacher_flag != 'NoTeacherPages':
+            students_df.to_excel(writer, index=False, sheet_name=teacher)
 
     if form.include_counselors_flag.data:
         for Counselor, students_df in df.groupby('Counselor'):

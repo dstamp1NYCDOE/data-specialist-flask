@@ -11,6 +11,7 @@ from app.scripts.commutes import commutes
 from app.scripts.programming import routes
 from app.scripts.programming.jupiter import routes
 from app.scripts.attendance import attendance
+from app.scripts.attendance.rdal_analysis import routes
 from app.scripts.organization import routes
 from app.scripts.organization.metrocards import routes
 from app.scripts.organization.gsheet_classlist import routes
