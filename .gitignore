@@ -2,7 +2,10 @@
 app/data/*
 !app/data/.gitkeep
 
-
+!app/data/gsheet_urls.csv
+!app/data/RegentsCalendar.xlsx
+!app/data/SchoolCalendar.xlsx
+!app/data/DOE_High_School_Directory.csv
 
 .DS_store
 
