@@ -58,7 +58,6 @@ def main(form, request):
     if form.student_list_source.data == "STARS_Classlist_Report":
         sort_by_df = sort_by_df.rename(columns={"PeriodId || '/'": "Period"})
         sort_by_df = sort_by_df.astype(str)
-        sort_by_df = sort_by_df.merge(photos_df, on=["Student Id"], how='left')
         group_by = ["TeacherName", "Period", "CourseCode", "SectionId"]
         sort_by_df["sort_by_col"] = (
             sort_by_df["TeacherName"]

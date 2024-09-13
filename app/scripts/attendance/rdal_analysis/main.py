@@ -333,7 +333,7 @@ def return_classroom_teacher_lookup_formula(row):
     lookup_index_range = f"'{lookup_sheet}'!{lookup_index}"
     lookup_val_range = f"A{row.name}"
 
-    formula_str = f"=index({lookup_index_range}, match({lookup_val_range}, {lookup_match_range},0) , 0)"
+    formula_str = f'="{lookup_sheet} - "&index({lookup_index_range}, match({lookup_val_range}, {lookup_match_range},0) , 0)'
     
     return formula_str
 
