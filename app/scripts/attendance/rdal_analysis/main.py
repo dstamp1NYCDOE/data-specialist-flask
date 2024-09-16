@@ -4,7 +4,7 @@ import os
 from io import BytesIO
 
 import app.scripts.utils as utils
-from app.scripts import scripts, files_df
+from app.scripts import scripts, files_df, photos_df, gsheets_df
 
 from flask import current_app, session, redirect, url_for
 
@@ -21,17 +21,45 @@ def main(form, request):
 
     consecutive_absences_df = return_consecutive_absences_df(class_date)
 
-    f = return_rdal_report(consecutive_absences_df, rdal_df)
+    f = return_rdal_report(consecutive_absences_df, rdal_df, class_date)
 
     download_name = f"RDAL_{class_date}.xlsx"
 
     return f, download_name
 
 
-def return_rdal_report(consecutive_absences_df, rdal_df):
+def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
+
+    absentee_form_url = utils.return_gsheet_url_by_title(
+        gsheets_df, "absentee_form_results", year_and_semester
+    )
+
+    absentee_form_df = utils.return_google_sheet_as_dataframe(absentee_form_url)
+
+    absentee_form_df = absentee_form_df.rename(columns={
+        'Student Osis (ID) number\nNúmero de estudiante Osis (DNI)':'StudentID',
+        'Date of Absence\nFecha de ausencia':'date_of_absence',
+        'Expected Date of Return\nFecha prevista de regreso':'date_of_return',
+        'Reason for Absence\nMotivo de la ausencia':'reason_for_absence',
+       'If OTHER for reason of absence, please include a brief explanation. \nSi es OTRO por motivo de ausencia, incluya una breve explicación.':'brief_explanation'
+    })
+
+    class_date = pd.to_datetime(class_date)
+    absentee_form_df['date_of_absence'] = pd.to_datetime(absentee_form_df['date_of_absence'])
+    absentee_form_df['date_of_return'] = pd.to_datetime(absentee_form_df['date_of_return'])
+    print(absentee_form_df)
+
+    mask = (absentee_form_df['date_of_absence'] <= class_date) & (class_date < absentee_form_df['date_of_return'])
+    absentee_form_df = absentee_form_df[mask]
+    print(absentee_form_df)
+
+    absentee_form_df["Notes From Attendance Teacher"] = absentee_form_df["reason_for_absence"] + " - Return Date " + absentee_form_df['date_of_return'].apply(lambda x: x.strftime('%Y-%m-%d')) + '(From Google Form)'
+
+    absentee_form_df = absentee_form_df[['StudentID',"Notes From Attendance Teacher"]]
+    
 
     absent_students_lst = rdal_df["STUDENT ID"]
 
@@ -179,6 +207,11 @@ def return_rdal_report(consecutive_absences_df, rdal_df):
         consecutive_absences_df, on="StudentID", how="left"
     )
 
+    absent_students_df = absent_students_df.merge(
+        absentee_form_df, on="StudentID", how="left"
+    ).fillna('')
+    
+
     f = BytesIO()
     rdal_df.to_excel(f, index=False)
     f.seek(0)
@@ -206,7 +239,7 @@ def return_rdal_report_xlsx(absent_students_df):
         "Notes From Classroom Teachers",
     ]
     students_by_attd_teacher = absent_students_df.drop_duplicates(subset=["StudentID"])
-    students_by_attd_teacher["Notes From Attendance Teacher"] = ""
+    # students_by_attd_teacher["Notes From Attendance Teacher"] = ""
     for attd_teacher, students_df in students_by_attd_teacher.groupby("attd_teacher"):
         students_df = students_df.sort_values(
             by=["consecutive_absences", "total_absences"], ascending=[False, False]
