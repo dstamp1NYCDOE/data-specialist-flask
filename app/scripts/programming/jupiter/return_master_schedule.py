@@ -10,7 +10,7 @@ import math
 
 def main(request, form):
     df = return_jupiter_schedule(request, form)
-    print(df)
+    
     output_lst = []
     for (course, section), course_rows in df.groupby(
         ["JupiterCourse", "JupiterSection"]
@@ -105,7 +105,7 @@ def return_jupiter_schedule(request, form):
         how="left",
     )
     # drop classes with no students
-    df = df[df["Capacity"] > 0]
+    df = df[df["Capacity"] != 0]
     # drop classes with no meeting days
     df = df[df["Cycle Day"] != 0]
     # drop classes attached to "staff"

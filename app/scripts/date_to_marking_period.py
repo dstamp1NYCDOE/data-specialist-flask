@@ -8,6 +8,14 @@ marking_period_dates = {
         ('S1-MP3',dt.datetime(2023, 12, 4)),
         ('S1-MP2',dt.datetime(2023, 10, 19)),
         ('S1-MP1',dt.datetime(2023, 9, 7)),
+    ],
+    2024:[
+        ('S2-MP3',dt.datetime(2025, 5, 5)),
+        ('S2-MP2',dt.datetime(2025, 3, 17)),
+        ('S2-MP1',dt.datetime(2025, 1, 28)),
+        ('S1-MP3',dt.datetime(2024, 12, 2)),
+        ('S1-MP2',dt.datetime(2024, 10, 16)),
+        ('S1-MP1',dt.datetime(2024, 9, 6)),
     ]
 }
 

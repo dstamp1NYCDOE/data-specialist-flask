@@ -11,8 +11,9 @@ from flask import session
 
 
 def main(RATR_df):
+    school_year = session["school_year"]
     calendar_filename = "app/data/SchoolCalendar.xlsx"
-    calendar_df = pd.read_excel(calendar_filename)
+    calendar_df = pd.read_excel(calendar_filename, sheet_name=f"{school_year}")
     calendar_df["Holiday?"] = calendar_df["Holiday?"].astype("bool")
     calendar_df["HalfDay?"] = calendar_df["HalfDay?"].astype("bool")
     calendar_df = calendar_df[calendar_df["SchoolDay?"]]
@@ -21,7 +22,7 @@ def main(RATR_df):
 
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
-    school_year = session["school_year"]
+    
     cr_3_07_df["year_in_hs"] = cr_3_07_df["GEC"].apply(
         utils.return_year_in_hs, args=(school_year,)
     )
@@ -44,6 +45,7 @@ def main(RATR_df):
             RATR_dff = RATR_df
 
         student_attd_df = return_student_attd(RATR_dff)
+        
 
         student_attd_by_month_df = return_student_pvt_by_subcolumn(RATR_dff, "Month")
 
@@ -56,14 +58,18 @@ def main(RATR_df):
             RATR_dff, "DaysBeforeBreak"
         )
         
+        
         student_attd_by_days_after_break = return_student_pvt_by_subcolumn(
             RATR_dff, "DaysAfterBreak"
         )
+        
 
         multiple_day_df = return_multiple_day_df(RATR_dff)
 
         output_df = students_df
+        
         student_attd_df = student_attd_df[["StudentID", "ytd_absence_%"]]
+        
         month_df = student_attd_by_month_df.pivot(
             index="StudentID", columns="Month", values="absence_%"
         )
@@ -83,22 +89,29 @@ def main(RATR_df):
         vacation_extender_df = return_vacation_extender_df(
             student_attd_by_days_before_break_df, student_attd_by_days_after_break
         )
+        print(vacation_extender_df)
         day_of_week_df = return_day_of_week_df(student_attd_by_day_of_week_df)
 
         student_attd_correl_df = return_student_correlation_to_overall(RATR_df)
 
         output_df = output_df.merge(student_attd_df, on="StudentID")
+        
         output_df = output_df.merge(student_attd_correl_df, on="StudentID")
+        
         output_df = output_df.merge(month_df, on="StudentID")
+        
         output_df = output_df.merge(term_df, on="StudentID")
+        
         output_df = output_df.merge(vacation_extender_df, on="StudentID")
+        
         output_df = output_df.merge(day_of_week_df, on="StudentID")
         output_df = output_df.merge(multiple_day_df, on="StudentID")
 
         output_df["AttdTier"] = output_df["ytd_absence_%"].apply(return_attd_tier)
         output_df = output_df.sort_values(by=["year_in_hs", "LastName", "FirstName"])
-
+        
         output_dict[month] = output_df.copy()
+        
 
     return output_dict
 
@@ -236,12 +249,14 @@ def return_vacation_extender_df(
         student_attd_by_days_before_break_df["DaysBeforeBreak"] == 1
     ]
     
+    
     day_after_df = student_attd_by_days_after_break[
         student_attd_by_days_after_break["DaysAfterBreak"] == 1
     ]
-    df = day_before_df.merge(day_after_df, on=["StudentID"])
+    df = day_after_df.merge(day_before_df, on=["StudentID"], how='left')
 
-
+    print(df)
+    
 
     df["Holiday Pattern"] = df.apply(return_vacation_extender_flag, axis=1)
     df["Holiday Pattern %"] = df.apply(return_vacation_extender_pct, axis=1)
@@ -307,7 +322,7 @@ def return_student_correlation_to_overall(RATR_df):
     )
     output_df = output_df.reset_index()
     output_df.columns = ["StudentID", "", "Overall_Daily_Absence_Corr"]
-    print(output_df.columns)
+    
     return output_df[["StudentID", "Overall_Daily_Absence_Corr"]]
 
 
@@ -358,6 +373,10 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
         values="absence_%",
         aggfunc=["mean", "std"],
     ).reset_index()
+    
+    
+    if len(student_avg_and_std_dev.columns) == 2:
+        student_avg_and_std_dev['Std'] = 0        
 
     student_avg_and_std_dev.columns = ["StudentID", "Avg", "Std"]
 
@@ -370,7 +389,7 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
     ]
 
     output_df = output_df.drop(columns=["Avg", "Std"])
-
+ 
     return output_df
 
 

@@ -32,6 +32,13 @@ def return_attendance_reports():
             "report_function": "scripts.return_RATR_analysis",
             "report_description": "Analyze student daily attendance using ATS report RATR",
         },
+
+        {
+            "report_title": "Confirmation Sheets Cover Page Generator",
+            "report_function": "scripts.return_confirmation_sheets_cover_page",
+            "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
+        },
+
         {
             "report_title": "RDAL Analysis",
             "report_function": "scripts.return_rdal_analysis_spreadsheet",

@@ -83,6 +83,12 @@ def return_programming_reports():
             "form": jupiter_master_schedule_form,
             "route": "scripts.return_jupiter_student_upload",
         },
+        {
+            "Title": "Combine ICT Sections",
+            "Description": "Combine ICT sections for STARS Upload",
+            "form": jupiter_master_schedule_form,
+            "route": "scripts.return_combined_ict_for_stars",
+        },
     ]
 
 

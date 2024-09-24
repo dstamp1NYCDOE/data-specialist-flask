@@ -54,7 +54,7 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
 
     mask = (absentee_form_df['date_of_absence'] <= class_date) & (class_date < absentee_form_df['date_of_return'])
     absentee_form_df = absentee_form_df[mask]
-    print(absentee_form_df)
+    
 
     absentee_form_df["Notes From Attendance Teacher"] = absentee_form_df["reason_for_absence"] + " - Return Date " + absentee_form_df['date_of_return'].apply(lambda x: x.strftime('%Y-%m-%d')) + '(From Google Form)'
 
