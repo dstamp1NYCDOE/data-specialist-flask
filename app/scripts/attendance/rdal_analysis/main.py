@@ -48,8 +48,8 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     })
 
     class_date = pd.to_datetime(class_date)
-    absentee_form_df['date_of_absence'] = pd.to_datetime(absentee_form_df['date_of_absence'])
-    absentee_form_df['date_of_return'] = pd.to_datetime(absentee_form_df['date_of_return'])
+    absentee_form_df['date_of_absence'] = pd.to_datetime(absentee_form_df['date_of_absence'], format="mixed")
+    absentee_form_df['date_of_return'] = pd.to_datetime(absentee_form_df['date_of_return'], format ="mixed")
     print(absentee_form_df)
 
     mask = (absentee_form_df['date_of_absence'] <= class_date) & (class_date < absentee_form_df['date_of_return'])
@@ -422,7 +422,7 @@ def return_consecutive_absences_df(class_date):
     RDAL_df_lst = []
     for RDAL_filename in RDAL_filenames:
         RDAL_df = pd.read_excel(RDAL_filename)[["STUDENT ID", "ABSENCE", "CLS"]]
-        RDAL_df["ABSENCE"] = pd.to_datetime(RDAL_df["ABSENCE"], format="%m/%d/%y")
+        RDAL_df["ABSENCE"] = pd.to_datetime(RDAL_df["ABSENCE"], format="mixed")
 
         RDAL_dt = RDAL_df.iloc[0]["ABSENCE"].date()
         if class_date >= RDAL_dt:
