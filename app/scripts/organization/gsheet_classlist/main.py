@@ -153,7 +153,7 @@ def main(form, request):
         wks = sh.worksheet_by_title("Combined")
     except:
         wks = sh.add_worksheet("Combined")
-        cell_str = f"""=query(AllStudents!A:N"""
+        cell_str = f"""=query(AllStudents!A:N)"""
         wks.update_value("a1", cell_str)
 
     ## write the query cells to each sheet
