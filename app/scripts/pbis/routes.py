@@ -25,6 +25,11 @@ def return_pbis_reports():
             "report_function": "scripts.return_abc_analysis",
             "report_description": "Return ABC Analysis",
         },
+        {
+            "report_title": "SmartPass Analysis",
+            "report_function": "scripts.return_smartpass_reports",
+            "report_description": "Return SmartPass Analysis reports",
+        },
     ]
     title = 'PBIS'
     return render_template(
