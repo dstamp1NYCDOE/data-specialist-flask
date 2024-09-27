@@ -10,7 +10,7 @@ import math
 
 def main(request, form):
     df = return_jupiter_schedule(request, form)
-    
+
     output_lst = []
     for (course, section), course_rows in df.groupby(
         ["JupiterCourse", "JupiterSection"]
@@ -156,6 +156,8 @@ def return_jupiter_course(row):
         }
         return pe_dict_by_cycle.get(days)
 
+    if "QQ" in course_code:
+        return course_code
     if course_code[5] == "Q":
         return course_code[0:5]
 
