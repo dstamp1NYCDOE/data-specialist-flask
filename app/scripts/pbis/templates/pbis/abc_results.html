@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_pbis_reports')}}">PBIS</a></li>
+    <li class="breadcrumb-item active">ABC Report</li>
+  </ol>
+</nav>
+
+<h1>ABC Report</h1>
+
+
+{{data.df_to_html|safe}}
+</form>
+
+</div>
+{% endblock %}

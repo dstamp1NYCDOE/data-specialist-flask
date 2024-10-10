@@ -8,7 +8,4 @@ from werkzeug.utils import secure_filename
 
 
 class ABC_AnalysisForm(FlaskForm):
-    student_records_pdf = FileField(
-        "Student Records as PDF",
-        validators=[FileRequired()],
-    )
+    pass

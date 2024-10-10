@@ -40,6 +40,7 @@ def return_index():
         "Official Class": "scripts.return_officialclass_reports",
         "Summer School": "scripts.return_summer_school_routes",
         "Graduation Certification": "graduation.return_graduation_routes",
+        "Data Specialist Projects": "scripts.return_data_specialist_project_reports",
     }
     data = {"sections": dict(sorted(sections.items()))}
     return render_template("index.html", data=data)

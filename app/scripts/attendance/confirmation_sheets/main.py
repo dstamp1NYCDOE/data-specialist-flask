@@ -39,16 +39,33 @@ def main(form, request):
 
         df = df.rename(columns={"Student ID": "StudentID", "Attd. Date": "Date"})
 
-        dff = df[["StudentID", "Student Name", "Teacher", "Date"]]
-        dfff = df[["StudentID", "Student Name", "Teacher.1", "Date"]]
-        dfff = dfff.rename(columns={"Teacher.1": "Teacher"})
+        dff = df[["StudentID", "Student Name", "Teacher", "Course/Sect","Date"]]
+        dfff = df[["StudentID", "Student Name", "Teacher.1", "Course/Sect.1","Date"]]
+        dfff = dfff.rename(columns={"Teacher.1": "Teacher","Course/Sect.1":
+                                    "Course/Sect"})
 
         df_lst.append(dff)
         df_lst.append(dfff)
 
     df = pd.concat(df_lst)
+    df[['CourseCode','SectionID']] = df['Course/Sect'].str.split('-', expand=True)
+    df = df.dropna(subset=['SectionID'])
+    
+    df['SectionID'] = df['SectionID'].apply(lambda x: int(x))
+
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "MasterSchedule", year_and_semester=year_and_semester
+    )
+    master_schedule_df = utils.return_file_as_df(filename)
+    
+
+    df = df.merge(master_schedule_df[['CourseCode','SectionID','PeriodID']], on=['CourseCode','SectionID'], how='left')
+
     df = df.dropna()
+
     df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y")
+
+    
 
     week_of_date = min(df["Date"])
     week_of_date = week_of_date.strftime("%Y_%m_%d")
@@ -57,10 +74,32 @@ def main(form, request):
     filename = request.files[form.jupiter_attendance_file.name]
     attendance_df = pd.read_csv(filename)
     attendance_df["Date"] = pd.to_datetime(attendance_df["Date"])
-    attendance_df["Pd"] = attendance_df["Period"].apply(lambda x: x[1:])
+    attendance_df["Pd"] = attendance_df["Period"].str.extract("(\d+)")
+    attendance_df["Pd"] = attendance_df["Pd"].apply(lambda x: int(x))
 
     rdsc_students = df["StudentID"].unique()
     attendance_df = attendance_df[attendance_df["StudentID"].isin(rdsc_students)]
+
+    attendance_by_students_by_date_pvt = pd.pivot_table(attendance_df, index=['StudentID','Date'],columns=['Type'],aggfunc='count', values='Pd').fillna(0)
+    attendance_by_students_by_date_pvt['Total'] = attendance_by_students_by_date_pvt.sum(axis=1)
+    attendance_by_students_by_date_pvt = attendance_by_students_by_date_pvt.reset_index()
+
+
+    df = df.merge(attendance_df[['StudentID','Date','Pd','Type']], left_on=['StudentID','Date','PeriodID'], right_on=['StudentID','Date','Pd'])
+
+    print(df)
+
+
+    ### look at P3
+    p3_df = df[df['Pd']==3]
+    print(p3_df)
+    ## look at marking absent on Jupiter
+    absent_on_jupiter_df = df[df['Type'].isin(['excused','unexcused'])]
+    
+    absent_stats_by_teacher_df = pd.pivot_table(absent_on_jupiter_df,index=['Teacher'],values='StudentID',aggfunc='count')
+    total_by_student_pvt = pd.pivot_table(df,index=['Teacher'],values='StudentID',aggfunc='count').sort_values(by=['StudentID'], ascending=[False])
+    print(total_by_student_pvt)
+    
 
     temp_lst = []
     for (student, date), attendance_df in attendance_df.groupby(["StudentID", "Date"]):
@@ -76,12 +115,15 @@ def main(form, request):
         temp_lst.append(attendance_dict)
 
     parsed_attd_df = pd.DataFrame(temp_lst).fillna("")
-    parsed_cols = ["StudentID", "Date", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    parsed_cols = ["StudentID", "Date", 1,2,3,4,5,6,7,8,9]
     parsed_attd_df = parsed_attd_df[parsed_cols]
 
     parsed_attd_df = df[["StudentID", "Date", "Student Name"]].merge(
         parsed_attd_df, on=["StudentID", "Date"], how="left"
     )
+
+    
+
 
     ## build letters
 
@@ -147,7 +189,7 @@ def main(form, request):
             flowables.append(paragraph)
             attd_grid_flowable = return_attd_grid_as_table(
                 student_attd_df,
-                ["Student Name", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+                ["Student Name", 1,2,3,4,5,6,7,8,9],
             )
             flowables.append(attd_grid_flowable)
             flowables.append(Spacer(width=0, height=0.25 * inch))

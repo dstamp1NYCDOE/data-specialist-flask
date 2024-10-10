@@ -12,6 +12,7 @@ from app.scripts.pbis.forms import ABC_AnalysisForm
 import app.scripts.pbis.academic_intervention_plan as academic_intervention_plan
 import app.scripts.pbis.abc_analysis as abc_analysis
 
+
 @scripts.route("/pbis")
 def return_pbis_reports():
     reports = [
@@ -31,15 +32,18 @@ def return_pbis_reports():
             "report_description": "Return SmartPass Analysis reports",
         },
     ]
-    title = 'PBIS'
+    title = "PBIS"
     return render_template(
-        "section.html", reports=reports, title=title,
+        "section.html",
+        reports=reports,
+        title=title,
     )
+
 
 @scripts.route("pbis/AIP")
 def return_academic_intervention_plan_candidates():
     df = academic_intervention_plan.return_candidates()
-    semester = session['semester']
+    semester = session["semester"]
     report_name = f"Academic Intervention Plan Candidates {semester}"
     if request.args.get("download") == "true":
         f = BytesIO()
@@ -61,21 +65,16 @@ def return_academic_intervention_plan_candidates():
                 },
             ]
         }
-        return render_template("viewReport.html", data=data)    
-    
-@scripts.route("/pbs/abc", methods=["GET", "POST"])
+        return render_template("viewReport.html", data=data)
+
+
+@scripts.route("/pbis/abc", methods=["GET", "POST"])
 def return_abc_analysis():
     if request.method == "GET":
         form = ABC_AnalysisForm()
-        return render_template(
-            "pbis/templates/pbis/abc_form.html", form=form
-        )
+        return render_template("pbis/templates/pbis/abc_form.html", form=form)
     else:
         form = ABC_AnalysisForm(request.form)
         df = abc_analysis.main(form, request)
-        data = {
-            'df_to_html':df.to_html()
-        }
-        return render_template(
-            "pbis/templates/pbis/abc_results.html", data = data
-        )        
+        data = {"df_to_html": df.to_html()}
+        return render_template("pbis/templates/pbis/abc_results.html", data=data)

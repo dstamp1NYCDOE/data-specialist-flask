@@ -84,6 +84,16 @@ def return_attendance_reports():
             "report_function": "scripts.return_cut_analysis",
             "report_description": "Return Cut Analysis",
         },
+        {
+            "report_title": "Cut Analysis reports",
+            "report_function": "scripts.return_jupiter_cut_analysis_reports",
+            "report_description": "Return Cut Analysis reports based on Jupiter",
+        },        
+        {
+            "report_title": "Late Analysis Reports",
+            "report_function": "scripts.return_jupiter_late_analysis_reports",
+            "report_description": "Return Late Analysis reports based on Jupiter",
+        },        
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -364,7 +374,12 @@ import app.scripts.attendance.cut_analysis.main as cut_analysis
 
 @scripts.route("/attendance/return_cut_analysis")
 def return_cut_analysis():
-    f = cut_analysis.main()
-    return ""
-    download_name = f"CutAnalysis.xlsx"
-    return send_file(f, as_attachment=True, download_name=download_name)
+    
+    f, download_name = cut_analysis.main()
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )
+    

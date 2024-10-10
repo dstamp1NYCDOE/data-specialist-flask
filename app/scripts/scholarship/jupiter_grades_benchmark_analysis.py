@@ -6,7 +6,12 @@ from app.scripts import scripts, files_df
 
 
 def main():
-    filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
+    school_year = session["school_year"]
+    term = session["term"]
+
+    year_and_semester = f"{school_year}-{term}"  
+        
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades",year_and_semester=year_and_semester)
     df = utils.return_file_as_df(filename)
     
     ## drop courses with no grades
@@ -24,7 +29,7 @@ def main():
     pvt_tbl = pvt_tbl.reset_index()
 
     ## student_info
-    cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
+    cr_3_07_filename = utils.return_most_recent_report_by_semester(files_df, "3_07",year_and_semester=year_and_semester)
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
     school_year = session["school_year"]
     cr_3_07_df["year_in_hs"] = cr_3_07_df["GEC"].apply(

@@ -92,7 +92,7 @@ def return_jupiter_schedule(request, form):
     )
     teacher_reference_df["DelegatedNickName1"] = teacher_reference_df["TeacherName"]
     teacher_reference_df["DelegatedNickName2"] = teacher_reference_df["TeacherName"]
-    print(teacher_reference_df)
+
 
     ## attach Teacher 2
     teachers_df = student_schedules_df[

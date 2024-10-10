@@ -12,14 +12,24 @@ gsheets_df = utils.return_dataframe_of_gsheets()
 from app.scripts.attendance import attendance
 from app.scripts.attendance.rdal_analysis import routes
 from app.scripts.attendance.confirmation_sheets import routes
+from app.scripts.attendance.jupiter import routes
+from app.scripts.attendance.late_analysis import routes
+from app.scripts.attendance.cut_analysis import routes
+
+
+from app.scripts.dataspecialist import routes
+from app.scripts.dataspecialist.sy2425 import routes
 
 from app.scripts.classwork import routes
 from app.scripts.commutes import commutes
 from app.scripts.officialclass import routes
+
 from app.scripts.organization import routes
 from app.scripts.organization.gsheet_classlist import routes
 from app.scripts.organization.locker_assignment_letters import routes
 from app.scripts.organization.metrocards import routes
+from app.scripts.organization.mailinglabels import routes
+
 from app.scripts.pbis import routes
 from app.scripts.pbis.smartpass import routes
 from app.scripts.privileges import routes
