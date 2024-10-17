@@ -3,7 +3,7 @@ import pandas as pd
 import datetime as dt
 from io import BytesIO
 
-from flask import render_template, request, send_file
+from flask import render_template, request, send_file, session
 
 
 import app.scripts.utils as utils
@@ -106,7 +106,8 @@ def return_attd_tiers_from_RATR():
     RATR_df = utils.return_file_as_df(RATR_filename)
     df_dict = attendance_tiers.main(RATR_df)
 
-    report_name = "Student Attd Tiers"
+    school_year = session["school_year"]
+    report_name = f"{school_year}-{int(school_year)+1}-Student Attd Tiers ({dt.datetime.today().strftime('%Y_%m_%d')})"
     if request.args.get("download") == "true":
         f = BytesIO()
         writer = pd.ExcelWriter(f)

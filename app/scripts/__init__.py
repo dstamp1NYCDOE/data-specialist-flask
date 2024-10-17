@@ -29,6 +29,7 @@ from app.scripts.organization.gsheet_classlist import routes
 from app.scripts.organization.locker_assignment_letters import routes
 from app.scripts.organization.metrocards import routes
 from app.scripts.organization.mailinglabels import routes
+from app.scripts.organization.gather_teacher_input_per_student_spreadsheet import routes
 
 from app.scripts.pbis import routes
 from app.scripts.pbis.smartpass import routes

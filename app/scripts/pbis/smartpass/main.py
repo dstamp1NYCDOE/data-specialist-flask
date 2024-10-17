@@ -36,6 +36,20 @@ def process_smartpass_data(smartpass_df):
     ## drop passes less than 30 seconds
     smartpass_df = smartpass_df[smartpass_df["Duration (sec)"] > 30]
 
+    ## keep bathroom passes only
+    bathroom_passes_destinations = ['9th Floor Girls',
+        '7th Floor Girls',
+        '6th Floor Girls',
+        '5th floor Girls',
+        '4th Floor Boys',
+        'Gender Neutral',
+        '4th Floor Girls',
+        '9th Floor Boys',
+        '3rd Floor Girls',
+        '5th Floor Boys',
+        '6th Floor Boys',
+    ]
+    smartpass_df = smartpass_df[smartpass_df['Destination'].isin(bathroom_passes_destinations)]
     ## exceeded 10 minutes
     smartpass_df["OvertimeFlag"] = smartpass_df["Duration (sec)"] > 60 * 10
     ## futz with the date and time to return class period
@@ -194,6 +208,20 @@ def return_number_of_passes_by_students_by_day(smartpass_df):
     pvt = pvt.sort_values(by=["Total"], ascending=[False])
     return pvt
 
+def return_number_of_passes_by_student_by_destination(smartpass_df):
+    pvt = pd.pivot_table(
+        smartpass_df,
+        index=["StudentID", "Student Name"],
+        columns="Destination",
+        values="Grade",
+        aggfunc="count",
+        margins=True,
+        margins_name="Total",
+    ).fillna(0)
+    pvt = pvt.reset_index()
+
+    pvt = pvt.sort_values(by=["Total"], ascending=[False])
+    return pvt
 
 def return_total_time_per_period_by_student(smartpass_df):
     pvt = pd.pivot_table(
@@ -343,6 +371,10 @@ def return_smartpass_report(smartpass_df, date_of_interest):
             return_total_time_out_of_class_by_origin_by_period(smartpass_df),
         ),
         ("possible_encounters_pvt", return_possible_encounters(smartpass_df)),
+        (
+            "total_passes_by_dest_by_student",
+            return_number_of_passes_by_student_by_destination(smartpass_df)
+        ),
     ]
 
     f = BytesIO()

@@ -27,6 +27,11 @@ def return_smartpass_reports():
             "report_function": "scripts.return_smartpass_analysis_parent_letter",
             "report_description": "Return parent letter with SmartPass usage and sign up information",
         },
+        {
+            "report_title": "SmartPass Intervention Letter",
+            "report_function": "scripts.return_smartpass_analysis_intervention_letter",
+            "report_description": "Return parent letter with SmartPass usage and sign up information",
+        },
     ]
     return render_template(
         "PBIS/templates/smartpass/index.html", reports=reports
@@ -70,3 +75,23 @@ def return_smartpass_analysis_parent_letter():
             as_attachment=True,
             download_name=download_name,
         )
+
+from app.scripts.pbis.smartpass import intervention_letters as smartpass_intervention_letters
+@scripts.route("/pbis/smartpass/intervention_letter", methods=["GET", "POST"])
+def return_smartpass_analysis_intervention_letter():
+    if request.method == "GET":
+        form = SmartPassDataUploadForm()
+        return render_template(
+            "pbis/templates/smartpass/smartpass_intervention_letter_form.html",
+            form=form,
+        )
+    else:
+        
+        form = SmartPassDataUploadForm(request.form)
+        f, download_name = smartpass_intervention_letters.main(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )    
