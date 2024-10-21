@@ -25,11 +25,16 @@ def return_scholarship_reports():
             "report_function": "scripts.return_jupiter_analysis_reports",
             "report_description": "Reports based on Jupiter Grades",
         },
-
+        {
+            "report_title": "Report Card Reports",
+            "report_function": "scripts.return_reportcard_reports",
+            "report_description": "Report card reports",
+        },
     ]
     return render_template(
         "scholarship/templates/scholarship/index.html", reports=reports
     )
+
 
 @scripts.route("/scholarship/jupiter")
 def return_jupiter_analysis_reports():
@@ -49,7 +54,7 @@ def return_jupiter_analysis_reports():
             "report_function": "scripts.return_jupiter_grades_teacher_analysis",
             "report_description": "Analyze grades by teacher",
         },
-                {
+        {
             "report_title": "Jupiter Grades Senior Checkup",
             "report_function": "scripts.return_jupiter_grads_senior_checkup",
             "report_description": "Analyze jupiter grades for seniors by teacher",
@@ -105,7 +110,10 @@ def return_grade_point_trajectory():
         }
         return render_template("viewReport.html", data=data)
 
+
 from app.scripts.scholarship.jupiter import senior_checkup
+
+
 @scripts.route("/scholarship/jupiter/senior_checkup")
 def return_jupiter_grads_senior_checkup():
     pvt = senior_checkup.main()
@@ -120,9 +128,7 @@ def return_jupiter_grads_senior_checkup():
         pvt = pvt.style.set_table_attributes(
             'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
         )
-        pvt_html = (
-            pvt.to_html(classes=["table", "table-sm"])
-        )
+        pvt_html = pvt.to_html(classes=["table", "table-sm"])
 
         data = {
             "reports": [
@@ -136,6 +142,8 @@ def return_jupiter_grads_senior_checkup():
 
 
 from app.scripts.scholarship.jupiter import semester_trajectory
+
+
 @scripts.route("/scholarship/jupiter/grade_trajectory")
 def return_jupiter_grades_trajectory():
     pvt = semester_trajectory.main()
@@ -150,9 +158,7 @@ def return_jupiter_grades_trajectory():
         pvt = pvt.style.set_table_attributes(
             'data-toggle="table" data-sortable="true" data-show-export="true" data-height="460"'
         )
-        pvt_html = (
-            pvt.to_html(classes=["table", "table-sm"])
-        )
+        pvt_html = pvt.to_html(classes=["table", "table-sm"])
 
         data = {
             "reports": [
@@ -163,6 +169,7 @@ def return_jupiter_grades_trajectory():
             ]
         }
         return render_template("viewReport.html", data=data)
+
 
 @scripts.route("/scholarship/jupiter/grades_benchmark_analysis")
 def return_jupiter_grades_benchmark_analysis():

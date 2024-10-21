@@ -8,7 +8,6 @@ photos_df = utils.return_dataframe_of_photos()
 gsheets_df = utils.return_dataframe_of_gsheets()
 
 
-
 from app.scripts.attendance import attendance
 from app.scripts.attendance.rdal_analysis import routes
 from app.scripts.attendance.confirmation_sheets import routes
@@ -39,6 +38,7 @@ from app.scripts.programming.ICT_sections import routes
 from app.scripts.programming.jupiter import routes
 from app.scripts.progress_towards_graduation import routes
 from app.scripts.scholarship import routes
+from app.scripts.scholarship.reportcards import routes
 from app.scripts.summer import routes
 from app.scripts.summer.attendance import routes
 from app.scripts.summer.organization import routes

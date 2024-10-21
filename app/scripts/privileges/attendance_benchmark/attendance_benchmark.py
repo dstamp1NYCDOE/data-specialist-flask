@@ -11,11 +11,14 @@ from app.scripts.date_to_marking_period import return_mp_from_date
 
 
 def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
-    school_year = session["school_year"]
 
-    jupiter_attd_filename = utils.return_most_recent_report(
-        files_df, "jupiter_period_attendance"
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+    jupiter_attd_filename = utils.return_most_recent_report_by_semester(
+        files_df, "jupiter_period_attendance", year_and_semester=year_and_semester
     )
+
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
     attendance_marks_df["Date"] = pd.to_datetime(attendance_marks_df["Date"])
@@ -110,9 +113,10 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
 
 def return_attd_grid(StudentID):
     school_year = session["school_year"]
-
-    jupiter_attd_filename = utils.return_most_recent_report(
-        files_df, "jupiter_period_attendance"
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+    jupiter_attd_filename = utils.return_most_recent_report_by_semester(
+        files_df, "jupiter_period_attendance", year_and_semester=year_and_semester
     )
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
     attendance_marks_df = attendance_marks_df[

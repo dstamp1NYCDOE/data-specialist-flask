@@ -5,12 +5,11 @@
     <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
-    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_pbis_reports')}}">PBIS</a></li>
-    <li class="breadcrumb-item active">SmartPass Analysis</li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_scholarship_reports')}}">Scholarship</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_scholarship_reports')}}">Report Card Reports</a></li>
+    <li class="breadcrumb-item active">Enhanced Student Report Cards</li>
   </ol>
 </nav>
-
-<h1>SmartPass Analysis</h1>
 
 
 <form action="{{url_for('scripts.return_smartpass_analysis_spreadsheet')}}" class="grid gap-3" method="post" enctype="multipart/form-data">

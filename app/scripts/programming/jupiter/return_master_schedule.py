@@ -65,7 +65,7 @@ def return_student_jupiter(request, form):
     return jupiter_output_df.to_html(index=False)
 
 
-def return_jupiter_schedule(request, form):
+def return_jupiter_schedule(request=None, form=None):
     school_year = session["school_year"]
     term = session["term"]
 
@@ -92,7 +92,6 @@ def return_jupiter_schedule(request, form):
     )
     teacher_reference_df["DelegatedNickName1"] = teacher_reference_df["TeacherName"]
     teacher_reference_df["DelegatedNickName2"] = teacher_reference_df["TeacherName"]
-
 
     ## attach Teacher 2
     teachers_df = student_schedules_df[
