@@ -21,10 +21,22 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
 
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades",year_and_semester=year_and_semester)
+    rosters_df = utils.return_file_as_df(filename).drop_duplicates(subset=['StudentID','Course','Section'])
+    rosters_df = rosters_df[['StudentID','Course','Section']]
+    rosters_df['Enrolled?'] = True
+    
+
+    attendance_marks_df = attendance_marks_df.merge(rosters_df, on=['StudentID','Course','Section'], how='left').fillna(False)
+    attendance_marks_df = attendance_marks_df[attendance_marks_df['Enrolled?']]
+    
+
     attendance_marks_df["Date"] = pd.to_datetime(attendance_marks_df["Date"])
     attendance_marks_df["Term"] = attendance_marks_df["Date"].apply(
         return_mp_from_date, args=(school_year,)
     )
+
+    
 
     periods_df = attendance_marks_df[["Period"]].drop_duplicates()
     periods_df["Pd"] = periods_df["Period"].apply(utils.return_pd)
@@ -51,6 +63,7 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
     ).fillna(0)
     semester_attd_pvt["total"] = semester_attd_pvt.sum(axis=1)
     semester_attd_pvt = semester_attd_pvt.reset_index()
+    
 
     full_term_attd_pvt = pd.pivot_table(
         attendance_marks_df,
@@ -92,8 +105,7 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
         semester_attd_pvt["%_on_time"] >= ON_TIME_STANDARD
     )
     semester_attd_pvt["meet_attd_standard"] = (
-        semester_attd_pvt["meeting_present_standard"]
-        & semester_attd_pvt["meeting_on_time_standard"]
+        (semester_attd_pvt["meeting_present_standard"] & semester_attd_pvt["meeting_on_time_standard"] ) | (semester_attd_pvt["%_present"] == 100)
     )
 
     benchmark_pvt = pd.pivot_table(
@@ -107,6 +119,7 @@ def main(PRESENT_STANDARD=90, ON_TIME_STANDARD=80):
     semester_attd_pvt = semester_attd_pvt.merge(
         benchmark_pvt, on=["StudentID", "Term"], how="left"
     )
+    print(semester_attd_pvt)
 
     return semester_attd_pvt
 

@@ -31,6 +31,12 @@ def return_privileges_reports():
             "form": student_privileges_summary_form,
             "route": "scripts.return_student_privileges_report",
         },
+        {
+            "Title": "Attendance Benchmark Letters",
+            "Description": "Return student letters with attendance benchmark leter",
+            "form": attendance_benchmark_form,
+            "route": "scripts.return_attendance_benchmark_letters",
+        },        
     ]
 
     return render_template(
@@ -74,6 +80,25 @@ def return_student_attendance_benchmark():
         download_name = (
             f"Attendance_Benchmark_{dt.datetime.today().strftime('%Y-%m-%d')}.xlsx"
         )
+        mimetype = "application/pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype=mimetype,
+        )
+
+from app.scripts.privileges.attendance_benchmark import attendance_benchmark_letters
+@scripts.route("/privileges/attendance_benchmark_letters", methods=["GET", "POST"])
+def return_attendance_benchmark_letters():
+    if request.method == "GET":
+        form = AttendanceBenchmarkForm()
+        return redirect(url_for("scripts.return_privileges_reports"))
+    else:
+        form = AttendanceBenchmarkForm(request.form)
+        f, student_name = attendance_benchmark_letters.return_attendance_benchmark_letters(form, request)
+        download_name = f"{student_name}_Student_Privileges_report_{dt.datetime.today().strftime('%Y-%m-%d')}.pdf"
         mimetype = "application/pdf"
 
         return send_file(

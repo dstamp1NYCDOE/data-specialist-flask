@@ -3,6 +3,8 @@
         {{student_form(form_card.form,form_card.route)}}
     {% elif form_card.Title == "Attendance Benchmark" %}
         {{benchmark_form(form_card.form,form_card.route)}}
+    {% elif form_card.Title == "Attendance Benchmark Letters" %}
+        {{benchmark_form(form_card.form,form_card.route)}}
     {% endif %}
 {%- endmacro %}
 
