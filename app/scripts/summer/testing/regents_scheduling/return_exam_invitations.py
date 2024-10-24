@@ -40,7 +40,7 @@ def main(form, request):
     if term == 7:
         month = "August"
 
-    filename = utils.return_most_recent_report(files_df, "1_08")
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_08",year_and_semester=year_and_semester)
     cr_1_08_df = utils.return_file_as_df(filename)
     cr_1_08_df = cr_1_08_df[cr_1_08_df["Status"] == True]
     cr_1_08_df = cr_1_08_df.fillna({"Room": 202})

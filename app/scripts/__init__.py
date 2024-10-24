@@ -14,6 +14,7 @@ from app.scripts.attendance.confirmation_sheets import routes
 from app.scripts.attendance.jupiter import routes
 from app.scripts.attendance.late_analysis import routes
 from app.scripts.attendance.cut_analysis import routes
+from app.scripts.attendance.historical_period_attd import routes
 
 
 from app.scripts.dataspecialist import routes
@@ -39,6 +40,8 @@ from app.scripts.programming.jupiter import routes
 from app.scripts.progress_towards_graduation import routes
 from app.scripts.scholarship import routes
 from app.scripts.scholarship.reportcards import routes
+from app.scripts.scholarship.egg import routes
+
 from app.scripts.summer import routes
 from app.scripts.summer.attendance import routes
 from app.scripts.summer.organization import routes

@@ -93,7 +93,13 @@ def return_attendance_reports():
             "report_title": "Late Analysis Reports",
             "report_function": "scripts.return_jupiter_late_analysis_reports",
             "report_description": "Return Late Analysis reports based on Jupiter",
-        },        
+        },     
+        {
+            "report_title": "Historical Jupiter Attd Reports",
+            "report_function": "scripts.return_historical_jupiter_attd_reports",
+            "report_description": "Return historical period attendance reports based on Jupiter",
+        },  
+           
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports

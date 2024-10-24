@@ -9,7 +9,7 @@ from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
 
-@scripts.route("/scholarship/reportcards/smartpass/", methods=["GET", "POST"])
+@scripts.route("/scholarship/reportcards/", methods=["GET", "POST"])
 def return_reportcard_reports():
     reports = [
         {

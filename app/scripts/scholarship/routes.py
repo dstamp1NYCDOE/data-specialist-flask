@@ -30,6 +30,11 @@ def return_scholarship_reports():
             "report_function": "scripts.return_reportcard_reports",
             "report_description": "Report card reports",
         },
+        {
+            "report_title": "EGG Reports",
+            "report_function": "scripts.return_egg_reports",
+            "report_description": "Report card reports",
+        },
     ]
     return render_template(
         "scholarship/templates/scholarship/index.html", reports=reports

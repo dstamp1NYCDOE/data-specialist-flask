@@ -85,6 +85,13 @@ def return_dataframe_of_files():
 
     return files_df
 
+def return_most_recent_report_per_semester(files_df, report):
+    files_df = return_dataframe_of_files()
+    files_df = files_df[files_df["report"] == report]
+    files_df = files_df.sort_values(by=["download_date"])
+    files_df = files_df.drop_duplicates(subset='year_and_semester')
+    return files_df['filename'].to_list()
+
 
 def return_most_recent_report(files_df, report):
     files_df = return_dataframe_of_files()
