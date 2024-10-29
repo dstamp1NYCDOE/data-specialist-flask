@@ -24,14 +24,6 @@ def main(RATR_df):
     RATR_df = RATR_df.merge(calendar_df, on="Date", how="left")
 
     student_attd_df = return_student_attd(RATR_df)
-    student_attd_by_month_df = student_attd_by_month(RATR_df)
-    student_attd_by_day_of_week_df = student_attd_by_weekday(RATR_df)
-    student_attd_by_days_before_break_df = return_student_pvt_by_subcolumn(
-        RATR_df, "DaysBeforeBreak"
-    )
-    student_attd_by_days_after_break = return_student_pvt_by_subcolumn(
-        RATR_df, "DaysAfterBreak"
-    )
     return student_attd_df
 
 
@@ -51,6 +43,7 @@ def return_student_attd(RATR_df):
 
     return pvt_tbl
 
+
 def student_lateness_overall(RATR_df):
     RATR_df = clean(RATR_df)
     pvt_tbl = pd.pivot_table(
@@ -66,7 +59,8 @@ def student_lateness_overall(RATR_df):
 
     pvt_tbl = pvt_tbl.reset_index()
 
-    return pvt_tbl    
+    return pvt_tbl
+
 
 def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
 
@@ -129,4 +123,3 @@ def student_attd_by_weekday(RATR_df):
 
     pvt_tbl = pvt_tbl.reset_index()
     return pvt_tbl
-

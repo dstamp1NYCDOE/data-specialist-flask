@@ -40,6 +40,7 @@ def return_index():
         "Official Class": "scripts.return_officialclass_reports",
         "Summer School": "scripts.return_summer_school_routes",
         "Graduation Certification": "graduation.return_graduation_routes",
+        "Data Specialist Projects": "scripts.return_data_specialist_project_reports",
     }
     data = {"sections": dict(sorted(sections.items()))}
     return render_template("index.html", data=data)
@@ -152,13 +153,19 @@ def upload_files():
         else:
             report_name = filename.split(".")[0]
             extension = filename.split(".")[1]
+        print(report_name)
         if "CustomReport" in report_name:
             report_name = report_name[13:-5]
+            filename = f"{report_name}.{extension}"
+        if 'Hall-Pass-Data' in report_name:
+            report_name = 'SmartPassExport'
             filename = f"{report_name}.{extension}"
 
         download_date = form.download_date.data
         year_and_semester = form.year_and_semester.data
         if report_name == "attendance":
+            filename = f"{year_and_semester}_9999-12-31_{filename}"
+        elif 'SmartPassExport' in report_name:
             filename = f"{year_and_semester}_9999-12-31_{filename}"
         else:
             filename = f"{year_and_semester}_{download_date}_{filename}"

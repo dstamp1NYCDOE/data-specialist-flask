@@ -3,7 +3,7 @@ import pandas as pd
 import datetime as dt
 from io import BytesIO
 
-from flask import render_template, request, send_file
+from flask import render_template, request, send_file, session
 
 
 import app.scripts.utils as utils
@@ -84,6 +84,22 @@ def return_attendance_reports():
             "report_function": "scripts.return_cut_analysis",
             "report_description": "Return Cut Analysis",
         },
+        {
+            "report_title": "Cut Analysis reports",
+            "report_function": "scripts.return_jupiter_cut_analysis_reports",
+            "report_description": "Return Cut Analysis reports based on Jupiter",
+        },        
+        {
+            "report_title": "Late Analysis Reports",
+            "report_function": "scripts.return_jupiter_late_analysis_reports",
+            "report_description": "Return Late Analysis reports based on Jupiter",
+        },     
+        {
+            "report_title": "Historical Jupiter Attd Reports",
+            "report_function": "scripts.return_historical_jupiter_attd_reports",
+            "report_description": "Return historical period attendance reports based on Jupiter",
+        },  
+           
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -96,7 +112,8 @@ def return_attd_tiers_from_RATR():
     RATR_df = utils.return_file_as_df(RATR_filename)
     df_dict = attendance_tiers.main(RATR_df)
 
-    report_name = "Student Attd Tiers"
+    school_year = session["school_year"]
+    report_name = f"{school_year}-{int(school_year)+1}-Student Attd Tiers ({dt.datetime.today().strftime('%Y_%m_%d')})"
     if request.args.get("download") == "true":
         f = BytesIO()
         writer = pd.ExcelWriter(f)
@@ -364,7 +381,12 @@ import app.scripts.attendance.cut_analysis.main as cut_analysis
 
 @scripts.route("/attendance/return_cut_analysis")
 def return_cut_analysis():
-    f = cut_analysis.main()
-    return ""
-    download_name = f"CutAnalysis.xlsx"
-    return send_file(f, as_attachment=True, download_name=download_name)
+    
+    f, download_name = cut_analysis.main()
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )
+    

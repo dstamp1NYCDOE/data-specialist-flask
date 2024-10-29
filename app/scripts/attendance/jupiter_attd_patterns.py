@@ -5,6 +5,10 @@ import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 def main():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    year_and_semester = f"{school_year}-{term}"    
     ## student_info
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
@@ -15,7 +19,7 @@ def main():
 
     students_df = cr_3_07_df[["StudentID", "LastName", "FirstName", "year_in_hs"]]
 
-    jupiter_attd_filename = utils.return_most_recent_report(files_df, "jupiter_period_attendance")
+    jupiter_attd_filename = utils.return_most_recent_report_by_semester(files_df, "jupiter_period_attendance", year_and_semester=year_and_semester)
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
     periods_df = attendance_marks_df[["Period"]].drop_duplicates()

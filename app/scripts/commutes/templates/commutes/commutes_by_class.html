@@ -18,13 +18,13 @@
 <script>
     // Get the select element.
 var select = document.getElementById("course_and_section");
-
+console.log(select)
 // Make an API call to get the data for the dropdown menu.
 fetch("{{url_for('api.return_classes')}}")
   .then(response => response.json())
   .then(data => {
     // Clear the existing options in the dropdown menu.
-    select.innerHTML = "";
+    // select.innerHTML = "";
 
     // Add the new options to the dropdown menu.
     for (var i = 0; i < data.length; i++) {

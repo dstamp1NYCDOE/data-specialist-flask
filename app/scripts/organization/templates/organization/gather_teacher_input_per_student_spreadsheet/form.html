@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+    <li class="breadcrumb-item active">Create Teacher Input per Student Spreadsheet</li>
+  </ol>
+</nav>
+
+<h1>Create Teacher Input per Student Spreadsheet</h1>
+
+<form action="{{url_for('scripts.return_gather_teacher_input_per_student_spreadsheet')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+      <div class="form-group p-1 g-col-12">
+        {{ form.spreadsheet_title.label(class_="form-label") }}
+        {{ form.spreadsheet_title(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.input_cols.label(class_="form-label") }}
+        {{ form.input_cols(class_="form-control", cols="35", rows="10") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+      {{ form.data_validation_values.label(class_="form-label") }}
+      {{ form.data_validation_values(class_="form-control", cols="35", rows="3") }}
+  </div>
+
+    <div class="form-group p-1 g-col-12">
+      {{ form.teacher.label(class_="form-label") }}
+      {{ form.teacher(class_="form-select") }}
+    </div>
+
+
+    <div class="form-group p-1 g-col-12">
+      {{ form.periods.label(class_="form-label") }}
+      {{ form.periods(class_="form-select") }}
+  </div>
+
+  <div class="form-group p-1 g-col-12">
+    {{ form.course_lst.label(class_="form-label") }}
+    {{ form.course_lst(class_="form-control", cols="35", rows="5") }}
+  </div>
+
+  <div class="form-group p-1 g-col-12">
+    <div class="form-check">
+      {{ form.computer_labs_flag.label(class_="form-check-label") }}
+      {{ form.computer_labs_flag(class_="form-check-input") }}
+    </div>
+  </div>
+
+  <div class="form-group p-1 g-col-12">
+    <div class="form-check">
+      {{ form.include_counselors_flag.label(class_="form-check-label") }}
+      {{ form.include_counselors_flag(class_="form-check-input") }}
+    </div>
+  </div>
+
+  <div class="form-group p-1 g-col-12">
+    <div class="form-check">
+      {{ form.include_student_duplicates_flag.label(class_="form-check-label") }}
+      {{ form.include_student_duplicates_flag(class_="form-check-input") }}
+    </div>
+  </div>
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Run</button>
+    </div>
+</form>
+
+
+</div>
+
+{% endblock %}

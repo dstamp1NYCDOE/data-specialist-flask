@@ -10,7 +10,7 @@ import math
 
 def main(request, form):
     df = return_jupiter_schedule(request, form)
-    
+
     output_lst = []
     for (course, section), course_rows in df.groupby(
         ["JupiterCourse", "JupiterSection"]
@@ -65,7 +65,7 @@ def return_student_jupiter(request, form):
     return jupiter_output_df.to_html(index=False)
 
 
-def return_jupiter_schedule(request, form):
+def return_jupiter_schedule(request=None, form=None):
     school_year = session["school_year"]
     term = session["term"]
 
@@ -92,7 +92,6 @@ def return_jupiter_schedule(request, form):
     )
     teacher_reference_df["DelegatedNickName1"] = teacher_reference_df["TeacherName"]
     teacher_reference_df["DelegatedNickName2"] = teacher_reference_df["TeacherName"]
-    print(teacher_reference_df)
 
     ## attach Teacher 2
     teachers_df = student_schedules_df[
@@ -156,6 +155,8 @@ def return_jupiter_course(row):
         }
         return pe_dict_by_cycle.get(days)
 
+    if "QQ" in course_code:
+        return course_code
     if course_code[5] == "Q":
         return course_code[0:5]
 

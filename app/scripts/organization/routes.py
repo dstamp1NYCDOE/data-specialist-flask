@@ -31,6 +31,13 @@ from app.scripts.organization import career_day
 def return_organization_reports():
     reports = [
         {
+            "report_title": "Return Teacher Input per Student Spreadsheet",
+            "report_function": "scripts.return_gather_teacher_input_per_student_spreadsheet",
+            "report_description": "",
+        },
+
+        
+        {
             "report_title": "Update Google Sheet Class lists",
             "report_function": "scripts.return_updated_google_sheet_classlists",
             "report_description": "Update student class lists on Google Sheet",
@@ -70,6 +77,11 @@ def return_organization_reports():
             "report_function": "scripts.return_lockers_reports",
             "report_description": "Generate Locker reports",
         },
+        {
+            "report_title": "Student Mailing Labels for a PDF",
+            "report_function": "scripts.return_mailing_labels_by_student_pdf",
+            "report_description": "Generate Mailing Labels to go with a PDF of student records",
+        },        
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports

@@ -50,7 +50,7 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     class_date = pd.to_datetime(class_date)
     absentee_form_df['date_of_absence'] = pd.to_datetime(absentee_form_df['date_of_absence'], format="mixed")
     absentee_form_df['date_of_return'] = pd.to_datetime(absentee_form_df['date_of_return'], format ="mixed")
-    print(absentee_form_df)
+    
 
     mask = (absentee_form_df['date_of_absence'] <= class_date) & (class_date < absentee_form_df['date_of_return'])
     absentee_form_df = absentee_form_df[mask]

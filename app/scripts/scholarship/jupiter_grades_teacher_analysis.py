@@ -6,7 +6,12 @@ from app.scripts import scripts, files_df
 
 
 def main():
-    filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
+    school_year = session["school_year"]
+    term = session["term"]
+
+    year_and_semester = f"{school_year}-{term}"  
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades",year_and_semester=year_and_semester)
     df = utils.return_file_as_df(filename)
 
     ## drop courses with no grades

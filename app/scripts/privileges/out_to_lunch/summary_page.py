@@ -135,7 +135,7 @@ def return_student_letter(form, request):
     table_style = TableStyle([("ALIGN", (0, 0), (-1, -1), "RIGHT")])
     student_attd_grid_table.setStyle(table_style)
 
-    flowables.append(student_attd_grid_table)
+    # flowables.append(student_attd_grid_table)
 
     f = BytesIO()
     my_doc = SimpleDocTemplate(
