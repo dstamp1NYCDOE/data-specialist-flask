@@ -9,7 +9,7 @@ from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
 from app.scripts.attendance.confirmation_sheets.forms import ConfirmationSheetsCoverPageForm
-from app.scripts.attendance.confirmation_sheets import main as rdal_analysis
+from app.scripts.attendance.confirmation_sheets import main as confirmation_sheets
 
 
 @scripts.route("/attendance/confirmation_sheets", methods=["GET", "POST"])
@@ -23,7 +23,7 @@ def return_confirmation_sheets_cover_page():
     else:
 
         form = ConfirmationSheetsCoverPageForm(request.form)
-        f, download_name = rdal_analysis.main(form, request)
+        f, download_name = confirmation_sheets.main(form, request)
 
         return send_file(
             f,

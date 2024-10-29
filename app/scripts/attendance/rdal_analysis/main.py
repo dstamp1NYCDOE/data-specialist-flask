@@ -66,6 +66,7 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     filename = utils.return_most_recent_report_by_semester(
         files_df, "1_01", year_and_semester=year_and_semester
     )
+    print(filename)
     student_schedules_df = utils.return_file_as_df(filename).fillna("")
 
     filename = utils.return_most_recent_report_by_semester(
