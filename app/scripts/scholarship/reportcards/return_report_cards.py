@@ -49,12 +49,19 @@ from app.scripts.programming.jupiter.return_master_schedule import (
     return_jupiter_schedule,
 )
 
+## files needed
+# 3_07
+# 1_49
+# RATR
+# 1_01
+# 1_40
+# 1_32
 
 def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
-    students_df = return_students_df().sort_values(by=["LastName", "FirstName"])
+    students_df = return_students_df().sort_values(by=["LastName", "FirstName"]).head()
     dfs_dict = return_dfs_dict()
     f = generate_letters(students_df, dfs_dict)
     download_name = f"{school_year}_{term}_Report_Cards.pdf"
@@ -697,7 +704,7 @@ def return_daily_attd_summary_graph(RATR_Summary_df):
         # pattern_shape_sequence=[".", "x", "+"],
         orientation="h",
         # color="ATTD",
-        color_discrete_sequence=["grey", "white", "black"],
+        color_discrete_sequence=["lightgrey", "white", "grey"],
         barmode="stack",
     )
 
@@ -732,7 +739,7 @@ def return_daily_attd_summary_graph(RATR_Summary_df):
         textposition="auto",
         cliponaxis=False,
         marker_line_width=2,
-        marker_line_color="black",
+        marker_line_color="grey",
         width=0.55,
     )
 
@@ -761,7 +768,7 @@ def return_jupiter_attd_summary_graph(df):
         # pattern_shape_sequence=[".", "x", "+"],
         orientation="h",
         # color="ATTD",
-        color_discrete_sequence=["grey", "white", "black"],
+        color_discrete_sequence=["lightgrey", "white", "grey"],
         barmode="stack",
     )
 
@@ -796,7 +803,7 @@ def return_jupiter_attd_summary_graph(df):
         textposition="auto",
         cliponaxis=False,
         marker_line_width=2,
-        marker_line_color="black",
+        marker_line_color="grey",
         width=0.4,
     )
 

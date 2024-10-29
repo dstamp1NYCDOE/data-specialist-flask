@@ -57,6 +57,7 @@ def main(form, request):
 
     if form.student_list_source.data == "STARS_Classlist_Report":
         sort_by_df = sort_by_df.rename(columns={"PeriodId || '/'": "Period"})
+        sort_by_df = sort_by_df.merge(photos_df[['StudentID','photo_filename']], on=["StudentID"], how='left')
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Period", "CourseCode", "SectionId"]
         sort_by_df["sort_by_col"] = (
@@ -73,7 +74,7 @@ def main(form, request):
         student_roster_table_cols = ["StudentName", "___________"]
 
     if form.student_list_source.data == "teacher_and_room_list":
-        sort_by_df = sort_by_df.merge(photos_df, on=["StudentID"], how='left')
+        sort_by_df = sort_by_df.merge(photos_df[['StudentID','photo_filename']], on=["StudentID"], how='left')
 
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Room"]
@@ -95,8 +96,8 @@ def main(form, request):
 
     for sort_by, students_df in sort_by_df.groupby("sort_by_col"):
 
-        students_df = students_df.sort_values(by=student_sort_by_cols)
-
+        students_df = students_df.sort_values(by=student_sort_by_cols).dropna()
+        
         if include_classlist_flag:
             roster_pdf = return_class_list_roster_pdf(
                 sort_by, students_df, student_roster_table_cols
@@ -106,7 +107,13 @@ def main(form, request):
             photo_roster_pdf = return_photo_roster_pdf(
                 sort_by, students_df, student_roster_table_cols
             )
-            pdfWriter.add_page(photo_roster_pdf)
+
+            rosterPDFReader = PyPDF2.PdfReader(photo_roster_pdf)
+            num_of_pages = rosterPDFReader.pages            
+            for page_num, page in enumerate(num_of_pages):
+                pdfWriter.add_page(page)
+
+            # pdfWriter.add_page(photo_roster_pdf)
 
         for StudentID in students_df["StudentID"]:
             page_nums = StudentID_dict.get(StudentID)
@@ -264,17 +271,24 @@ def return_photo_roster_pdf(sort_by, students_df, student_roster_table_cols):
         nCols = 4
     for index, student in students_df.iterrows():
         photo_path = student["photo_filename"]
-        FirstName = student["FirstName"]
-        LastName = student["LastName"]
-
+        
         try:
-            I = Image(photo_path)
-            I.drawHeight = image_dim * inch
-            I.drawWidth = image_dim * inch
-            I.hAlign = "CENTER"
-
+            FirstName = student["FirstName"]
+            LastName = student["LastName"]
         except:
-            I = ""
+            FirstName, LastName = student['StudentName'].split(',')
+
+        if photo_path=='nan':
+            I = ''
+        else:
+            try:
+                I = Image(photo_path)
+                I.drawHeight = image_dim * inch
+                I.drawWidth = image_dim * inch
+                I.hAlign = "CENTER"
+
+            except:
+                I = ""
 
         chart_style = TableStyle(
             [("ALIGN", (0, 0), (-1, -1), "CENTER"), ("VALIGN", (0, 0), (-1, -1), "TOP")]
@@ -315,6 +329,4 @@ def return_photo_roster_pdf(sort_by, students_df, student_roster_table_cols):
     )
     my_doc.build(flowables)
 
-    pdfReader = PyPDF2.PdfReader(f)
-    pdfPage = pdfReader.pages[0]
-    return pdfPage
+    return f

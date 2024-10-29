@@ -7,11 +7,17 @@ import pandas as pd
 import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
+from flask import session
+
 def main(data):
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
     term = data['form']['marking_period']
     semester, marking_period = term.split('-')
 
-    filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
     grades_df = utils.return_file_as_df(filename)
     
     ## keep grades from current semester
@@ -35,14 +41,14 @@ def main(data):
 
     students_df = grades_df[(grades_df['StudentID'].isin(students_failing_all_classes)) & (grades_df['failing?'])]
 
-    filename = utils.return_most_recent_report(files_df, "1_49")
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_49", year_and_semester=year_and_semester)
     cr_1_49 = utils.return_file_as_df(filename)
     cr_1_49 = cr_1_49[['StudentID','LastName','FirstName','Counselor']]
     
     students_df = cr_1_49[cr_1_49['StudentID'].isin(students_failing_all_classes)]
 
     ## process assignments
-    filename = utils.return_most_recent_report(files_df, "assignments")
+    filename = utils.return_most_recent_report_by_semester(files_df, "assignments", year_and_semester=year_and_semester)
     assignments_df = utils.return_file_as_df(filename)
     # Keep Assignments from Marking Period
     assignments_df = assignments_df[assignments_df['Term']==term]
