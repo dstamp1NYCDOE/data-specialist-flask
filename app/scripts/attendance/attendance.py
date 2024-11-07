@@ -32,13 +32,11 @@ def return_attendance_reports():
             "report_function": "scripts.return_RATR_analysis",
             "report_description": "Analyze student daily attendance using ATS report RATR",
         },
-
         {
             "report_title": "Confirmation Sheets Cover Page Generator",
             "report_function": "scripts.return_confirmation_sheets_cover_page",
             "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
         },
-
         {
             "report_title": "RDAL Analysis",
             "report_function": "scripts.return_rdal_analysis_spreadsheet",
@@ -88,18 +86,22 @@ def return_attendance_reports():
             "report_title": "Cut Analysis reports",
             "report_function": "scripts.return_jupiter_cut_analysis_reports",
             "report_description": "Return Cut Analysis reports based on Jupiter",
-        },        
+        },
         {
             "report_title": "Late Analysis Reports",
             "report_function": "scripts.return_jupiter_late_analysis_reports",
             "report_description": "Return Late Analysis reports based on Jupiter",
-        },     
+        },
         {
             "report_title": "Historical Jupiter Attd Reports",
             "report_function": "scripts.return_historical_jupiter_attd_reports",
             "report_description": "Return historical period attendance reports based on Jupiter",
-        },  
-           
+        },
+        {
+            "report_title": "CAASS Reports",
+            "report_function": "scripts.return_caass_reports",
+            "report_description": "Return CAASS reports",
+        },
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -381,7 +383,7 @@ import app.scripts.attendance.cut_analysis.main as cut_analysis
 
 @scripts.route("/attendance/return_cut_analysis")
 def return_cut_analysis():
-    
+
     f, download_name = cut_analysis.main()
 
     return send_file(
@@ -389,4 +391,3 @@ def return_cut_analysis():
         as_attachment=True,
         download_name=download_name,
     )
-    

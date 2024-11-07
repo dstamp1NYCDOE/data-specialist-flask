@@ -61,7 +61,8 @@ def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
-    students_df = return_students_df().sort_values(by=["LastName", "FirstName"]).head()
+    students_df = return_students_df().sort_values(by=["LastName", "FirstName"])
+    
     dfs_dict = return_dfs_dict()
     f = generate_letters(students_df, dfs_dict)
     download_name = f"{school_year}_{term}_Report_Cards.pdf"

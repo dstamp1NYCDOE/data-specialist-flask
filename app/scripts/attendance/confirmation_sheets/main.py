@@ -74,12 +74,8 @@ def main(form, request):
     filename = request.files[form.jupiter_attendance_file.name]
     attendance_df = pd.read_csv(filename)
     attendance_df["Date"] = pd.to_datetime(attendance_df["Date"])
-<<<<<<< HEAD
-    attendance_df['Pd'] = attendance_df['Period'].str.extract(r"(\d{1,2})")
-=======
     attendance_df["Pd"] = attendance_df["Period"].str.extract("(\d+)")
     attendance_df["Pd"] = attendance_df["Pd"].apply(lambda x: int(x))
->>>>>>> 4262955186cd883e796ed8e3647eeeaec821d2b5
 
     rdsc_students = df["StudentID"].unique()
     attendance_df = attendance_df[attendance_df["StudentID"].isin(rdsc_students)]
@@ -91,19 +87,15 @@ def main(form, request):
 
     df = df.merge(attendance_df[['StudentID','Date','Pd','Type']], left_on=['StudentID','Date','PeriodID'], right_on=['StudentID','Date','Pd'])
 
-    print(df)
-
-
     ### look at P3
     p3_df = df[df['Pd']==3]
-    print(p3_df)
+
     ## look at marking absent on Jupiter
     absent_on_jupiter_df = df[df['Type'].isin(['excused','unexcused'])]
     
     absent_stats_by_teacher_df = pd.pivot_table(absent_on_jupiter_df,index=['Teacher'],values='StudentID',aggfunc='count')
     total_by_student_pvt = pd.pivot_table(df,index=['Teacher'],values='StudentID',aggfunc='count').sort_values(by=['StudentID'], ascending=[False])
-    print(total_by_student_pvt)
-    
+
 
     temp_lst = []
     for (student, date), attendance_df in attendance_df.groupby(["StudentID", "Date"]):
@@ -119,14 +111,7 @@ def main(form, request):
         temp_lst.append(attendance_dict)
 
     parsed_attd_df = pd.DataFrame(temp_lst).fillna("")
-<<<<<<< HEAD
-    parsed_cols = ["StudentID", "Date", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    missing_cols = [x for x in parsed_cols if x not in parsed_attd_df.columns]
-    for missing_col in missing_cols:
-        parsed_attd_df[missing_col] = ''
-=======
     parsed_cols = ["StudentID", "Date", 1,2,3,4,5,6,7,8,9]
->>>>>>> 4262955186cd883e796ed8e3647eeeaec821d2b5
     parsed_attd_df = parsed_attd_df[parsed_cols]
 
     parsed_attd_df = df[["StudentID", "Date", "Student Name"]].merge(

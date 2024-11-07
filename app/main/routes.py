@@ -157,15 +157,20 @@ def upload_files():
         if "CustomReport" in report_name:
             report_name = report_name[13:-5]
             filename = f"{report_name}.{extension}"
-        if 'Hall-Pass-Data' in report_name:
-            report_name = 'SmartPassExport'
+        if "Hall-Pass-Data" in report_name:
+            report_name = "SmartPassExport"
+            filename = f"{report_name}.{extension}"
+        if "RPT-School-Messenger-Attendance" in report_name:
+            report_name = "CAASS-Swipe-Data"
             filename = f"{report_name}.{extension}"
 
         download_date = form.download_date.data
         year_and_semester = form.year_and_semester.data
         if report_name == "attendance":
             filename = f"{year_and_semester}_9999-12-31_{filename}"
-        elif 'SmartPassExport' in report_name:
+        elif "SmartPassExport" in report_name:
+            filename = f"{year_and_semester}_9999-12-31_{filename}"
+        elif "CAASS_SWIPE_EXPORT" in report_name:
             filename = f"{year_and_semester}_9999-12-31_{filename}"
         else:
             filename = f"{year_and_semester}_{download_date}_{filename}"
@@ -178,7 +183,7 @@ def upload_files():
             os.makedirs(path)
         f.save(os.path.join(path, filename))
         flash(f"{filename} successfully uploaded", category="success")
-        global files_df 
+        global files_df
         files_df = utils.return_dataframe_of_files()
         return redirect(url_for("main.upload_files"))
 

@@ -17,13 +17,13 @@ def get_time_hh_mm_ss_short(sec):
 
 def main(student_row):
     y_aspect = 400
-    x_aspect = 700
+    x_aspect = 900
 
     
 
     y = ['Pd-1','Pd-2','Pd-3','Pd-4','Pd-5','Pd-6','Pd-7','Pd-8','Pd-9']
     
-    x = [student_row[1],student_row[2],student_row[3],student_row[4],student_row[5],student_row[6],student_row[7],student_row[8],student_row[9]]
+    x = [student_row[1.0],student_row[2.0],student_row[3.0],student_row[4.0],student_row[5.0],student_row[6.0],student_row[7.0],student_row[8.0],student_row[9.0]]
     
     text = [get_time_hh_mm_ss_short(x) for x in x[::-1]]
     data = [go.Bar(x=x[::-1],y=y[::-1], text=text, orientation='h')]
@@ -32,7 +32,8 @@ def main(student_row):
     x_tickvals = [i*30*60 for i in range(1,100) if i*30*60 <= max(x)+30*60]
     x_ticktext = [get_time_hh_mm_ss_short(x) for x in x_tickvals]
 
-    scale = 1.25
+    scale = 0.75
+
     fig.update_layout(
         template="simple_white",
         margin=dict(l=0, r=0, t=0, b=0),
