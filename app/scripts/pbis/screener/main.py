@@ -33,7 +33,11 @@ def return_screener_questions(columns):
 
 
 def process_screener_data(dfs_dict):
-    dfs_lst = dfs_dict.values()
+    surveys_list = [df for (sheet, df) in dfs_dict.items() if sheet !='Students']
+
+    student_responses_df = dfs_dict['Students']
+    student_responses_df = student_responses_df.drop(columns=['LastName','FirstName'])
+    
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
@@ -44,44 +48,90 @@ def process_screener_data(dfs_dict):
     cr_1_49_df = utils.return_file_as_df(cr_1_49_filename)
     cr_1_49_df = cr_1_49_df[["StudentID", "Counselor"]]
 
-    df = pd.concat(dfs_lst)
-    df = df.merge(cr_1_49_df, on="StudentID", how="left")
-    return df
-
-
-def return_teacher_completition_pvt(df, screener_questions):
-    student_pvt = pd.concat(
-        [
-            pd.pivot_table(
-                df,
-                index="Teacher1",
-                columns=question,
-                values="StudentID",
-                aggfunc="count",
-            ).fillna(0)
-            for question in screener_questions
-        ],
-        axis=1,
-        keys=screener_questions,
+    cr_3_07_filename = utils.return_most_recent_report_by_semester(
+        files_df, "3_07", year_and_semester=year_and_semester
     )
-    return [("Combined", student_pvt)]
+    cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
+    cr_3_07_df = cr_3_07_df[["StudentID", "GEC"]]
+
+    df = pd.concat(surveys_list)
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+
+    df = df.merge(cr_1_49_df, on="StudentID", how="left")
+    df = df.merge(cr_3_07_df, on="StudentID", how="left")
+    
+
+    screener_questions = return_screener_questions(df.columns)
+    student_pvt = return_student_pivot(df, screener_questions)
+    student_by_teacher_pvt = return_student_by_teacher_pvt(df, screener_questions)
+
+    dff = df.merge(student_pvt, on=['StudentID','LastName','FirstName'], how='left')
+    dff = dff.merge(student_by_teacher_pvt, on=['StudentID','LastName','FirstName','Teacher1'], how='left')
+    dff = dff.merge(student_responses_df, on=['StudentID'], how='left')
+
+    
+    return dff
+
+
+def return_sheets_by_cohort(dff, screener_questions):
+    sheets = []
+
+    cols = ['StudentID', 'LastName', 'FirstName',
+       'Counselor', 'GEC', 'Total Above Average', 'Total Average',
+       'Total Below Average', 'Total Net', 'I feel like I belong at HSFI',
+       'I feel like my HSFI classmates care about me',
+       'I feel comfortable interacting with other students in my classes',
+       'I have friends at HSFI I feel a connection with and can go to if I have concerns',
+       'I need help from the school with making friends at HSFI',
+       'I have an adult at HSFI I feel a connection with and can go to if I have concerns',
+       'I need help from the school with getting to HSFI on time every day.',
+       'I need help from the school with learning how to control my emotions',
+       'I need help from the school with learning how to improve my work habits to reach my academic potential',
+       'Which of the following clubs have you participated in this year',
+       'Who is an adult at HSFI you feel connected to and can go to if you have questions/concerns?']
+    dff = dff[cols]
+    dff = dff.sort_values(by=['Total Net'])
+    students_df = dff.drop_duplicates(subset='StudentID')
+
+    for cohort, cohort_students_df in students_df.groupby('GEC'):
+        sheets.append((f'{cohort}', cohort_students_df))
+
+    return sheets
+        
 
 
 
-def return_results_by_questions(df, screener_questions):
+def return_student_by_teacher_pvt(df, screener_questions):
     id_vars = [x for x in df.columns if x not in screener_questions]
+    dff = df.melt(id_vars=id_vars, var_name="Question", value_name="TeacherResponse")
 
-    results = []
-    for question, sheet_name in zip(screener_questions,['Q1','Q2','Q3']):
-        student_pvt = pd.pivot_table(
-            df,
-            index=["StudentID", "LastName", "FirstName", "Counselor"],
-            columns=question,
-            values="Teacher1",
-            aggfunc="count",
-        )
-        results.append((sheet_name, student_pvt))
-    return results
+    pvt_lst = []
+    for _ in ['Above Average', 'Below Average']:
+        pvt = pd.pivot_table(dff[dff['TeacherResponse']==_],index="StudentID", columns='Question', values='Teacher1', aggfunc=lambda x: '\n'.join(x)).fillna('')
+        pvt.columns = [f"{x} - {_}" for x in pvt.columns]
+        # pvt = pvt.reset_index()
+        pvt_lst.append(pvt)
+
+    teachers_pvt = pd.concat(pvt_lst, axis=1).fillna('')
+    
+    print(teachers_pvt)
+
+    student_pvt = pd.pivot_table(
+        dff,
+        index=["StudentID", "LastName", "FirstName","Teacher1"],
+        columns="TeacherResponse",
+        values="Counselor",
+        aggfunc="count",
+    ).fillna(0)
+    student_pvt['total'] = student_pvt.sum(axis=1)
+    student_pvt['overall_net'] = (student_pvt['Above Average'] - student_pvt['Below Average']) / student_pvt['total']
+    
+    student_pvt.columns = ['Teacher Above Average', 'Teacher Average', 'Teacher Below Average', 'total', 'Teacher Net']
+    student_pvt = student_pvt[['Teacher Above Average', 'Teacher Average', 'Teacher Below Average', 'Teacher Net']].reset_index()
+
+    student_pvt = student_pvt.merge(teachers_pvt, on=['StudentID'], how='left').fillna('')
+
+    return student_pvt
 
 
 def return_student_pivot(df, screener_questions):
@@ -89,40 +139,19 @@ def return_student_pivot(df, screener_questions):
     dff = df.melt(id_vars=id_vars, var_name="Question", value_name="TeacherResponse")
     student_pvt = pd.pivot_table(
         dff,
-        index=["StudentID", "LastName", "FirstName", "Counselor"],
+        index=["StudentID", "LastName", "FirstName"],
         columns="TeacherResponse",
         values="Teacher1",
         aggfunc="count",
-    )
-    return [("StudentPivot", student_pvt)]
+    ).fillna(0)
+    student_pvt['total'] = student_pvt.sum(axis=1)
+    student_pvt['overall_net'] = (student_pvt['Above Average'] - student_pvt['Below Average']) / student_pvt['total']
+    
+    student_pvt.columns = ['Total Above Average', 'Total Average', 'Total Below Average', 'total', 'Total Net']
+
+    return student_pvt[['Total Above Average', 'Total Average', 'Total Below Average', 'Total Net']].reset_index()
 
 
-def return_results_by_counselor(df, screener_questions):
-    sheets = []
-
-    for counselor, dff in df.groupby("Counselor"):
-
-        index = ["StudentID", "LastName", "FirstName"]
-        student_pvt = pd.concat(
-            [
-                pd.pivot_table(
-                    dff,
-                    index=index,
-                    columns=question,
-                    values="Teacher1",
-                    aggfunc="count",
-                ).fillna(0)
-                for question in screener_questions
-            ],
-            axis=1,
-            keys=screener_questions,
-        )
-
-        sheets.append(
-            (counselor, student_pvt),
-        )
-
-    return sheets
 
 
 def return_download_file(df):
@@ -131,17 +160,9 @@ def return_download_file(df):
 
     sheets = []
 
-    # counselor_sheets = return_results_by_counselor(df, screener_questions)
-    # sheets.extend(counselor_sheets)
+    counselor_sheets = return_sheets_by_cohort(df, screener_questions)
+    sheets.extend(counselor_sheets)
 
-    teacher_completion_sheet = return_teacher_completition_pvt(df, screener_questions)
-    sheets.extend(teacher_completion_sheet)
-
-    student_pvt_sheet = return_student_pivot(df, screener_questions)
-    sheets.extend(student_pvt_sheet)
-
-    sheets_temp = return_results_by_questions(df, screener_questions)
-    sheets.extend(sheets_temp)
 
     f = BytesIO()
 

@@ -16,8 +16,6 @@ def main():
     ## student_info
     cr_3_07_filename = utils.return_most_recent_report_by_semester(files_df, "3_07", year_and_semester=year_and_semester)
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
-    print(cr_3_07_df)
-    print(cr_3_07_df.columns)
     school_year = session["school_year"]
     cr_3_07_df["year_in_hs"] = cr_3_07_df["GEC"].apply(
         utils.return_year_in_hs, args=(school_year,)
