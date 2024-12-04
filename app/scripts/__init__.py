@@ -38,6 +38,7 @@ from app.scripts.pbis import routes
 from app.scripts.pbis.smartpass import routes
 from app.scripts.pbis.screener import routes
 from app.scripts.pbis.phone_call_tracker import routes
+from app.scripts.pbis.student_network import routes
 
 
 from app.scripts.privileges import routes

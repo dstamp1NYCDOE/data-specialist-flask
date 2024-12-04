@@ -26,7 +26,7 @@ from flask import session, current_app
 
 from app.scripts.reportlab_utils import reportlab_letter_head, reportlab_closing
 import app.scripts.utils as utils
-from app.scripts import scripts, files_df
+from app.scripts import scripts, files_df, photos_df
 
 styles = getSampleStyleSheet()
 
@@ -68,6 +68,7 @@ def main():
     cr_1_08_df = cr_1_08_df.merge(section_properties_df, on=["Section"], how="left")
 
     cr_1_08_df["Report Time"] = cr_1_08_df["Time"].apply(return_exam_report_time)
+    cr_1_08_df = cr_1_08_df.merge(photos_df, on=["StudentID"], how="left")
 
     # reformat_date
     cr_1_08_df["Day"] = pd.to_datetime(cr_1_08_df["Day"])
@@ -156,8 +157,8 @@ def generate_student_letter(exams_df):
     flowables.append(paragraph)
 
     try:
-        path = os.path.join(current_app.root_path, f"data/StudentPhotos")
-        photo_str = os.path.join(path, f"{int(StudentID)}.jpg")
+        
+        photo_str = exams_df.iloc[0, :]["photo_filename"]
         I = Image(photo_str)
         I.drawHeight = 2.75 * inch
         I.drawWidth = 2.75 * inch

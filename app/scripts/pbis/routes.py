@@ -41,6 +41,11 @@ def return_pbis_reports():
             "report_function": "scripts.return_phone_call_tracker_reports",
             "report_description": "Return Phone Call Tracker Analysis",
         },
+        {
+            "report_title": "Student Network Analysis",
+            "report_function": "scripts.return_student_network_routes",
+            "report_description": "Return student network analysis reports",
+        },
     ]
     title = "PBIS"
     return render_template(

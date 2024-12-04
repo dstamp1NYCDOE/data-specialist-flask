@@ -26,7 +26,12 @@ def return_screener_reports():
             "report_title": "Universal Screener Wellness Team Report",
             "report_function": "scripts.return_screener_analysis_wellness_report_report",
             "report_description": "Analyze universal screener data and Generate Wellness Team Report",
-        },                
+        },  
+        {
+            "report_title": "Universal Screener Classroom Report",
+            "report_function": "scripts.return_screener_analysis_classroom_report",
+            "report_description": "Analyze universal screener data and Generate Classroom Summary",
+        },                        
     ]
     return render_template(
         "PBIS/templates/screener/index.html", reports=reports
@@ -90,6 +95,28 @@ def return_screener_analysis_wellness_report_report():
         
         form = ScreenerUploadForm(request.form)
         f, download_name = wellness_team_summary(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )        
+    
+
+from app.scripts.pbis.screener.forms import ScreenerUploadForm
+from app.scripts.pbis.screener.class_summary import main as class_summary
+@scripts.route("/pbis/screener/analysis/classroom_report", methods=["GET", "POST"])
+def return_screener_analysis_classroom_report():
+    if request.method == "GET":
+        form = ScreenerUploadForm()
+        return render_template(
+            "pbis/templates/screener/classroom_report_form.html",
+            form=form,
+        )
+    else:
+        
+        form = ScreenerUploadForm(request.form)
+        f, download_name = class_summary(form, request)
 
         return send_file(
             f,

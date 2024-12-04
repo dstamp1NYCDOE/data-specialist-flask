@@ -7,24 +7,35 @@ import app.scripts.utils as utils
 from app.scripts import scripts, files_df, photos_df
 
 
-def main():
+def main(form, request):
     f = BytesIO()
+
+
+    CAASS_file = request.files[
+        form.CAASS_file.name
+    ]
+    CAASS_df = pd.read_csv(CAASS_file)    
+
+    students_present = CAASS_df['Student ID']
 
     attd_by_student = process_jupiter_attendance()
 
     students_to_exclude = [221272438,233601582]
     attd_by_student = attd_by_student[~attd_by_student['StudentID'].isin(students_to_exclude)]
-    total_cuts_by_student = pd.pivot_table(
-        attd_by_student,
-        index=["StudentID", "FirstName", "LastName"],
-        values=True,
-        aggfunc="sum",
-    )
+    attd_by_student = attd_by_student[attd_by_student['StudentID'].isin(students_present)]
+
 
     attd_by_student = attd_by_student.merge(photos_df, on=["StudentID"], how="left")
     flowables = []
-    for period in [2, 3, 4, 5, 6, 7, 8, 9]:
-        page_header = f"Top Cuts by Period {period}"
+    if form.periods.data == 'ALL':
+        periods = [2, 3, 4, 5, 6, 7, 8, 9]
+    else:
+        periods = [int(x) for x in form.periods.data if x!='ALL']
+        
+
+    date_str = form.date_of_interest.data
+    for period in periods:
+        page_header = f"Top Cuts by Period {period} {date_str}"
         
         top_27_df = (
             attd_by_student[attd_by_student["Pd"] == period]
@@ -34,20 +45,6 @@ def main():
         )
         
         flowables.extend(return_photo_roster_pdf(page_header, top_27_df))
-
-    total_cuts_by_student = total_cuts_by_student.reset_index()
-    total_cuts_by_student = total_cuts_by_student.merge(
-        photos_df, on=["StudentID"], how="left"
-    )
-    page_header = f"Top Cuts Overall"
-    top_27_cuts = (
-        total_cuts_by_student.sort_values(by=[True], ascending=[False])
-        .drop_duplicates(subset=["StudentID"])
-        .head(27)
-    )
-    top_27_cuts["Teacher1"] = top_27_cuts[True]
-    top_27_cuts["Room"] = ""
-    flowables.extend(return_photo_roster_pdf(page_header, top_27_cuts))
 
     my_doc = SimpleDocTemplate(
         f,

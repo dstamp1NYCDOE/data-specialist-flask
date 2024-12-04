@@ -56,6 +56,8 @@ def main():
 
     lab_eligibility_df = pd.DataFrame(lab_eligibility_lst)
 
+    print(lab_eligibility_df)
+
     ### check current term lab eligibility
     lab_courses = [
         "SLS22QL",
@@ -88,6 +90,16 @@ def main():
     writer = pd.ExcelWriter(filename)
     current_lab_courses_df.to_excel(
         writer, index=False, sheet_name="current_lab_eligibility"
+    )
+
+    lab_eligibility_df.to_excel(
+        writer, index=False, sheet_name="previous_lab_eligibility"
+    )
+
+    combined_df = pd.concat([lab_eligibility_df,current_lab_courses_df])
+    combined_df['LabEligible'] = combined_df['LabEligible'].astype(bool)
+    combined_df.to_excel(
+        writer, index=False, sheet_name="combined_lab_eligibility"
     )
 
     writer.close()

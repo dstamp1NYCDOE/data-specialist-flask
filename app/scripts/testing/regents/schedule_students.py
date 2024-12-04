@@ -9,6 +9,7 @@ from flask import current_app, session
 def main():
     school_year = session["school_year"]
     term = session["term"]
+    year_and_semester = f"{school_year}-{term}" 
 
     dataframe_dict = {}
 
@@ -17,7 +18,7 @@ def main():
     if term == 2:
         month = "June"
 
-    filename = utils.return_most_recent_report(files_df, "1_08")
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_08", year_and_semester=year_and_semester)
     registrations_df = utils.return_file_as_df(filename)
     cols = [
         "StudentID",
@@ -42,7 +43,7 @@ def main():
     registrations_df = registrations_df[cols]
 
     ## get lab eligibility
-    filename = utils.return_most_recent_report(files_df, "lab_eligibility")
+    filename = utils.return_most_recent_report_by_semester(files_df, "lab_eligibility", year_and_semester=year_and_semester)
     lab_eligibility_df = utils.return_file_as_df(filename)
 
     # ## exam_info
@@ -56,9 +57,9 @@ def main():
     registrations_df = registrations_df.merge(
         lab_eligibility_df, on=["StudentID", "Curriculum"], how="left"
     )
-    print(registrations_df)
+    
 
-    filename = utils.return_most_recent_report(files_df, "rosters_and_grades")
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
     rosters_df = utils.return_file_as_df(filename)
     # rosters_df = rosters_df[rosters_df['Term']==f"S{term}"]
     rosters_df = rosters_df[["StudentID", "Course", "Teacher1"]].drop_duplicates(
@@ -72,9 +73,7 @@ def main():
     ).fillna("")
 
     ## attach testing accommodations info
-    filename = utils.return_most_recent_report(
-        files_df, "testing_accommodations_processed"
-    )
+    filename = utils.return_most_recent_report_by_semester(files_df, "testing_accommodations_processed", year_and_semester=year_and_semester)
     testing_accommodations_df = utils.return_file_as_df(filename)
     testing_accommodations_df = testing_accommodations_df.drop_duplicates(
         keep="first", subset=["StudentID"]
@@ -269,14 +268,14 @@ def return_gen_ed_section_capacity(exam_code, month):
 
     if month == "January":
         if exam_code[0] == "E":
-            return 34
+            return 33
         else:
-            return 40
+            return 50
     if month == "June":
         if exam_code[0] == "E":
-            return 40
+            return 33
         else:
-            return 34
+            return 33
 
 
 def remove_lab_ineligible(row):

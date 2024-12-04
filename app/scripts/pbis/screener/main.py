@@ -33,7 +33,8 @@ def return_screener_questions(columns):
 
 
 def process_screener_data(dfs_dict):
-    surveys_list = [df for (sheet, df) in dfs_dict.items() if sheet !='Students']
+    non_surveys = ['Students','Families']
+    surveys_list = [df for (sheet, df) in dfs_dict.items() if not sheet in non_surveys]
 
     student_responses_df = dfs_dict['Students']
     student_responses_df = student_responses_df.drop(columns=['LastName','FirstName'])
@@ -52,17 +53,31 @@ def process_screener_data(dfs_dict):
         files_df, "3_07", year_and_semester=year_and_semester
     )
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
-    cr_3_07_df = cr_3_07_df[["StudentID", "GEC"]]
+    cr_3_07_df = cr_3_07_df[["StudentID", "GEC","IEPFlag"]]
+
+    
+
+    
+    cr_1_01_filename = utils.return_most_recent_report_by_semester(
+        files_df, "1_01", year_and_semester=year_and_semester
+    )
+    cr_1_01_df = utils.return_file_as_df(cr_1_01_filename)
+    lunch_df = cr_1_01_df[cr_1_01_df['Course'].isin(['ZL','ZL4','ZL5','ZL6','ZL7'])]
+    lunch_df['LunchPeriod'] = lunch_df['Period']
+    lunch_df = lunch_df[['StudentID','LunchPeriod']]
+
 
     df = pd.concat(surveys_list)
     df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
     df = df.merge(cr_1_49_df, on="StudentID", how="left")
     df = df.merge(cr_3_07_df, on="StudentID", how="left")
+    df = df.merge(lunch_df, on="StudentID", how="left")
     
 
     screener_questions = return_screener_questions(df.columns)
     student_pvt = return_student_pivot(df, screener_questions)
+    
     student_by_teacher_pvt = return_student_by_teacher_pvt(df, screener_questions)
 
     dff = df.merge(student_pvt, on=['StudentID','LastName','FirstName'], how='left')
@@ -77,7 +92,7 @@ def return_sheets_by_cohort(dff, screener_questions):
     sheets = []
 
     cols = ['StudentID', 'LastName', 'FirstName',
-       'Counselor', 'GEC', 'Total Above Average', 'Total Average',
+       'Counselor', 'GEC',"IEPFlag","LunchPeriod", 'Total Above Average', 'Total Average',
        'Total Below Average', 'Total Net', 'I feel like I belong at HSFI',
        'I feel like my HSFI classmates care about me',
        'I feel comfortable interacting with other students in my classes',
@@ -114,7 +129,7 @@ def return_student_by_teacher_pvt(df, screener_questions):
 
     teachers_pvt = pd.concat(pvt_lst, axis=1).fillna('')
     
-    print(teachers_pvt)
+
 
     student_pvt = pd.pivot_table(
         dff,
