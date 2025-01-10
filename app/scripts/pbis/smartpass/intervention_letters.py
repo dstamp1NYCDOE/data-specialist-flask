@@ -107,6 +107,7 @@ def get_time_hh_mm_ss_short(sec):
 def generate_letter_flowables(row, smartpass_df):
     flowables = []
     
+    print(row[1])
 
 
     first_name = str(row['FirstName']).title()
@@ -120,7 +121,7 @@ def generate_letter_flowables(row, smartpass_df):
 
     table_data = [
         [1,2,3,4,5,6,7,8,9],
-        [get_time_hh_mm_ss_short(row[1]),get_time_hh_mm_ss_short(row[2]),get_time_hh_mm_ss_short(row[3]),get_time_hh_mm_ss_short(row[4]),get_time_hh_mm_ss_short(row[5]),get_time_hh_mm_ss_short(row[6]),get_time_hh_mm_ss_short(row[7]),get_time_hh_mm_ss_short(row[8]),get_time_hh_mm_ss_short(row[9])]    
+        [get_time_hh_mm_ss_short(row[1.0]),get_time_hh_mm_ss_short(row[2.0]),get_time_hh_mm_ss_short(row[3.0]),get_time_hh_mm_ss_short(row[4.0]),get_time_hh_mm_ss_short(row[5.0]),get_time_hh_mm_ss_short(row[6.0]),get_time_hh_mm_ss_short(row[7.0]),get_time_hh_mm_ss_short(row[8.0]),get_time_hh_mm_ss_short(row[9.0])]    
     ]
 
     

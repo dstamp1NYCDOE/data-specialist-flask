@@ -252,9 +252,16 @@ from app.scripts.testing.regents import create_exam_invitation as create_exam_in
 
 @scripts.route("/testing/regents/examinvitations")
 def return_regents_exam_invitations():
+    school_year = session["school_year"]
+    term = session["term"]
+    if term == 1:
+        month = "January"
+        school_year += 1
+    if term == 2:
+        month = "June"
 
     f = create_exam_invitation.main()
-    testing_period = "June2024"
+    testing_period = f"{month}{school_year}"
     download_name = f"{testing_period}_exam_invitations.pdf"
     return send_file(
         f,

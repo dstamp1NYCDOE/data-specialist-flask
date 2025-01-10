@@ -35,21 +35,26 @@ def process_smartpass_data(smartpass_df):
     smartpass_df = smartpass_df.dropna(subset=["StudentID"])
     ## drop passes less than 30 seconds
     smartpass_df = smartpass_df[smartpass_df["Duration (sec)"] > 30]
+    ## drop passes that originate from cafeteria
+    smartpass_df = smartpass_df[smartpass_df["Origin"] != "Cafeteria"]
 
     ## keep bathroom passes only
-    bathroom_passes_destinations = ['9th Floor Girls',
-        '7th Floor Girls',
-        '6th Floor Girls',
-        '5th floor Girls',
-        '4th Floor Boys',
-        'Gender Neutral',
-        '4th Floor Girls',
-        '9th Floor Boys',
-        '3rd Floor Girls',
-        '5th Floor Boys',
-        '6th Floor Boys',
+    bathroom_passes_destinations = [
+        "9th Floor Girls",
+        "7th Floor Girls",
+        "6th Floor Girls",
+        "5th floor Girls",
+        "4th Floor Boys",
+        "Gender Neutral",
+        "4th Floor Girls",
+        "9th Floor Boys",
+        "3rd Floor Girls",
+        "5th Floor Boys",
+        "6th Floor Boys",
     ]
-    smartpass_df = smartpass_df[smartpass_df['Destination'].isin(bathroom_passes_destinations)]
+    smartpass_df = smartpass_df[
+        smartpass_df["Destination"].isin(bathroom_passes_destinations)
+    ]
     ## exceeded 10 minutes
     smartpass_df["OvertimeFlag"] = smartpass_df["Duration (sec)"] > 60 * 10
     ## futz with the date and time to return class period
@@ -133,21 +138,23 @@ def return_possible_encounters(smartpass_df):
         index="Student1_StudentID",
         values="overlap_factor",
         aggfunc=["mean", "std"],
-    ).reset_index()     
+    ).reset_index()
 
-    student_avg_and_std_dev.columns = ["Student1_StudentID", "Student1_Avg", "Student1_Std"]
+    student_avg_and_std_dev.columns = [
+        "Student1_StudentID",
+        "Student1_Avg",
+        "Student1_Std",
+    ]
 
     encounters_pvt = encounters_pvt.merge(
         student_avg_and_std_dev, on=["Student1_StudentID"], how="left"
     )
 
-    encounters_pvt[f"Student1_z_score"] = (encounters_pvt["overlap_factor"] - encounters_pvt["Student1_Avg"]) / encounters_pvt[
-        "Student1_Std"
-    ]
+    encounters_pvt[f"Student1_z_score"] = (
+        encounters_pvt["overlap_factor"] - encounters_pvt["Student1_Avg"]
+    ) / encounters_pvt["Student1_Std"]
 
-
-
-    encounters_pvt = encounters_pvt[encounters_pvt['Student1_z_score']>0].sort_values(
+    encounters_pvt = encounters_pvt[encounters_pvt["Student1_z_score"] > 0].sort_values(
         by=["Student1_z_score"], ascending=[False]
     )
 
@@ -193,6 +200,22 @@ def return_overtime_pvt_by_student(smartpass_df):
     return pvt
 
 
+def return_total_time_by_students_by_day(smartpass_df):
+    pvt = pd.pivot_table(
+        smartpass_df,
+        index=["StudentID", "Student Name"],
+        columns="Date",
+        values="Duration (sec)",
+        aggfunc="sum",
+        margins=True,
+        margins_name="Total",
+    ).fillna(0)
+    pvt = pvt.reset_index()
+
+    pvt = pvt.sort_values(by=["Total"], ascending=[False])
+    return pvt
+
+
 def return_number_of_passes_by_students_by_day(smartpass_df):
     pvt = pd.pivot_table(
         smartpass_df,
@@ -208,6 +231,7 @@ def return_number_of_passes_by_students_by_day(smartpass_df):
     pvt = pvt.sort_values(by=["Total"], ascending=[False])
     return pvt
 
+
 def return_number_of_passes_by_student_by_destination(smartpass_df):
     pvt = pd.pivot_table(
         smartpass_df,
@@ -222,6 +246,7 @@ def return_number_of_passes_by_student_by_destination(smartpass_df):
 
     pvt = pvt.sort_values(by=["Total"], ascending=[False])
     return pvt
+
 
 def return_total_time_per_period_by_student(smartpass_df):
     pvt = pd.pivot_table(
@@ -361,6 +386,10 @@ def return_smartpass_report(smartpass_df, date_of_interest):
             "total_passes_per_day_by_student",
             return_number_of_passes_by_students_by_day(smartpass_df),
         ),
+        (
+            "total_time_per_day_by_student",
+            return_total_time_by_students_by_day(smartpass_df),
+        ),
         ("overtime_by_origin", return_overtime_pvt_by_origin(smartpass_df)),
         (
             "total_time_by_origin",
@@ -373,7 +402,7 @@ def return_smartpass_report(smartpass_df, date_of_interest):
         ("possible_encounters_pvt", return_possible_encounters(smartpass_df)),
         (
             "total_passes_by_dest_by_student",
-            return_number_of_passes_by_student_by_destination(smartpass_df)
+            return_number_of_passes_by_student_by_destination(smartpass_df),
         ),
     ]
 

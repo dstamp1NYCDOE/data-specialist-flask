@@ -38,7 +38,7 @@
        <form class="d-flex" role="search" method="Post" action="{{ url_for('main.set_semester')}}">
         
         <select class="form-control" name="semester" id="semester">
-          {% for year in [2022,2023,2024]|reverse %}
+          {% for year in [2022,2023,2024,2025,2026]|reverse %}
             {% for semester,season in [(1,'Fall'),(2,'Spring'),(7,'Summer')]|reverse %}
               {% if session.semester == year|string +'-'+semester|string %}
               <option value="{{year}}-{{semester}}" selected>{{year}}/{{semester}} - {{season}} {{year+1 if season!='Fall' else year}}</option>

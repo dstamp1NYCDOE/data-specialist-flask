@@ -197,9 +197,9 @@ def create_master_course(teacher_row, period):
 
 
 def return_teacher_name(teacher_row):
-    first_name = teacher_row["first_name"]
+    first_name = str(teacher_row["first_name"])
 
-    last_name = teacher_row["last_name"]
+    last_name = str(teacher_row["last_name"])
     if len(first_name) > 0:
         return (
             last_name.replace(" ", "").replace("-", "").upper()
@@ -244,27 +244,27 @@ def return_capacity(course_code, section=None):
 
 def return_default_capacity(course_code, section=None):
     if course_code == "EES87QD" and section == 47:
-        return 34
+        return 25
     if course_code in ["MQS21", "MQS22"]:
-        return 36
+        return 25
     if len(course_code) > 5:
         if course_code in ["SCS21H", "SCS22H"]:
-            return 40
+            return 25
         if course_code[5] in ["X", "H"]:
-            return 34
+            return 25
     if len(course_code) == 5 and course_code == "MQS11":
-        return 30
+        return 25
     if course_code[0:2] == "ES":
-        return 34
+        return 25
 
     if course_code in ["AUS11QE"]:
-        return 32
+        return 25
     if course_code[0:2] == "PP":
-        return 50
+        return 40
     if course_code[0:2] == "GQ":
-        return 34
+        return 25
     if course_code[0:2] == "PH":
-        return 33
+        return 25
     if course_code[0:2] == "ZL":
         return 450
     if course_code[0:2] == "ZA":
@@ -277,10 +277,10 @@ def return_default_capacity(course_code, section=None):
         "EES85QE",
         "EES86QE",
     ]:
-        return 22
+        return 15
     if course_code[0:5] in ["EES87", "EES88"]:
         if course_code[-1] == "T":
-            return 12
+            return 10
         if course_code[-1] == "M":
             return 15
         if course_code[-2:] == "QP":
@@ -293,11 +293,11 @@ def return_default_capacity(course_code, section=None):
             return 35
         return 32
     if course_code[0:2] == "AF":
-        return 28
+        return 25
     if course_code[0:2] in ["BM", "BN"]:
-        return 32
+        return 25
     if course_code[0:2] == "FS":
-        return 34
+        return 25
     if course_code[-2:] == "QE":
         return 4
     if course_code[-2:] == "QM":
@@ -305,18 +305,18 @@ def return_default_capacity(course_code, section=None):
     if course_code[-3:] == "QEM":
         return 15
     if course_code[-2:] == "QT":
-        return 12
+        return 10
     if course_code[-3:] == "QET":
-        return 12
+        return 10
     if course_code[-2:] == "QA":
-        return 20
+        return 15
     if course_code[-3:] == "QEA":
-        return 20
+        return 15
     if course_code[-2:] == "QP":
-        return 4
+        return 1
     if course_code[-1] in ["H", "X"]:
-        return 32
-    return 30
+        return 25
+    return 24
 
 
 def return_course_code(course_code):
@@ -402,7 +402,7 @@ def return_adjusted_capacity(course_code, section=None):
         "SPS21": +4,
         "SWS21": +2,
     }
-
+    return default_capacity
     adjustment = adjustment_dict.get(course_code, 0)
     # if adjustment < 0:
     #     adjustment += 1

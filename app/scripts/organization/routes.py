@@ -81,6 +81,11 @@ def return_organization_reports():
             "report_description": "Generate Mailing Labels to go with a PDF of student records",
         },
         {
+            "report_title": "Student Mailing Labels for StudentID List",
+            "report_function": "scripts.return_mailing_labels_by_student_list",
+            "report_description": "Generate Mailing Labels to go with a list of StudentIDs",
+        },
+        {
             "report_title": "Photo Roster from List of StudentIDs",
             "report_function": "scripts.return_photo_roster_by_studentid_lst",
             "report_description": "Generate student photo grid from list of StudentID numebers",

@@ -50,34 +50,40 @@ from app.scripts.programming.jupiter.return_master_schedule import (
 )
 
 ## files needed
-# 3_07
-# 1_49
-# RATR
 # 1_01
-# 1_40
 # 1_32
+# 1_40
+# 1_49
+# 3_07
+# RATR
+
 
 def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
-    students_df = return_students_df().sort_values(by=["LastName", "FirstName"])
-    
-    dfs_dict = return_dfs_dict()
-    f = generate_letters(students_df, dfs_dict)
+    marking_period = form.marking_period.data
+    students_df = return_students_df(marking_period).sort_values(
+        by=["LastName", "FirstName"]
+    )
+
+    dfs_dict = return_dfs_dict(marking_period)
+    f = generate_letters(students_df, dfs_dict, marking_period)
     download_name = f"{school_year}_{term}_Report_Cards.pdf"
 
     return f, download_name
 
 
-def return_students_df():
+def return_students_df(marking_period):
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
     cr_3_07_filename = utils.return_most_recent_report_by_semester(
         files_df, "3_07", year_and_semester=year_and_semester
     )
+
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
+    cr_3_07_df = cr_3_07_df[cr_3_07_df["StudentID"] == 236817342]
     counselors_df = return_counselors_df()
     cr_3_07_df = cr_3_07_df.merge(counselors_df, on=["StudentID"], how="left")
     fd_balances = return_fashion_dollar_balances()
@@ -85,11 +91,15 @@ def return_students_df():
         {"fashion_dollar_balance": 0}
     )
 
-    mp = "1"
-    honor_roll_df = return_honor_roll_flag_df(mp)
+    honor_roll_df = return_honor_roll_flag_df(marking_period)
     cr_3_07_df = cr_3_07_df.merge(honor_roll_df, on=["StudentID"], how="left").fillna(
-        ""
+        "Not on Honor Roll"
     )
+    cr_1_40_df = return_df_by_title("1_40", year_and_semester)
+    cr_1_40_df = cr_1_40_df.rename(columns={"Student": "StudentID"})
+    cr_1_40_df = cr_1_40_df[["StudentID", "Average", "Minimum"]]
+    cr_3_07_df = cr_3_07_df.merge(cr_1_40_df, on=["StudentID"], how="left").fillna("")
+
     return cr_3_07_df
 
 
@@ -104,7 +114,7 @@ from app.scripts.pbis.smartpass.main import (
 )
 
 
-def return_dfs_dict():
+def return_dfs_dict(marking_period):
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
@@ -114,7 +124,7 @@ def return_dfs_dict():
     smartpass_df = process_smartpass_data(smartpass_df)
     dfs_dict = {
         "1_01": return_student_grades(),
-        "1_40": return_df_by_title("1_40", year_and_semester),
+        "HonorRoll": return_df_by_title("HonorRoll", year_and_semester),
         "assignments_df": return_df_by_title("assignments", year_and_semester),
         "jupiter_period_attendance_df": return_df_by_title(
             "jupiter_period_attendance", year_and_semester
@@ -169,7 +179,7 @@ def return_jupiter_assignment_missing_pvt():
             df,
             index=["StudentID", "Course", "Category"],
             columns="Missing",
-            values="DueDate",
+            values="Section",
             aggfunc="count",
             margins=True,
         )
@@ -302,27 +312,23 @@ def return_honor_roll_flag_df(mp):
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
 
-    cr_1_40_df = return_df_by_title("1_40", year_and_semester)
-    cr_1_40_df["honor_roll_flag"] = cr_1_40_df.apply(determine_honor_roll_flag, axis=1)
-    cr_1_40_df = cr_1_40_df.rename(columns={"Student": "StudentID"})
+    HonorRoll_df = return_df_by_title("HonorRoll", year_and_semester)
+    HonorRoll_df["honor_roll_flag"] = HonorRoll_df.apply(
+        determine_honor_roll_flag, axis=1
+    )
+    HonorRoll_df = HonorRoll_df.rename(columns={"Student Id": "StudentID"})
 
-    return cr_1_40_df[["StudentID", "honor_roll_flag", "Average", "Minimum"]]
+    return HonorRoll_df[["StudentID", "honor_roll_flag"]]
 
 
 def determine_honor_roll_flag(student):
     gpa = student["Average"]
-    min_grade = student["Minimum"]
-
-    if min_grade < 65 and gpa < 85:
-        return f"<b>GPA</b> {gpa} - Not on Honor Roll"
-    if min_grade < 65 and gpa >= 85:
-        return f"<b>GPA</b> {gpa} - Not on Honor Roll | failed a class"
     if gpa >= 90:
-        return f"<b>GPA</b> {gpa} - Principal's Honor Roll (90+)"
-    if gpa >= 85:
-        return f"<b>GPA</b> {gpa} - Honor Roll (85-90)"
+        return f"Principal's Honor Roll (90+)"
+    else:
+        return f"Honor Roll (85-90)"
 
-    return f"<b>GPA</b> {gpa} - Not on Honor Roll"
+    return f"Not on Honor Roll"
 
 
 def return_df_by_title(title, year_and_semester):
@@ -333,9 +339,9 @@ def return_df_by_title(title, year_and_semester):
     return df
 
 
-def generate_letters(students_df, dfs_dict):
+def generate_letters(students_df, dfs_dict, marking_period):
     students_df["flowables"] = students_df.apply(
-        generate_letter_flowables, axis=1, args=(dfs_dict,)
+        generate_letter_flowables, axis=1, args=(dfs_dict, marking_period)
     )
     flowables = students_df["flowables"].explode().to_list()
 
@@ -354,15 +360,17 @@ def generate_letters(students_df, dfs_dict):
     return f
 
 
-def generate_letter_flowables(student_row, dfs_dict):
+def generate_letter_flowables(student_row, dfs_dict, marking_period):
 
     flowables = []
     chart_style = TableStyle(
         [("ALIGN", (0, 0), (-1, -1), "CENTER"), ("VALIGN", (0, 0), (-1, -1), "TOP")]
     )
 
-    left_flowables = return_left_flowables(student_row, dfs_dict)
-    right_flowables = return_student_class_flowables(student_row, dfs_dict)
+    left_flowables = return_left_flowables(student_row, dfs_dict, marking_period)
+    right_flowables = return_student_class_flowables(
+        student_row, dfs_dict, marking_period
+    )
 
     flowables.append(
         Table(
@@ -377,7 +385,7 @@ def generate_letter_flowables(student_row, dfs_dict):
     return flowables
 
 
-def return_student_class_flowables(student_row, dfs_dict):
+def return_student_class_flowables(student_row, dfs_dict, marking_period):
     StudentID = student_row["StudentID"]
     class_flowables = []
 
@@ -389,22 +397,31 @@ def return_student_class_flowables(student_row, dfs_dict):
 
     if len(student_classes_df) > 0:
         student_classes_df["flowables"] = student_classes_df.apply(
-            return_class_flowables, axis=1, args=(dfs_dict,)
+            return_class_flowables, axis=1, args=(dfs_dict, marking_period)
         )
         class_flowables = student_classes_df["flowables"].explode().to_list()
 
     return class_flowables
 
 
-def return_class_flowables(student_row, dfs_dict):
+def return_class_flowables(student_row, dfs_dict, marking_period):
     StudentID = student_row["StudentID"]
 
     course_code = student_row["Course"]
     course_name = student_row["CourseName"]
     period = student_row["Period"]
     teacher = student_row["Teacher1"]
-    mark = student_row["Mark1"]
+    mark = student_row[f"Mark{marking_period}"]
     narrative = student_row["Narrative"]
+
+    if marking_period == "2":
+        previous_mark = student_row[f"Mark1"]
+    elif marking_period == "3":
+        previous_mark = student_row[f"Mark2"]
+    else:
+        previous_mark = student_row[f"Mark1"]
+
+    mark_indicator = return_mark_indicator(mark, previous_mark, marking_period)
 
     JupiterCourseCode = student_row["JupiterCourse"]
     # assignments_df = dfs_dict["assignments_df"]
@@ -475,7 +492,7 @@ def return_class_flowables(student_row, dfs_dict):
         mark_fontname = "Helvetica-Bold"
     table_data = [
         [f"P{period}", course_name, I],
-        [mark, teacher, ""],
+        [f"{mark}{mark_indicator}", teacher, ""],
         ["", practice_str, performance_str],
     ]
     colWidths = [0.75 * inch, 2.625 * inch, 2.625 * inch]
@@ -494,7 +511,7 @@ def return_class_flowables(student_row, dfs_dict):
         ("BOX", (0, 0), (-1, -1), 2, colors.black),
         ("SPAN", (2, 0), (2, 1)),
         ("SPAN", (0, 1), (0, 2)),
-        ("FONTSIZE", (0, 1), (0, 1), 22),
+        ("FONTSIZE", (0, 1), (0, 1), 20),
         ("FONTNAME", (0, 1), (0, 1), mark_fontname),
         ("BOTTOMPADDING", (0, 1), (0, 1), 25),
     ]
@@ -512,7 +529,21 @@ def return_class_flowables(student_row, dfs_dict):
     return t
 
 
-def return_left_flowables(student_row, dfs_dict):
+def return_mark_indicator(mark, previous_mark, marking_period):
+    if marking_period == "1":
+        return ""
+    try:
+        if int(mark) > int(previous_mark):
+            return "▲"
+        if int(mark) < int(previous_mark):
+            return "▼"
+        else:
+            return ""
+    except:
+        return ""
+
+
+def return_left_flowables(student_row, dfs_dict, marking_period):
     flowables = []
     LastName = student_row["LastName"]
     FirstName = student_row["FirstName"]
@@ -523,7 +554,7 @@ def return_left_flowables(student_row, dfs_dict):
     year_and_semester = f"{school_year}-{term}"
 
     paragraph = Paragraph(
-        f"{year_and_semester} Report Card",
+        f"{year_and_semester}-MP{marking_period} Report Card",
         styles["Heading1"],
     )
     flowables.append(paragraph)
@@ -542,8 +573,9 @@ def return_left_flowables(student_row, dfs_dict):
     flowables.append(paragraph)
 
     honor_roll_flag = student_row["honor_roll_flag"]
+    gpa = student_row["Average"]
     paragraph = Paragraph(
-        f"{honor_roll_flag}",
+        f"<b>GPA:</b> {gpa} - {honor_roll_flag}",
         styles["Normal"],
     )
     flowables.append(paragraph)
@@ -688,6 +720,9 @@ def return_attendance_sentence_paragraphs(student_RATR_df):
     return paragraphs
 
 
+color_discrete_sequence = ["#32CD32", "#FAFA33", "#FF3131"]
+
+
 def return_daily_attd_summary_graph(RATR_Summary_df):
     y_aspect = 200
     x_aspect = 600
@@ -705,7 +740,7 @@ def return_daily_attd_summary_graph(RATR_Summary_df):
         # pattern_shape_sequence=[".", "x", "+"],
         orientation="h",
         # color="ATTD",
-        color_discrete_sequence=["lightgrey", "white", "grey"],
+        color_discrete_sequence=color_discrete_sequence,
         barmode="stack",
     )
 
@@ -769,7 +804,7 @@ def return_jupiter_attd_summary_graph(df):
         # pattern_shape_sequence=[".", "x", "+"],
         orientation="h",
         # color="ATTD",
-        color_discrete_sequence=["lightgrey", "white", "grey"],
+        color_discrete_sequence=color_discrete_sequence,
         barmode="stack",
     )
 
@@ -841,15 +876,15 @@ def smartpass_usage_by_period(student_row):
     y = ["Pd-1", "Pd-2", "Pd-3", "Pd-4", "Pd-5", "Pd-6", "Pd-7", "Pd-8", "Pd-9"]
 
     x = [
-        student_row[1],
-        student_row[2],
-        student_row[3],
-        student_row[4],
-        student_row[5],
-        student_row[6],
-        student_row[7],
-        student_row[8],
-        student_row[9],
+        student_row[1.0],
+        student_row[2.0],
+        student_row[3.0],
+        student_row[4.0],
+        student_row[5.0],
+        student_row[6.0],
+        student_row[7.0],
+        student_row[8.0],
+        student_row[9.0],
     ]
 
     text = [get_time_hh_mm_ss_short(x) for x in x[::-1]]

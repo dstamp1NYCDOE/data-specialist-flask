@@ -198,8 +198,9 @@ def create_master_course(teacher_row, period, day, cycle_day):
 
 
 def return_teacher_name(teacher_row):
-    first_name = teacher_row["first_name"]
-    last_name = teacher_row["last_name"]
+    first_name = str(teacher_row["first_name"])
+
+    last_name = str(teacher_row["last_name"])
     if len(first_name) > 0:
         return (
             last_name.replace(" ", "").replace("-", "").upper()

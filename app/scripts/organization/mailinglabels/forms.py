@@ -23,3 +23,7 @@ class ReturnMailingLabelsFromStudentPDFForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+class ReturnMailingLabelsByStudentIDListForm(FlaskForm):
+    subset_lst = StringField("StudentID List", widget=TextArea())
+    

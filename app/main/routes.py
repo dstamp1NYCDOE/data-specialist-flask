@@ -36,6 +36,7 @@ def return_index():
         "PBIS": "scripts.return_pbis_reports",
         "Privileges": "scripts.return_privileges_reports",
         "Classwork": "scripts.return_classwork_reports",
+        "Assignments": "scripts.return_jupiter_assignments_analysis_reports",
         "Progress Towards Graduation": "scripts.return_progress_towards_graduation_reports",
         "Official Class": "scripts.return_officialclass_reports",
         "Summer School": "scripts.return_summer_school_routes",
@@ -94,6 +95,7 @@ def upload_gsheet():
         gsheet_url = form.gsheet_url.data
         year_and_semester = form.year_and_semester.data
         school_year, semester = year_and_semester.split("-")
+        
 
         file_dict = {
             "gsheet_url": gsheet_url,

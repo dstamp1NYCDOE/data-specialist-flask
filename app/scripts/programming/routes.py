@@ -89,6 +89,12 @@ def return_programming_reports():
             "form": jupiter_master_schedule_form,
             "route": "scripts.return_combined_ict_for_stars",
         },
+        {
+            "Title": "Spring Programming",
+            "Description": "Return Spring Programming Scripts",
+            "form": jupiter_master_schedule_form,
+            "route": "scripts.return_programming_spring_scripts",
+        },        
     ]
 
 

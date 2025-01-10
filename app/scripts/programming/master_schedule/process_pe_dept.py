@@ -174,8 +174,9 @@ def create_master_course(teacher_row, period, day, cycle_day):
 
 
 def return_teacher_name(teacher_row):
-    first_name = teacher_row["first_name"]
-    last_name = teacher_row["last_name"]
+    first_name = str(teacher_row["first_name"])
+
+    last_name = str(teacher_row["last_name"])
     if len(first_name) > 0:
         return (
             last_name.replace(" ", "").replace("-", "").upper()
@@ -207,18 +208,18 @@ def return_section_number(teacher_row, period, cycle=None):
 
 def return_capacity_(course_code, period, teacher_row):
     teacher_row_course_code = teacher_row[f"Period{period}"]
-    print(teacher_row_course_code)
+    # print(teacher_row_course_code)
     if course_code in ["PPS83"]:
-        return 34
+        return 40
     if course_code in ["PHS21", "GAS83", "PHS11"]:
-        return 34
+        return 25
     if teacher_row_course_code in ["PPS81", "PPS87", "PPS85"]:
         if period in [4, 7]:
-            return 34
+            return 40
         else:
-            return 50
+            return 40
     else:
-        return 25
+        return 20
 
 
 def return_course_code(course_code, day):

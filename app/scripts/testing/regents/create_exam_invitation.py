@@ -87,6 +87,7 @@ def main():
         "Room",
         "Section",
         "Type",
+        "photo_filename"
     ]
 
     cr_1_08_df = cr_1_08_df[cols]
@@ -163,7 +164,6 @@ def generate_student_letter(exams_df):
         I.drawHeight = 2.75 * inch
         I.drawWidth = 2.75 * inch
         I.hAlign = "CENTER"
-        # flowables.append(I)
     except:
         I = ""
         pass
