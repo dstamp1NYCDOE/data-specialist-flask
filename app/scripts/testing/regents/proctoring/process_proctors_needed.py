@@ -49,13 +49,10 @@ def return_hall_proctor_need(rooms_df):
     rooms_df = rooms_df.copy()
     rooms_df["Room"] = rooms_df["Room"].apply(lambda x: str(x)[0] + "th Floor")
     rooms_df = rooms_df.sort_values(by=["assignment_difficulty"])
-    print(rooms_df)
 
     floors_df = rooms_df.drop_duplicates(subset=["Day", "Time", "Room"], keep="last")
     floors_df = floors_df.sort_values(by=["Day", "Time", "Room"])
     floors_df = floors_df[floors_df["Type"] != "SCRIBE"]
-
-    print(floors_df)
 
     hall_proctors_lst = []
     for (day, TIME), df in floors_df.groupby(["Day", "Time"]):

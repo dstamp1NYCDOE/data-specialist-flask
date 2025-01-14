@@ -43,7 +43,7 @@ def return_number_of_proctors_needed(room):
     Time = room["Time"]
     Active = room["Active"]
     if "scribe" in Type.lower():
-        return Active * 2
+        return Active * 3
 
     if "QR" in Type:
         return 3
@@ -54,8 +54,3 @@ def return_number_of_proctors_needed(room):
             return 3
         else:
             return 2
-
-
-import re
-
-

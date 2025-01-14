@@ -90,6 +90,7 @@ class GsheetForm(FlaskForm):
             ("summer_school_gradebooks_hub", "Summer School Gradebooks Hub"),
             ("summer_school_attendance_hub", "Summer School Attendance Hub"),
             ("absentee_form_results", "HSFI Absentee Form Results"),
+            ("regents_exam_book", "Regents Exam Book"),
         ],
     )
     gsheet_url = URLField(

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="#">Testing</a></li>
+    <li class="breadcrumb-item"><a href="#">Regents</a></li>
+    <li class="breadcrumb-item active"><a href="#">Day Of Organization</a></li>
+  </ol>
+</nav>
+
+<h1>Day of Organization</h1>
+
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Exam</th>
+      <th scope="col">Date</th>
+      <th scope="col">Time</th>
+      <th scope="col">Student Labels</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for exam in exambook %}
+    <tr>
+      <th scope="row">{{exam.ExamTitle}}</th>
+      <td>{{exam.Day}}</td>
+      <td>{{exam.Time}}</td>
+      <td>{{form(exam,'Rooms')}} {{form(exam,'Sections')}}</td>
+    </tr>
+    {% endfor %} 
+  </tbody>
+</table>
+
+  
+
+
+</div>
+{% endblock %}
+
+
+{% macro form(exam, lst) -%}
+
+<form action="{{url_for('scripts.return_regents_day_of_org_files',course=exam.Course, file='StudentLabels')}}" class="grid gap-3" method="GET">
+    
+<div class="row">
+    <div class="col-2">
+        <label for="cars">{{lst}}:</label>
+    </div>
+    <div class="form-group col-6">
+        
+        <select name="{{lst}}" id="{{lst}}" class="form-select" aria-label="Default select example">
+        <option selected>ALL</option>
+        {% for lst_option in exam[lst] %}
+            <option>{{lst_option}}</option>
+        {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group col-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</div>
+</form>
+
+{%- endmacro %}

@@ -19,6 +19,8 @@ from app.scripts.attendance.cut_analysis import routes
 from app.scripts.attendance.historical_period_attd import routes
 from app.scripts.attendance.CAASS import routes
 
+from app.scripts.college_and_career import routes
+
 
 from app.scripts.dataspecialist import routes
 from app.scripts.dataspecialist.sy2425 import routes

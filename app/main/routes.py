@@ -30,6 +30,7 @@ def return_index():
         "Programming": "scripts.return_programming_reports",
         "Commutes": "scripts.return_commute_reports",
         "Attendance": "scripts.return_attendance_reports",
+        "College and Career": "scripts.return_college_and_career_reports",
         "Organization": "scripts.return_organization_reports",
         "Testing": "scripts.return_testing_reports",
         "Scholarship": "scripts.return_scholarship_reports",

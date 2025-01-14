@@ -161,9 +161,8 @@ def main():
                 junior_college_apps.append(temp_df)                    
 
     junior_college_apps_df = pd.concat(junior_college_apps)
+    ninth_grade_extra_lunch_df = pd.concat(ninth_grade_extra_lunch)
     
-    print(junior_apps_df)
-    print(junior_college_apps_df)
 
 
     junior_apps_dff = junior_college_apps_df[['StudentID',
@@ -196,7 +195,7 @@ def main():
     dff = cr_1_01_df[student_output_cols]
     junior_apps_dff = junior_apps_dff[student_output_cols]
 
-    dff = pd.concat([dff,junior_apps_dff])
+    dff = pd.concat([dff,junior_apps_dff,ninth_grade_extra_lunch_df])
     
 
     student_counts = pd.pivot_table(dff,index=['Course','Section'], values='StudentID',aggfunc='count')

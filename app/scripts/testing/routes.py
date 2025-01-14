@@ -453,36 +453,4 @@ def return_special_appeal_candidates():
     )
 
 
-from app.scripts.testing.regents.day_of_org import (
-    main as regents_day_of_org,
-)
-
-
-@scripts.route("/testing/regents/day_of_org")
-def return_regents_day_of_org_index():
-    school_year = session["school_year"]
-    term = session["term"]
-    path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
-    regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    regents_calendar_df = regents_calendar_df.sort_values(by=["Day", "Time"])
-
-    return render_template(
-        "testing/templates/testing/regents/day_of_org.html",
-        regents_calendar=regents_calendar_df.to_dict("records"),
-    )
-
-
-@scripts.route("/testing/regents/day_of_org/<course>/<file>")
-def return_regents_day_of_org_files(course, file):
-    school_year = session["school_year"]
-    term = session["term"]
-    data = {"school_year": school_year, "term": term, "course": course, "file": file}
-    f = regents_day_of_org.main(data)
-
-    download_name = f"{school_year}_{term}_{course}_{file}.xlsx"
-    return send_file(
-        f,
-        as_attachment=True,
-        download_name=download_name,
-        # mimetype="application/pdf",
-    )
+from app.scripts.testing.regents.day_of_org import routes

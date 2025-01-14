@@ -14,18 +14,16 @@ def main(proctor_assignments_df, proctor_availability_df):
     proctors_dict = {}
     assigned_proctors_by_day = {}
     proctor_assignments_list = []
+
     for day in assignments_days_in_order:
+
         assignments_to_make = proctor_assignments_df[
             proctor_assignments_df["Day"] == day
         ]
 
-        # assignments_to_make = assignments_to_make.sort_values(by=['assignment_difficulty'], ascending=False)
         assignments_to_make = assignments_to_make.sort_values(
             by=["Time", "proctor#", "assignment_difficulty"],
             ascending=[False, True, False],
-        )
-        assignments_to_make = assignments_to_make.sort_values(
-            by=["Time", "assignment_difficulty"], ascending=[False, False]
         )
 
         if len(assignments_to_make) == 0:
