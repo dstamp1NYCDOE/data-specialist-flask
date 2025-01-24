@@ -57,7 +57,7 @@ def main(form, request):
 
     if form.student_list_source.data == "STARS_Classlist_Report":
         sort_by_df = sort_by_df.rename(columns={"PeriodId || '/'": "Period"})
-        sort_by_df = sort_by_df.merge(photos_df[['StudentID','photo_filename']], on=["StudentID"], how='left')
+ 
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Period", "CourseCode", "SectionId"]
         sort_by_df["sort_by_col"] = (
@@ -74,7 +74,7 @@ def main(form, request):
         student_roster_table_cols = ["StudentName", "___________"]
 
     if form.student_list_source.data == "teacher_and_room_list":
-        sort_by_df = sort_by_df.merge(photos_df[['StudentID','photo_filename']], on=["StudentID"], how='left')
+
 
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Room"]
@@ -99,6 +99,7 @@ def main(form, request):
         students_df = students_df.sort_values(by=student_sort_by_cols).dropna()
         
         if include_classlist_flag:
+            sort_by_df = sort_by_df.merge(photos_df[['StudentID','photo_filename']], on=["StudentID"], how='left')
             roster_pdf = return_class_list_roster_pdf(
                 sort_by, students_df, student_roster_table_cols
             )
