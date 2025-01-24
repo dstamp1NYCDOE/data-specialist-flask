@@ -74,16 +74,12 @@ def main(form, request):
     filename = request.files[form.jupiter_attendance_file.name]
     attendance_df = pd.read_csv(filename)
     attendance_df["Date"] = pd.to_datetime(attendance_df["Date"])
-<<<<<<< HEAD
-    attendance_df['Pd'] = attendance_df['Period'].str.extract(r"(\d{1,2})")
-=======
     attendance_df["Pd"] = attendance_df["Period"].str.extract("(\d+)")
     attendance_df["Pd"] = attendance_df["Pd"].apply(lambda x: int(x))
->>>>>>> 4262955186cd883e796ed8e3647eeeaec821d2b5
 
     rdsc_students = df["StudentID"].unique()
     attendance_df = attendance_df[attendance_df["StudentID"].isin(rdsc_students)]
-
+    print(attendance_df)
     attendance_by_students_by_date_pvt = pd.pivot_table(attendance_df, index=['StudentID','Date'],columns=['Type'],aggfunc='count', values='Pd').fillna(0)
     attendance_by_students_by_date_pvt['Total'] = attendance_by_students_by_date_pvt.sum(axis=1)
     attendance_by_students_by_date_pvt = attendance_by_students_by_date_pvt.reset_index()
@@ -119,14 +115,7 @@ def main(form, request):
         temp_lst.append(attendance_dict)
 
     parsed_attd_df = pd.DataFrame(temp_lst).fillna("")
-<<<<<<< HEAD
-    parsed_cols = ["StudentID", "Date", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    missing_cols = [x for x in parsed_cols if x not in parsed_attd_df.columns]
-    for missing_col in missing_cols:
-        parsed_attd_df[missing_col] = ''
-=======
     parsed_cols = ["StudentID", "Date", 1,2,3,4,5,6,7,8,9]
->>>>>>> 4262955186cd883e796ed8e3647eeeaec821d2b5
     parsed_attd_df = parsed_attd_df[parsed_cols]
 
     parsed_attd_df = df[["StudentID", "Date", "Student Name"]].merge(
