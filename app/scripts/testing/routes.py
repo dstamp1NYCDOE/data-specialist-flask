@@ -120,6 +120,12 @@ def return_college_board_exam_tickets():
 def return_regents_reports():
     reports = [
         {
+            "report_title": "Generate Day of Regents Materials",
+            "report_function": "scripts.return_regents_day_of_org",
+            "report_description": "Generate Day of Testing Materials for Regents Exams",
+            "files_needed": ["1_01", "1_08", "regents_exam_calendar"],
+        },
+        {
             "report_title": "Generate Exam Invitations",
             "report_function": "scripts.return_regents_exam_invitations",
             "report_description": "Generates student exam invitations from CR 1.08 and Regents Exam Calendar",

@@ -15,7 +15,9 @@ def main(exam_book_df):
     )
     exam_book_df = exam_book_df.sort_values(by=["assignment_difficulty"])
 
-    rooms_df = exam_book_df.drop_duplicates(subset=["Day", "Time", "Room"], keep="last")
+    rooms_df = exam_book_df.drop_duplicates(
+        subset=["Day", "Time", "Course", "Room"], keep="last"
+    )
 
     rooms_df["number_of_proctors_needed"] = rooms_df.apply(
         utils.return_number_of_proctors_needed, axis=1

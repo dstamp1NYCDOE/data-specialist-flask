@@ -89,7 +89,7 @@ def main(RATR_df):
         vacation_extender_df = return_vacation_extender_df(
             student_attd_by_days_before_break_df, student_attd_by_days_after_break
         )
-        print(vacation_extender_df)
+
         day_of_week_df = return_day_of_week_df(student_attd_by_day_of_week_df)
 
         student_attd_correl_df = return_student_correlation_to_overall(RATR_df)
@@ -108,10 +108,17 @@ def main(RATR_df):
         output_df = output_df.merge(multiple_day_df, on="StudentID")
 
         output_df["AttdTier"] = output_df["ytd_absence_%"].apply(return_attd_tier)
+        output_df["AttdMetric"] = output_df["ytd_absence_%"].apply(return_attd_multiplier)
         output_df = output_df.sort_values(by=["year_in_hs", "LastName", "FirstName"])
         
         output_dict[month] = output_df.copy()
-        
+
+
+    ## run stats on ytd
+    ytd_df = output_dict['ytd']
+    attendance_metric_by_cohort = pd.pivot_table(ytd_df, index='year_in_hs', values='AttdMetric',aggfunc='mean')
+    attendance_metric_by_cohort = attendance_metric_by_cohort.reset_index()
+    output_dict['attd_metric_by_cohort'] = attendance_metric_by_cohort         
 
     return output_dict
 
@@ -174,8 +181,20 @@ def return_multiple_day_df(RATR_df):
         }
         output_lst.append(temp_dict)
 
+
+
     return pd.DataFrame(output_lst)
 
+def return_attd_multiplier(absence_rate):
+    if absence_rate <= 0.05:
+        return 2.5
+    if absence_rate <= 0.10:
+        return 2
+    if absence_rate <= 0.15:
+        return 1
+    if absence_rate <= 0.2:
+        return 0
+    return 0
 
 def return_attd_tier(absence_rate):
     if absence_rate <= 0.05:
@@ -254,10 +273,6 @@ def return_vacation_extender_df(
         student_attd_by_days_after_break["DaysAfterBreak"] == 1
     ]
     df = day_after_df.merge(day_before_df, on=["StudentID"], how='left')
-
-    print(df)
-    
-
     df["Holiday Pattern"] = df.apply(return_vacation_extender_flag, axis=1)
     df["Holiday Pattern %"] = df.apply(return_vacation_extender_pct, axis=1)
 

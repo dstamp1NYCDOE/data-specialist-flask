@@ -26,6 +26,8 @@ def main(proctor_assignments_df, proctor_availability_df):
             ascending=[False, True, False],
         )
 
+        print(assignments_to_make)
+
         if len(assignments_to_make) == 0:
             continue
 
@@ -47,8 +49,8 @@ def main(proctor_assignments_df, proctor_availability_df):
 
         proctors_by_assignment_type = {
             "AM": {
-                1: AM_possible_proctors + PM_possible_proctors,
-                2: AM_possible_proctors + PM_possible_proctors,
+                1: AM_possible_proctors,
+                2: AM_possible_proctors,
                 3: AM_possible_proctors + PM_possible_proctors,
                 4: AM_possible_proctors + PM_possible_proctors,
                 5: AM_possible_proctors + PM_possible_proctors,
@@ -58,9 +60,9 @@ def main(proctor_assignments_df, proctor_availability_df):
                 9: AM_possible_proctors + PM_possible_proctors,
             },
             "PM": {
-                1: PM_possible_proctors + AM_possible_proctors,
-                2: PM_possible_proctors + AM_possible_proctors,
-                3: PM_possible_proctors + AM_possible_proctors,
+                1: PM_possible_proctors,
+                2: PM_possible_proctors,
+                3: PM_possible_proctors,
                 4: PM_possible_proctors,
                 5: PM_possible_proctors,
                 6: PM_possible_proctors,
@@ -82,6 +84,18 @@ def main(proctor_assignments_df, proctor_availability_df):
                 for teacher in proctors_to_pick_from
                 if teacher not in assigned_proctors_by_day[day]
             ]
+
+            if len(proctors_to_pick_from) == 0:
+                if time == 'AM':
+                    proctors_to_pick_from = proctors_by_assignment_type['PM'][proctor_type]
+                elif time == 'PM':
+                    proctors_to_pick_from = proctors_by_assignment_type['AM'][proctor_type]
+                proctors_to_pick_from = [
+                    teacher
+                    for teacher in proctors_to_pick_from
+                    if teacher not in assigned_proctors_by_day[day]
+                ]                    
+
 
             assigned_proctor = return_proctor(proctors_to_pick_from, proctors_dict)
 

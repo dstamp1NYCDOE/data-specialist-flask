@@ -22,6 +22,12 @@
       <th scope="col">Date</th>
       <th scope="col">Time</th>
       <th scope="col">Student Labels</th>
+      <th scope="col">Folder Labels</th>
+      <th scope="col">ENL Rosters</th>
+      <th scope="col">Bag Labels</th>
+      <th scope="col">Bathroom Passes</th>
+      <th scope="col">Direction Labels</th>
+      <th scope="col">Proctors + Grid</th>
     </tr>
   </thead>
   <tbody>
@@ -30,9 +36,27 @@
       <th scope="row">{{exam.ExamTitle}}</th>
       <td>{{exam.Day}}</td>
       <td>{{exam.Time}}</td>
-      <td>{{form(exam,'Rooms')}} {{form(exam,'Sections')}}</td>
+      <td>{{form_with_dropdown(exam,'Rooms','StudentLabels')}} {{form_with_dropdown(exam,'Sections','StudentLabels')}}</td>
+      <td>{{form_without_dropdown(exam, 'FolderLabels')}}</td>
+      <td>{{form_without_dropdown(exam, 'ENLRosters')}}</td>
+      <td>{{form_without_dropdown(exam, 'BagLabels')}}</td>
+      <td>{{form_without_dropdown(exam, 'BathroomPasses')}}</td>
+      <td>{{form_without_dropdown(exam, 'DirectionLabels')}}</td>
+      <td>{{form_without_dropdown(exam, 'ProctorsAndRoomGrid')}}</td>
     </tr>
     {% endfor %} 
+    <tr>
+        <th scope="row">All</th>
+        <td></td>
+        <td></td>
+        <td>{{form_with_dropdown({'Course':'All'},'Rooms','StudentLabels')}} {{form_with_dropdown({'Course':'All'},'Sections','StudentLabels')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'}, 'FolderLabels')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'},'ENLRosters')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'},'BagLabels')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'},'BathroomPasses')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'},'DirectionLabels')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'},'ProctorsAndRoomGrid')}}</td>
+      </tr>
   </tbody>
 </table>
 
@@ -43,9 +67,28 @@
 {% endblock %}
 
 
-{% macro form(exam, lst) -%}
 
-<form action="{{url_for('scripts.return_regents_day_of_org_files',course=exam.Course, file='StudentLabels')}}" class="grid gap-3" method="GET">
+
+{% macro form_without_dropdown(exam, file) -%}
+
+<form action="{{url_for('scripts.return_regents_day_of_org_files',course=exam.Course, file=file)}}" class="grid gap-3" method="GET">
+    
+<div class="row">
+    <div class="form-group col-4">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</div>
+</form>
+
+{%- endmacro %}
+
+
+
+
+
+{% macro form_with_dropdown(exam, lst, file) -%}
+
+<form action="{{url_for('scripts.return_regents_day_of_org_files',course=exam.Course, file=file)}}" class="grid gap-3" method="GET">
     
 <div class="row">
     <div class="col-2">

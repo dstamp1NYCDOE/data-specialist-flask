@@ -83,7 +83,7 @@ def return_students_df(marking_period):
     )
 
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
-    cr_3_07_df = cr_3_07_df[cr_3_07_df["StudentID"] == 236817342]
+
     counselors_df = return_counselors_df()
     cr_3_07_df = cr_3_07_df.merge(counselors_df, on=["StudentID"], how="left")
     fd_balances = return_fashion_dollar_balances()

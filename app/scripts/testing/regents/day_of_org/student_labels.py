@@ -53,7 +53,14 @@ def main(course, request):
         files_df, "1_08", year_and_semester=year_and_semester
     )
     cr_1_08_df = pd.read_csv(cr_1_08_filename)
-    cr_1_08_df = cr_1_08_df[cr_1_08_df["Course"] == course]
+
+    if course != 'All':
+        cr_1_08_df = cr_1_08_df[cr_1_08_df["Course"] == course]
+        download_name = f"{course}_Student_Labels.pdf"
+    else:
+        download_name = f"All_Student_Labels.pdf"
+
+    
 
     if "Rooms" in request.args.keys():
         if request.args.get("Rooms") == "ALL":
@@ -76,11 +83,12 @@ def main(course, request):
         exam_book_df, left_on=["Course", "Section"], right_on=["Course Code", "Section"]
     )
 
+    labels_to_make = []
     for (day, time, exam_title), students_df in registered_students_df.groupby(
         ["Day", "Time", "ExamTitle"]
     ):
-
-        labels_to_make = []
+        print(students_df)
+        
         for room, students_in_room_df in students_df.groupby("Room_y"):
             previous_remainder = len(labels_to_make) % 30
             exam_code = students_in_room_df.iloc[0]["Course"]
@@ -119,14 +127,14 @@ def main(course, request):
             for i in range(blanks_to_add):
                 labels_to_make.append({})
 
-        sheet = labels.Sheet(specs, draw_label, border=True)
-        sheet.add_labels(labels_to_make)
+    sheet = labels.Sheet(specs, draw_label, border=True)
+    sheet.add_labels(labels_to_make)
 
-    filename = f"{exam_title}_Labels.pdf"
+    
     f = BytesIO()
     sheet.save(f)
     f.seek(0)
-    return f, filename
+    return f, download_name
 
 
 def draw_label(label, width, height, obj):

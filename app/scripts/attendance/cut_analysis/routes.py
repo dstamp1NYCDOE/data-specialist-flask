@@ -34,7 +34,12 @@ def return_jupiter_cut_analysis_reports():
             "report_title": "Return Prospective Cutters Present In Building",
             "report_function": "scripts.return_jupiter_cut_analysis_in_building",
             "report_description": "Returns potential top cutters for a particular period based on CAASS Scan Data",
-        },        
+        },
+        {
+            "report_title": "Return Cut Analysis by Period and Date",
+            "report_function": "scripts.return_jupiter_cut_analysis_by_period_and_date",
+            "report_description": "Returns period attendance by date",
+        },
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -60,14 +65,30 @@ def return_jupiter_cut_analysis_groups():
 
 
 from app.scripts.attendance.cut_analysis import cut_analysis_by_course
+
+
 @scripts.route("/attendance/cut_analysis/cut_analysis_by_course")
 def return_jupiter_cut_analysis_by_course():
     f, download_name = cut_analysis_by_course.main()
     return send_file(f, as_attachment=True, download_name=download_name)
 
+
+from app.scripts.attendance.cut_analysis import cut_analysis_by_period_and_date
+
+
+@scripts.route("/attendance/cut_analysis/cut_analysis_by_period_and_date")
+def return_jupiter_cut_analysis_by_period_and_date():
+    f, download_name = cut_analysis_by_period_and_date.main()
+    return send_file(f, as_attachment=True, download_name=download_name)
+
+
 from app.scripts.attendance.cut_analysis.forms import ProspectiveCuttingFromCAASSForm
 from app.scripts.attendance.cut_analysis import top_cutters_by_period_with_CAASS
-@scripts.route("/attendance/cut_analysis/by_period_in_building", methods=["GET", "POST"])
+
+
+@scripts.route(
+    "/attendance/cut_analysis/by_period_in_building", methods=["GET", "POST"]
+)
 def return_jupiter_cut_analysis_in_building():
     if request.method == "GET":
         form = ProspectiveCuttingFromCAASSForm()
@@ -83,4 +104,4 @@ def return_jupiter_cut_analysis_in_building():
             f,
             as_attachment=True,
             download_name=download_name,
-        )        
+        )

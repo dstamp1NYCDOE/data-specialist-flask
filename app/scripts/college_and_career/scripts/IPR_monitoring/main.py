@@ -61,7 +61,6 @@ def main(form, request):
         dff[f'{experience}_Completed?'] = dff['Experience'].apply(lambda x: x == experience)
         combined_dfs.append(dff.drop(columns=['Experience','Experience Start Date']).set_index(['StudentID','LastName','FirstName','Counselor','GEC']))
 
-        print(dff)
 
         for index in ['Counselor','GEC']:
             dff_tbl = pd.pivot_table(dff,columns=f'{experience}_Completed?', index=index, margins=True,values='StudentID', aggfunc='count').fillna(0)
@@ -84,8 +83,16 @@ def main(form, request):
         sheet_name = f"{index}_{experience}"
         sheet_name = sheet_name[0:31]
         dff_tbl.to_excel(writer, sheet_name=sheet_name)
-        print(dff_tbl)
     
+
+    ## students without experience
+    for cohort, students_df in combined_df.groupby('GEC'):
+        students_dff = students_df[students_df['1 on 1 Postsecondary Planning Conference_Completed?']==False]
+        experience = '1 on 1 Postsecondary Planning Conference'
+        sheet_name = f"{cohort}_incomplete_{experience}"
+        sheet_name = sheet_name[0:31]
+        students_dff.to_excel(writer, sheet_name=sheet_name)
+     
 
 
     for sheet in writer.sheets:
