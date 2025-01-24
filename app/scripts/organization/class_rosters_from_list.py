@@ -112,7 +112,7 @@ def main(form, request):
 
     ## all students with course info
     if teacher_flag != 'NoTeacherPages':
-            df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_rosters')
+        df[cols].sort_values(by=['Period','Course','Section','LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_rosters')
     
     ## all students with counselor info
     df[counselor_cols].drop_duplicates(subset='StudentID').sort_values(by=['LastName','FirstName']).to_excel(writer, index=False, sheet_name='all_students')

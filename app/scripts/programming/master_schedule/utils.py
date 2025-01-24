@@ -7,11 +7,21 @@ import app.scripts.programming.master_schedule.gsheet_utils as gsheet_utils
 import app.scripts.programming.master_schedule.spreadsheet_ids as spreadsheet_ids
 
 
+from app.scripts import gsheets_df
+
+from flask import session
+
+from app.scripts.utils import return_gsheet_url_by_title
+
 gc = pygsheets.authorize(service_account_env_var="GDRIVE_API_CREDENTIALS")
 
 
 def return_master_schedule_by_sheet(sheet_name):
-    spreadsheet_id = spreadsheet_ids.master_schedule_planning
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+    
+    spreadsheet_id = return_gsheet_url_by_title(gsheets_df, 'master_schedule_planning', year_and_semester=year_and_semester)
     df = gsheet_utils.return_google_sheet_as_dataframe(spreadsheet_id, sheet=sheet_name)
     df = df.fillna("")
     if "department" in df.columns:

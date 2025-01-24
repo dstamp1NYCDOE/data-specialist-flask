@@ -100,6 +100,41 @@ def draw_label(label, width, height, obj):
         pass
 
 
+def by_list_of_students(form, request):
+
+    student_lst_str = form.subset_lst.data
+    student_lst = []
+    if student_lst_str != '':
+        student_lst = student_lst_str.split("\r\n")
+        student_lst = [int(x) for x in student_lst]
+
+    
+
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "3_07", year_and_semester=year_and_semester
+    )
+    student_info_df = utils.return_file_as_df(filename).fillna("")
+    
+    student_info_df["Zip"] = student_info_df["Zip"].apply(lambda x: str(x).zfill(5)[0:5])
+
+    student_info_df = student_info_df.set_index('StudentID')
+    student_info_df = student_info_df.reindex(student_lst)
+    
+
+    labels_to_make = student_info_df.to_dict('records')
+
+    sheet = labels.Sheet(specs, draw_label, border=True)
+    sheet.add_labels(labels_to_make)
+    f = BytesIO()
+    sheet.save(f)
+    f.seek(0)
+    return f
+
+
 def main(form, request):
 
     PDF = request.files[form.student_records_pdf.name]

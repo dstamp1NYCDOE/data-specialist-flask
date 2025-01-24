@@ -31,6 +31,21 @@ def return_pbis_reports():
             "report_function": "scripts.return_smartpass_reports",
             "report_description": "Return SmartPass Analysis reports",
         },
+        {
+            "report_title": "Univeral Screener Analysis",
+            "report_function": "scripts.return_screener_reports",
+            "report_description": "Return Univeral Screener Analysis reports",
+        },
+        {
+            "report_title": "Phone Call Tracker Analysis",
+            "report_function": "scripts.return_phone_call_tracker_reports",
+            "report_description": "Return Phone Call Tracker Analysis",
+        },
+        {
+            "report_title": "Student Network Analysis",
+            "report_function": "scripts.return_student_network_routes",
+            "report_description": "Return student network analysis reports",
+        },
     ]
     title = "PBIS"
     return render_template(

@@ -27,6 +27,14 @@ def main():
 
     ## only keep students still on register
     attendance_marks_df = attendance_marks_df[attendance_marks_df['StudentID'].isin(students_df['StudentID'])]
+    ## keep students still enrolled in the class.
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades",year_and_semester=year_and_semester)
+    rosters_df = utils.return_file_as_df(filename).drop_duplicates(subset=['StudentID','Course','Section'])
+    rosters_df = rosters_df[['StudentID','Course','Section']]
+    rosters_df['Enrolled?'] = True
+    attendance_marks_df = attendance_marks_df.merge(rosters_df, on=['StudentID','Course','Section'], how='left').fillna(False)
+    attendance_marks_df = attendance_marks_df[attendance_marks_df['Enrolled?']]
+    attendance_marks_df = attendance_marks_df.drop(columns=['Enrolled?'])
 
     periods_df = attendance_marks_df[["Period"]].drop_duplicates()
     periods_df["Pd"] = periods_df["Period"].apply(utils.return_pd)

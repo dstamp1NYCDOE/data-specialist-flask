@@ -30,12 +30,14 @@ def return_index():
         "Programming": "scripts.return_programming_reports",
         "Commutes": "scripts.return_commute_reports",
         "Attendance": "scripts.return_attendance_reports",
+        "College and Career": "scripts.return_college_and_career_reports",
         "Organization": "scripts.return_organization_reports",
         "Testing": "scripts.return_testing_reports",
         "Scholarship": "scripts.return_scholarship_reports",
         "PBIS": "scripts.return_pbis_reports",
         "Privileges": "scripts.return_privileges_reports",
         "Classwork": "scripts.return_classwork_reports",
+        "Assignments": "scripts.return_jupiter_assignments_analysis_reports",
         "Progress Towards Graduation": "scripts.return_progress_towards_graduation_reports",
         "Official Class": "scripts.return_officialclass_reports",
         "Summer School": "scripts.return_summer_school_routes",
@@ -94,6 +96,7 @@ def upload_gsheet():
         gsheet_url = form.gsheet_url.data
         year_and_semester = form.year_and_semester.data
         school_year, semester = year_and_semester.split("-")
+        
 
         file_dict = {
             "gsheet_url": gsheet_url,
@@ -157,15 +160,20 @@ def upload_files():
         if "CustomReport" in report_name:
             report_name = report_name[13:-5]
             filename = f"{report_name}.{extension}"
-        if 'Hall-Pass-Data' in report_name:
-            report_name = 'SmartPassExport'
+        if "Hall-Pass-Data" in report_name:
+            report_name = "SmartPassExport"
+            filename = f"{report_name}.{extension}"
+        if "RPT-School-Messenger-Attendance" in report_name:
+            report_name = "CAASS-Swipe-Data"
             filename = f"{report_name}.{extension}"
 
         download_date = form.download_date.data
         year_and_semester = form.year_and_semester.data
         if report_name == "attendance":
             filename = f"{year_and_semester}_9999-12-31_{filename}"
-        elif 'SmartPassExport' in report_name:
+        elif "SmartPassExport" in report_name:
+            filename = f"{year_and_semester}_9999-12-31_{filename}"
+        elif "CAASS_SWIPE_EXPORT" in report_name:
             filename = f"{year_and_semester}_9999-12-31_{filename}"
         else:
             filename = f"{year_and_semester}_{download_date}_{filename}"
@@ -178,7 +186,7 @@ def upload_files():
             os.makedirs(path)
         f.save(os.path.join(path, filename))
         flash(f"{filename} successfully uploaded", category="success")
-        global files_df 
+        global files_df
         files_df = utils.return_dataframe_of_files()
         return redirect(url_for("main.upload_files"))
 

@@ -35,8 +35,6 @@ def return_organization_reports():
             "report_function": "scripts.return_gather_teacher_input_per_student_spreadsheet",
             "report_description": "",
         },
-
-        
         {
             "report_title": "Update Google Sheet Class lists",
             "report_function": "scripts.return_updated_google_sheet_classlists",
@@ -81,7 +79,17 @@ def return_organization_reports():
             "report_title": "Student Mailing Labels for a PDF",
             "report_function": "scripts.return_mailing_labels_by_student_pdf",
             "report_description": "Generate Mailing Labels to go with a PDF of student records",
-        },        
+        },
+        {
+            "report_title": "Student Mailing Labels for StudentID List",
+            "report_function": "scripts.return_mailing_labels_by_student_list",
+            "report_description": "Generate Mailing Labels to go with a list of StudentIDs",
+        },
+        {
+            "report_title": "Photo Roster from List of StudentIDs",
+            "report_function": "scripts.return_photo_roster_by_studentid_lst",
+            "report_description": "Generate student photo grid from list of StudentID numebers",
+        },
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports
@@ -249,6 +257,30 @@ def return_mailing_labels_by_period():
         f = mailing_labels_by_period.main(form, request)
 
         download_name = "mailing_labels.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )
+
+
+import app.scripts.organization.photo_roster.main as photo_roster
+
+
+@scripts.route("/organization/photo_roster_by_studentid_lst", methods=["GET", "POST"])
+def return_photo_roster_by_studentid_lst():
+    if request.method == "GET":
+        form = ClassListCountsFromSubsetForm()
+        return render_template(
+            "organization/templates/organization/photo_roster.html",
+            form=form,
+        )
+    else:
+        form = ClassListCountsFromSubsetForm(request.form)
+
+        f, download_name = photo_roster.main(form, request)
 
         return send_file(
             f,

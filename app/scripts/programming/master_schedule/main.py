@@ -14,7 +14,18 @@ import app.scripts.programming.master_schedule.identify_irresolvables as identif
 
 from app.scripts.programming.master_schedule.utils import output_cols
 
+from app.scripts import gsheets_df
+
+from flask import session
+
+from app.scripts.utils import return_gsheet_url_by_title
+
 def main():
+
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
     output_list = []
 
     for academic_dept in ['Spanish','Math','Science','SS','ELA']:
@@ -46,7 +57,7 @@ def main():
     ## identify if the value should be added
     output_df['to_count'] = output_df.apply(to_count,axis=1)
     output_cols.append('to_count')
-    spreadsheet_id = spreadsheet_ids.master_schedule_planning
+    spreadsheet_id = return_gsheet_url_by_title(gsheets_df, 'master_schedule_planning', year_and_semester=year_and_semester)
     gsheet_utils.set_df_to_dataframe(
         output_df[output_cols], spreadsheet_id, sheet="Output")
 

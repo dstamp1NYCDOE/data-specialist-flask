@@ -189,7 +189,7 @@ def adjust_seat_capcity(course_code, default_seats):
         "BNS21TV": +0,
         "MKS21": +5 + 4,
     }
-
+    return default_seats
     return default_seats + adjustment_dict.get(course_code, 0)
 
 
@@ -198,8 +198,9 @@ def return_course_code(course_code):
 
 
 def return_teacher_name(teacher_row):
-    first_name = teacher_row["first_name"]
-    last_name = teacher_row["last_name"]
+    first_name = str(teacher_row["first_name"])
+
+    last_name = str(teacher_row["last_name"])
     if len(first_name) > 0:
         return (
             last_name.replace(" ", "").replace("-", "").upper()

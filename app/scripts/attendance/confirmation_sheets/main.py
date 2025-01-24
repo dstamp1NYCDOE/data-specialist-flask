@@ -87,19 +87,15 @@ def main(form, request):
 
     df = df.merge(attendance_df[['StudentID','Date','Pd','Type']], left_on=['StudentID','Date','PeriodID'], right_on=['StudentID','Date','Pd'])
 
-    print(df)
-
-
     ### look at P3
     p3_df = df[df['Pd']==3]
-    print(p3_df)
+
     ## look at marking absent on Jupiter
     absent_on_jupiter_df = df[df['Type'].isin(['excused','unexcused'])]
     
     absent_stats_by_teacher_df = pd.pivot_table(absent_on_jupiter_df,index=['Teacher'],values='StudentID',aggfunc='count')
     total_by_student_pvt = pd.pivot_table(df,index=['Teacher'],values='StudentID',aggfunc='count').sort_values(by=['StudentID'], ascending=[False])
-    print(total_by_student_pvt)
-    
+
 
     temp_lst = []
     for (student, date), attendance_df in attendance_df.groupby(["StudentID", "Date"]):

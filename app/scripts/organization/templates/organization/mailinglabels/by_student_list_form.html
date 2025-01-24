@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+    <li class="breadcrumb-item active">Return Mailing Labels from list of StudentID</li>
+  </ol>
+</nav>
+
+<h1>Return Mailing Labels List of StudentIDs</h1>
+
+<form action="{{url_for('scripts.return_mailing_labels_by_student_list')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.subset_lst.label }}
+        {{ form.subset_lst(class_="form-select") }}
+    </div>
+    
+
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Run</button>
+    </div>
+</form>
+
+
+</div>
+
+{% endblock %}

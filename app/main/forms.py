@@ -18,6 +18,9 @@ COHORT_YEAR_CHOICES = [
 
 
 school_year_and_semester_choices = [
+    ("2025-7", "Summer 2026"),
+    ("2025-2", "Spring 2026"),
+    ("2025-1", "Fall 2025"),
     ("2024-7", "Summer 2025"),
     ("2024-2", "Spring 2025"),
     ("2024-1", "Fall 2024"),
@@ -87,6 +90,7 @@ class GsheetForm(FlaskForm):
             ("summer_school_gradebooks_hub", "Summer School Gradebooks Hub"),
             ("summer_school_attendance_hub", "Summer School Attendance Hub"),
             ("absentee_form_results", "HSFI Absentee Form Results"),
+            ("regents_exam_book", "Regents Exam Book"),
         ],
     )
     gsheet_url = URLField(

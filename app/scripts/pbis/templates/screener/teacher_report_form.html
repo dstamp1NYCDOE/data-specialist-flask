@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_scholarship_reports')}}">PBIS</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_scholarship_reports')}}">Univeral Screener</a></li>
+    <li class="breadcrumb-item active">Teacher Report Form</li>
+  </ol>
+</nav>
+
+
+<form action="{{url_for('scripts.return_screener_analysis_teacher_report')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+  {{ form.hidden_tag() }}
+
+  <div class="form-group p-1 g-col-12">
+      {{ form.file.label }}
+      {{ form.file(class_="form-control") }}
+  </div>    
+
+
+  <div class="form-group p-1 g-col-12 d-grid">
+      <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
+</div>
+{% endblock %}

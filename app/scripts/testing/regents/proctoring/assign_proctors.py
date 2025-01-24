@@ -14,20 +14,17 @@ def main(proctor_assignments_df, proctor_availability_df):
     proctors_dict = {}
     assigned_proctors_by_day = {}
     proctor_assignments_list = []
+
     for day in assignments_days_in_order:
+
         assignments_to_make = proctor_assignments_df[
             proctor_assignments_df["Day"] == day
         ]
 
-        # assignments_to_make = assignments_to_make.sort_values(by=['assignment_difficulty'], ascending=False)
         assignments_to_make = assignments_to_make.sort_values(
             by=["Time", "proctor#", "assignment_difficulty"],
             ascending=[False, True, False],
         )
-        assignments_to_make = assignments_to_make.sort_values(
-            by=["Time", "assignment_difficulty"], ascending=[False, False]
-        )
-        print(assignments_to_make)
 
         if len(assignments_to_make) == 0:
             continue
@@ -39,7 +36,6 @@ def main(proctor_assignments_df, proctor_availability_df):
         possible_proctors = possible_proctors.sort_values(
             by=["total_difficulty", "#_of_proctor_days"]
         )
-        print(possible_proctors)
 
         AM_possible_proctors = possible_proctors[
             possible_proctors["Session"] == "Early"
@@ -113,15 +109,15 @@ def main(proctor_assignments_df, proctor_availability_df):
                 "assignment_difficulty": assignment_difficulty,
             }
             proctor_assignments_list.append(temp_dict)
-            proctor_availability_df.at[
-                assigned_proctor, "total_difficulty"
-            ] = cumulative_difficulty
+            proctor_availability_df.at[assigned_proctor, "total_difficulty"] = (
+                cumulative_difficulty
+            )
 
     proctor_assignments_dff = pd.DataFrame(proctor_assignments_list)
     total_assignment_difficulty_df = pd.DataFrame(
         proctors_dict.items(), columns=["Proctor", "total_assignment_difficulty"]
     )
-    print(total_assignment_difficulty_df)
+
     proctor_assignments_dff = proctor_assignments_dff.merge(
         total_assignment_difficulty_df, on=["Proctor"], how="left"
     )

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+    <li class="breadcrumb-item active">Photo Roster by StudentID List</li>
+  </ol>
+</nav>
+
+<h1>Photo Roster by StudentID List</h1>
+
+<form action="{{url_for('scripts.return_photo_roster_by_studentid_lst')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+      <div class="form-group p-1 g-col-12">
+        {{ form.subset_title.label(class_="form-label") }}
+        {{ form.subset_title(class_="form-control") }}
+    </div>
+
+    <div class="form-group p-1 g-col-12">
+        {{ form.subset_lst.label(class_="form-label") }}
+        {{ form.subset_lst(class_="form-control", cols="35", rows="20") }}
+    </div>
+    <div class="form-group p-1 g-col-12 d-grid">
+        <button type="submit" class="btn btn-primary">Run</button>
+    </div>
+</form>
+
+
+</div>
+
+{% endblock %}

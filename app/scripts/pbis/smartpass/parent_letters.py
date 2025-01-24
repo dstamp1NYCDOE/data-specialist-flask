@@ -49,6 +49,8 @@ from app.scripts import scripts, files_df
 
 from app.scripts.pbis.smartpass.main import process_smartpass_data, return_total_time_per_period_by_student
 
+from app.scripts.pbis.smartpass.return_student_period_usage_graph import main as return_student_period_usage_graph
+
 def main(form, request):
 
     school_year = session["school_year"]
@@ -65,7 +67,7 @@ def main(form, request):
 
     ## pull in parent code
     codes_df = return_parent_codes()
-    df = df.merge(codes_df, on='StudentID', how='left')
+    df = df.merge(codes_df, on='StudentID', how='left').head(214)
 
     f = generate_letters(df)
     download_name = f"SmartPassParentLetters.pdf"
@@ -111,12 +113,14 @@ def generate_letter_flowables(row):
     last_name = str(row["LastName"]).title()
     StudentID = row["StudentID"]
 
+
+
     total_time_str = get_time_hh_mm_ss(row['Total'])
     class_periods_equivalent_str = return_class_period_equivalence(row['Total'])
 
     table_data = [
         [1,2,3,4,5,6,7,8,9],
-        [get_time_hh_mm_ss_short(row[1]),get_time_hh_mm_ss_short(row[2]),get_time_hh_mm_ss_short(row[3]),get_time_hh_mm_ss_short(row[4]),get_time_hh_mm_ss_short(row[5]),get_time_hh_mm_ss_short(row[6]),get_time_hh_mm_ss_short(row[7]),get_time_hh_mm_ss_short(row[8]),get_time_hh_mm_ss_short(row[9])]    
+        [get_time_hh_mm_ss_short(row[1.0]),get_time_hh_mm_ss_short(row[2.0]),get_time_hh_mm_ss_short(row[3.0]),get_time_hh_mm_ss_short(row[4.0]),get_time_hh_mm_ss_short(row[5.0]),get_time_hh_mm_ss_short(row[6.0]),get_time_hh_mm_ss_short(row[7.0]),get_time_hh_mm_ss_short(row[8.0]),get_time_hh_mm_ss_short(row[9.0])]    
     ]
 
     
@@ -155,9 +159,13 @@ def generate_letter_flowables(row):
             ]
         )
     )
-    flowables.append(Spacer(width=0, height=0.25 * inch))
-    flowables.append(t)
-    flowables.append(Spacer(width=0, height=0.25 * inch))
+    # flowables.append(Spacer(width=0, height=0.25 * inch))
+    # flowables.append(t)
+    # flowables.append(Spacer(width=0, height=0.25 * inch))
+
+    I = return_student_period_usage_graph(row)
+    flowables.append(I)
+
     paragraphs = [
         "Our classes are best and our students learn the most when everyone is present and engaged for the entire class period.",
         f"To see {first_name}'s pass usage, go to http://smartpass.app/app/parent-sign-up and sign up for an account with your email and password. Once you’ve signed in, you’re redirected to the Parent Dashboard where you can add your child(ren) using an invite code -- <b><code>{parent_code}</code></b>. If you have multiple children at HSFI, add each of their invite codes to your account.",
