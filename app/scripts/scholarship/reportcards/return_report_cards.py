@@ -55,7 +55,11 @@ from app.scripts.programming.jupiter.return_master_schedule import (
 # 1_40
 # 1_49
 # 3_07
+# HonorRoll resave with this filename + as an .xlsx
 # RATR
+# SmartPassExport
+# sync jupiter attendance and jupiter assignments
+# FashionDollarTransactions
 
 
 def main(form, request):
@@ -680,7 +684,7 @@ def return_attendance_sentence_paragraphs(student_RATR_df):
 
     days_late = student_RATR_df[student_RATR_df["ATTD"] == "L"]["Date"].to_list()
     num_of_days_late = len(days_late)
-    days_late_lst_str = ", ".join([x.strftime("%-m/%-d") for x in days_late])
+    days_late_lst_str = ", ".join([x.strftime("%m/%d") for x in days_late])
     days_late_frequency_str = utils.convert_percentage_to_ratio(
         num_of_days_late / total_days
     )
@@ -699,7 +703,7 @@ def return_attendance_sentence_paragraphs(student_RATR_df):
 
     days_absent = student_RATR_df[student_RATR_df["ATTD"] == "A"]["Date"].to_list()
     num_of_days_absent = len(days_absent)
-    days_absent_lst_str = ", ".join([x.strftime("%-m/%-d") for x in days_absent])
+    days_absent_lst_str = ", ".join([x.strftime("%m/%d") for x in days_absent])
     days_absent_frequency_str = utils.convert_percentage_to_ratio(
         num_of_days_absent / total_days
     )

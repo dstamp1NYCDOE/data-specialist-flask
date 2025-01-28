@@ -142,9 +142,11 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     RETAINED_ATTD_TEACHER = "AMEH M"
     ATTD_TEACHERS = attd_teacher_dict.values()
 
+
     cr_3_07_df["attd_teacher"] = cr_3_07_df["GEC"].apply(
-        lambda x: attd_teacher_dict.get(x, RETAINED_ATTD_TEACHER)
+        lambda x: attd_teacher_dict.get(str(x), RETAINED_ATTD_TEACHER)
     )
+
 
     cr_3_07_df = cr_3_07_df[
         [

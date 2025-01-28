@@ -81,6 +81,7 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
 
 
 def clean(RATR_df):
+    RATR_df["STUDENT ID"] = RATR_df["STUDENT ID"].astype(str)
     RATR_df["StudentID"] = RATR_df["STUDENT ID"].str.extract("(\d{9})")
     RATR_df["StudentID"] = RATR_df["StudentID"].astype(int)
     RATR_df["Date"] = RATR_df["SCHOOL DAY"].str.extract("(\d{2}/\d{2}/\d{2})")
