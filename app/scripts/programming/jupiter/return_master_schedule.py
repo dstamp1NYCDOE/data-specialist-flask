@@ -7,6 +7,11 @@ from flask import current_app, session
 
 import math
 
+# Reports Needed
+## 1_01
+## MasterSchedule
+## 6_42
+
 
 def main(request, form):
     df = return_jupiter_schedule(request, form)
@@ -19,13 +24,14 @@ def main(request, form):
         course_row = course_rows.iloc[0]
         temp_dict = {
             "JupiterCourse": course_row["JupiterCourse"],
+            "JupiterCourseName": course_row["Course name"],
             "JupiterSection": course_row["JupiterSection"],
             "JupiterPeriods": ",".join(course_rows["JupiterPeriod"].unique().tolist()),
             "JupiterTab": return_jupiter_tab(
                 ",".join(course_rows["JupiterPeriod"].unique().tolist())
             ),
-            "JupiterTeacher1": course_row["DelegatedNickName1"],
-            "JupiterTeacher2": course_row["DelegatedNickName2"],
+            "JupiterTeacher1": course_row["TeacherName"],
+            "JupiterTeacher2": course_row["Co-Teacher"],
             "JupiterRoom": course_row["Room"],
         }
         output_lst.append(temp_dict)
@@ -82,6 +88,19 @@ def return_jupiter_schedule(request=None, form=None):
     master_schedule_df = utils.return_file_as_df(filename)
 
     filename = utils.return_most_recent_report_by_semester(
+        files_df, "4_23", year_and_semester=year_and_semester
+    )
+    section_properties_df = utils.return_file_as_df(filename)
+    co_teachers_df = section_properties_df[["Course", "Section", "Co-Teacher"]]
+
+    master_schedule_df = master_schedule_df.merge(
+        co_teachers_df,
+        left_on=["CourseCode", "SectionID"],
+        right_on=["Course", "Section"],
+    ).fillna("")
+    print(master_schedule_df)
+
+    filename = utils.return_most_recent_report_by_semester(
         files_df, "6_42", year_and_semester=year_and_semester
     )
     teacher_reference_df = utils.return_file_as_df(filename)
@@ -90,33 +109,23 @@ def return_jupiter_schedule(request=None, form=None):
         + " "
         + teacher_reference_df["FirstName"].str[0]
     )
-    teacher_reference_df["DelegatedNickName1"] = teacher_reference_df["TeacherName"]
-    teacher_reference_df["DelegatedNickName2"] = teacher_reference_df["TeacherName"]
 
-    ## attach Teacher 2
-    teachers_df = student_schedules_df[
-        ["Course", "Section", "Teacher1", "Teacher2"]
-    ].drop_duplicates()
     df = master_schedule_df.merge(
-        teachers_df,
-        left_on=["CourseCode", "SectionID"],
-        right_on=["Course", "Section"],
+        teacher_reference_df[["Teacher", f"TeacherName"]],
+        left_on=[f"Teacher Name"],
+        right_on=[f"Teacher"],
         how="left",
     )
+
     # drop classes with no students
+    df = df[df["Capacity"] != df["Remaining Capacity"]]
     df = df[df["Capacity"] != 0]
     # drop classes with no meeting days
     df = df[df["Cycle Day"] != 0]
     # drop classes attached to "staff"
     df = df[df["Teacher Name"] != "STAFF"]
-    ## attach delegated nickname
-    for teacher_num in [1, 2]:
-        df = df.merge(
-            teacher_reference_df[["Teacher", f"DelegatedNickName{teacher_num}"]],
-            left_on=[f"Teacher{teacher_num}"],
-            right_on=[f"Teacher"],
-            how="left",
-        )
+    # drop classes outside of 1-10
+    df = df[df["PeriodID"] < 11]
     # attach period
     df["JupiterPeriod"] = df.apply(return_jupiter_period, axis=1)
     # return jupiter_course
@@ -144,14 +153,21 @@ def return_jupiter_course(row):
         return course_code
     if course_code[0:7] in ["EES87QC", "EES87QD", "EES87QF", "EES87QG"]:
         return course_code[0:7]
-    if course_code[0:7] in ["MQS11QF", "MQS11QG", "EES87QF", "EES87QG"]:
+    if course_code[0:7] in ["EES88QC", "EES88QD", "EES88QF", "EES88QG"]:
+        return course_code[0:7]
+    if course_code[0:7] in [
+        "MQS11QF",
+        "MQS11QG",
+    ]:
         return course_code[0:7]
 
-    if course_code[0:5] in ["PPS85", "PPS87"]:
+    if course_code[0:5] in ["PPS85", "PPS87", "PPS86", "PPS88"]:
         days = row["Cycle Day"]
         pe_dict_by_cycle = {
             1010: "PPS85",
+            1010: "PPS86",
             10101: "PPS87",
+            10101: "PPS88",
         }
         return pe_dict_by_cycle.get(days)
 
@@ -185,6 +201,10 @@ def return_jupiter_period(row):
         101: ["W", "F"],
         10000: ["M"],
         10101: ["M", "W", "F"],
+        10100: [
+            "M",
+            "W",
+        ],
     }
 
     period_lst = [f"{day}{period}" for day in cycle_dict.get(days, [])]
