@@ -44,7 +44,12 @@ def return_jupiter_cut_analysis_reports():
             "report_title": "Return Weekly Cut Analysis Report By Teacher",
             "report_function": "scripts.return_weekly_cutting_report_by_teacher",
             "report_description": "Returns period attendance by date",
-        },        
+        },
+        {
+            "report_title": "Return Daily Cut Analysis",
+            "report_function": "scripts.return_daily_cutting_report",
+            "report_description": "Returns period attendance by date",
+        },                
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -125,6 +130,28 @@ def return_weekly_cutting_report_by_teacher():
     else:
         form = AttendanceWeekOfForm(request.form)
         f, download_name = weekly_cut_analysis_report_by_teacher.main(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
+
+from app.scripts.attendance.cut_analysis.forms import AttendanceDayOfForm
+from app.scripts.attendance.cut_analysis import daily_cut_analysis_report 
+
+@scripts.route("/attendance/daily_cut_analysis", methods=["GET", "POST"])
+def return_daily_cutting_report():
+    if request.method == "GET":
+        form = AttendanceDayOfForm()
+        return render_template(
+            "attendance/templates/attendance/cut_analysis/daily_form.html",
+            form=form,
+        )
+    else:
+        form = AttendanceDayOfForm(request.form)
+        f, download_name = daily_cut_analysis_report.main(form, request)
 
         return send_file(
             f,

@@ -11,7 +11,7 @@ period_regex = re.compile(r'\d+')
 
 
 
-def main(week_number=None):
+def main(week_number=None, day_of=None):
     school_year = session["school_year"]
     term = session["term"]
 
@@ -42,6 +42,8 @@ def main(week_number=None):
     if week_number:
         jupiter_attd_df = jupiter_attd_df[jupiter_attd_df['week_number']==int(week_number)]
 
+    if day_of:
+        jupiter_attd_df = jupiter_attd_df[jupiter_attd_df['Date']==day_of]
 
     ## only keep students still on register
     jupiter_attd_df = jupiter_attd_df[jupiter_attd_df['StudentID'].isin(students_df['StudentID'])]
@@ -145,7 +147,7 @@ def main(week_number=None):
 def detect_attd_error(student_row):
     only_present_one_period = student_row['only_present_one_period']
     attd_type = student_row['Type']
-    return only_present_one_period and (attd_type in ['Present', 'Late'])
+    return only_present_one_period and (attd_type in ['present', 'late'])
 
 def num_of_periods_late(row):
     pd = row['Pd']
