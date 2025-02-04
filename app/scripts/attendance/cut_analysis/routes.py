@@ -40,6 +40,11 @@ def return_jupiter_cut_analysis_reports():
             "report_function": "scripts.return_jupiter_cut_analysis_by_period_and_date",
             "report_description": "Returns period attendance by date",
         },
+        {
+            "report_title": "Return Weekly Cut Analysis Report By Teacher",
+            "report_function": "scripts.return_weekly_cutting_report_by_teacher",
+            "report_description": "Returns period attendance by date",
+        },        
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -99,6 +104,27 @@ def return_jupiter_cut_analysis_in_building():
     else:
         form = ProspectiveCuttingFromCAASSForm(request.form)
         f, download_name = top_cutters_by_period_with_CAASS.main(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
+from app.scripts.attendance.cut_analysis.forms import AttendanceWeekOfForm
+from app.scripts.attendance.cut_analysis import weekly_cut_analysis_report_by_teacher 
+
+@scripts.route("/attendance/cut_analysis/by_teacher", methods=["GET", "POST"])
+def return_weekly_cutting_report_by_teacher():
+    if request.method == "GET":
+        form = AttendanceWeekOfForm()
+        return render_template(
+            "attendance/templates/attendance/cut_analysis/form.html",
+            form=form,
+        )
+    else:
+        form = AttendanceWeekOfForm(request.form)
+        f, download_name = weekly_cut_analysis_report_by_teacher.main(form, request)
 
         return send_file(
             f,

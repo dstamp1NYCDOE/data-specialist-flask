@@ -21,6 +21,8 @@ from app.scripts.attendance.CAASS import routes
 
 from app.scripts.college_and_career import routes
 
+from app.scripts.family_engagement import routes
+from app.scripts.family_engagement.weekly_assignment import routes
 
 from app.scripts.dataspecialist import routes
 from app.scripts.dataspecialist.sy2425 import routes
