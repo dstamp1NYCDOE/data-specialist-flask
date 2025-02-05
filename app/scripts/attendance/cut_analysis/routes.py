@@ -43,13 +43,18 @@ def return_jupiter_cut_analysis_reports():
         {
             "report_title": "Return Weekly Cut Analysis Report By Teacher",
             "report_function": "scripts.return_weekly_cutting_report_by_teacher",
-            "report_description": "Returns period attendance by date",
+            "report_description": "Returns PDF by teacher for weekly attendnace data",
         },
         {
             "report_title": "Return Daily Cut Analysis",
             "report_function": "scripts.return_daily_cutting_report",
-            "report_description": "Returns period attendance by date",
-        },                
+            "report_description": "Returns XLSX file for daily attendance data",
+        },  
+        {
+            "report_title": "Return Semester Cut Analysis",
+            "report_function": "scripts.return_semester_cutting_report",
+            "report_description": "Returns XLSX file for semester attendance data",
+        },                        
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -158,3 +163,14 @@ def return_daily_cutting_report():
             as_attachment=True,
             download_name=download_name,
         )
+
+from app.scripts.attendance.cut_analysis import semester_cut_analysis_report 
+@scripts.route("/attendance/semester_cut_analysis")
+def return_semester_cutting_report():
+    f, download_name = semester_cut_analysis_report.main()
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )    

@@ -57,27 +57,41 @@ def main(form, request):
     student_cuts_by_period = pd.DataFrame(student_cuts_by_period).rename(columns={"Date": "Dates Cut"}).reset_index()
 
     cuts_df = student_period_attendance_df[student_period_attendance_df['cutting?']].sort_values(by=['Teacher','Pd','LastName','FirstName'])
-    print(cuts_df)
     cuts_df = cuts_df.merge(student_cuts_by_period, on=['StudentID','Pd','Course'], how='left')
     cuts_df["Dates Cut"] = cuts_df["Dates Cut"].apply(lambda x: ', '.join([y[5:] for y in x]))
 
     cuts_df = cuts_df.drop_duplicates(subset=['StudentID','Course','Section',])
 
-    group_by_teacher = cuts_df.groupby(['Teacher'])
+    
+    late_to_school_df = student_period_attendance_df[student_period_attendance_df['Type'].isin(['unexcused','tardy'])]
+    student_late_to_school_by_period = late_to_school_df[late_to_school_df['late_to_school?']].groupby(['StudentID','Pd','Course'])['Date'].apply(list)
+    student_late_to_school_by_period = pd.DataFrame(student_late_to_school_by_period).rename(columns={"Date": "Dates Late to school"}).reset_index()
+
+    late_to_school_df = late_to_school_df[late_to_school_df['late_to_school?']].sort_values(by=['Teacher','Pd','LastName','FirstName'])
+    late_to_school_df = late_to_school_df.merge(student_late_to_school_by_period, on=['StudentID','Pd','Course'], how='left')
+    late_to_school_df["Dates Late to school"] = late_to_school_df["Dates Late to school"].apply(lambda x: ', '.join([y[5:] for y in x]))
+
+    late_to_school_df = late_to_school_df.drop_duplicates(subset=['StudentID','Course','Section',])
 
     attd_errors_df = student_period_attendance_df[student_period_attendance_df['attd_error']]
-    for (teacher,), students_with_cuts_df in group_by_teacher:
+    teachers = student_period_attendance_df['Teacher'].sort_values().unique().tolist()
+    for teacher in teachers:
 
         students_present_in_one_period = attd_errors_df[attd_errors_df['Teacher']==teacher]
+        students_with_cuts_df = cuts_df[cuts_df['Teacher']==teacher]
         students_absent_all_week = students_absent_all_week_df[students_absent_all_week_df['Teacher'] == teacher].drop_duplicates(subset=['StudentID'])
 
+        
+        students_with_lates_df = late_to_school_df[late_to_school_df['Teacher']==teacher]
+        
 
+    
         days_with_attendance_by_teacher = student_period_attendance_df[
             student_period_attendance_df['Teacher'] == teacher]['Date'].unique()
         
 
         teacher_flowables = return_flowables_by_teacher(
-            students_with_cuts_df, students_present_in_one_period, students_absent_all_week, teacher, styles, date_of_report, days_with_attendance_by_teacher, dates_covered_by_report)
+            students_with_cuts_df,students_with_lates_df, students_present_in_one_period, students_absent_all_week, teacher, styles, date_of_report, days_with_attendance_by_teacher, dates_covered_by_report)
         flowables.extend(teacher_flowables)
 
 
@@ -125,7 +139,7 @@ def main(form, request):
     return buffer, filename
 
 
-def return_flowables_by_teacher(students_with_cuts_df, students_present_in_one_period, students_absent_all_week, teacher, styles, date_of_report, days_with_attendance_by_teacher, dates_covered_by_report):
+def return_flowables_by_teacher(students_with_cuts_df,students_with_lates_df, students_present_in_one_period, students_absent_all_week, teacher, styles, date_of_report, days_with_attendance_by_teacher, dates_covered_by_report):
     temp_list_of_flowables = []
     paragraph = Paragraph(
         f"{teacher}",
@@ -148,7 +162,7 @@ def return_flowables_by_teacher(students_with_cuts_df, students_present_in_one_p
        
     temp_list_of_flowables.append(paragraph)
     # temp_list_of_flowables.append(Spacer(width=0, height=0.25*inch) )     
-
+    ### Cutting
     paragraph = Paragraph(
         f"These students were marked present or tardy in at least two periods during the day {date_of_report}. It is possible they (1) were incorrectly marked present or tardy on this day or (2) cut class, arrived late, left early, or were in another location for the duration of the period. Please confirm your attendance records and speak with student about their location if they were not in class. As necessary, update their attendance from A to E for excused. Log any interactions in the dashboard. If you determine the student was cutting, take appropriate action --- update their attendance from A to C for cut --- and, if this is a repeat offense, submit a discipline referral",
         styles['Body_Justify']
@@ -172,17 +186,40 @@ def return_flowables_by_teacher(students_with_cuts_df, students_present_in_one_p
 
     temp_list_of_flowables.append(t)
 
+    paragraph = Paragraph(
+        f"These students were marked absent or tardy at the beginning of the day and in your class. It is most likely these students arrived to school late.",
+        styles['Body_Justify']
+    )
+    temp_list_of_flowables.append(paragraph)
+    temp_list_of_flowables.append(Spacer(width=0, height=0.25*inch) )
+
+    cols = ['LastName','FirstName','Course','Section','Pd','Dates Late to school']
+    table_data = students_with_lates_df[cols].values.tolist()
+    table_data.insert(0,cols)
+
+    t=Table(table_data, repeatRows=1)
+    t.setStyle (TableStyle ([
+        ('FONTSIZE', (0, 0), (100, 100), 10),
+        ('LEFTPADDING', (0, 0), (100, 100), 1),
+        ('RIGHTPADDING', (0, 0), (100, 100), 1),
+        ('BOTTOMPADDING', (0, 0), (100, 100), 1),
+        ('TOPPADDING', (0, 0), (100, 100), 1),
+        ('ROWBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, None)),
+        ]))
+
+    temp_list_of_flowables.append(t)
+
     if len(students_present_in_one_period) > 0:
         temp_list_of_flowables.append(Spacer(width=0, height=0.25*inch) )
 
         paragraph = Paragraph(
-            f"These students were marked present in only one period on date shown. Please verify your attendance records that the student was in fact present",
+            f"These students were marked present or tardy in only one period on date shown. Please verify your attendance records that the student was in fact present",
             styles['Body_Justify']
         )
         temp_list_of_flowables.append(paragraph)
         temp_list_of_flowables.append(Spacer(width=0, height=0.25*inch) )
 
-        cols = ['LastName','FirstName','Course','Section','Pd','Date']
+        cols = ['LastName','FirstName','Course','Section','Pd','Type','Date']
         table_data = students_present_in_one_period[cols].values.tolist()
         table_data.insert(0,cols)
 

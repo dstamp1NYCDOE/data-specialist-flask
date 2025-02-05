@@ -9,8 +9,6 @@ def main(form, request):
     student_period_attendance_df = process_jupiter(day_of=day_of) 
 
 
-    print(student_period_attendance_df)
-    
     f = BytesIO()
     writer = pd.ExcelWriter(f)
 

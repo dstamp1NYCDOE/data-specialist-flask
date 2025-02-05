@@ -71,17 +71,19 @@ def main(week_number=None, day_of=None):
         return_number_of_periods_present, axis=1)
     attd_by_date_by_student['only_present_one_period'] = attd_by_date_by_student.apply(
         return_only_present_one_period, axis=1)
+    
     # Merge in overall school absent/present
     jupiter_attd_df = jupiter_attd_df.merge(attd_by_date_by_student.reset_index(
     )[['StudentID', 'Date', 'in_school?', 'num_of_periods_in_class', 'only_present_one_period']], on=['StudentID', 'Date'], how='left')
 
     # determine_first_period_present
     df = jupiter_attd_df[jupiter_attd_df['in_school?']]
-    df = jupiter_attd_df[~jupiter_attd_df['Type'].isin(['absent', 'excused'])]
+    df = jupiter_attd_df[~jupiter_attd_df['Type'].isin(['excused','unexcused'])]
     df = df.drop_duplicates(subset=['StudentID', 'Date'])
     df['first_period_present'] = df['Pd']
     df['first_period_attd_type'] = df['Type']
     df = df[['StudentID', 'Date', 'first_period_present', 'first_period_attd_type']]
+
 
     # merge in first_period_present
     jupiter_attd_df = jupiter_attd_df.merge(
@@ -95,6 +97,9 @@ def main(week_number=None, day_of=None):
 
     # determine if cutting
     jupiter_attd_df['cutting?'] = jupiter_attd_df.apply(is_cutting, axis=1)
+    # determine if late to school
+    jupiter_attd_df['late_to_school?'] = jupiter_attd_df.apply(is_late_to_school, axis=1)
+
 
     number_of_cuts_df = pd.pivot_table(
         jupiter_attd_df[['StudentID','cutting?','Period']],
@@ -115,9 +120,7 @@ def main(week_number=None, day_of=None):
     ).fillna(0).reset_index()[['StudentID', False]]
     number_of_days_absent_df.columns = ['StudentID', 'num_of_days_absent']
 
-    ## Late to school
-    jupiter_attd_df['late_to_school?'] = jupiter_attd_df.apply(
-        is_late_to_school, axis=1)
+    # Late to school
     number_of_lates_to_school_df = pd.pivot_table(
         jupiter_attd_df[['StudentID', 'late_to_school?', 'Date']],
         values='Date',
@@ -147,7 +150,7 @@ def main(week_number=None, day_of=None):
 def detect_attd_error(student_row):
     only_present_one_period = student_row['only_present_one_period']
     attd_type = student_row['Type']
-    return only_present_one_period and (attd_type in ['present', 'late'])
+    return only_present_one_period and (attd_type in ['present', 'tardy'])
 
 def num_of_periods_late(row):
     pd = row['Pd']
@@ -163,13 +166,14 @@ def num_of_periods_late(row):
     return first_period_present - pd
 
 
-def is_late_to_school(row):
-    num_of_periods_late = row['num_of_periods_late']
-    in_school = row['in_school?']
-    if in_school:
-        return num_of_periods_late > 0
-    else:
-        return False
+def is_late_to_school(student_row):
+    
+    first_period_present = student_row['first_period_present']
+    class_period = student_row['Pd']
+    in_school = student_row['in_school?']
+    Type = student_row['Type']
+
+    return ((Type in ['unexcused','tardy']) and (class_period <= first_period_present) and in_school)
 
 
 def is_cutting(student_row):
