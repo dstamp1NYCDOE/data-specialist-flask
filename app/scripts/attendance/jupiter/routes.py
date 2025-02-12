@@ -115,3 +115,22 @@ def return_jupiter2_attd_student_report_by_teacher():
             download_name=download_name,
         )
 
+
+
+from app.scripts.attendance.jupiter.midday_analysis import main as jupiter_midday_analysis
+from app.scripts.attendance.jupiter.forms import JupiterAttdUpload
+@scripts.route("/attendance/jupiter2/midday_analysis", methods=['GET','POST'])
+def return_jupiter_midday_analysis():
+    if request.method == "GET":
+        form = JupiterAttdUpload()
+        return render_template(
+            "attendance/jupiter/templates/midday_analysis/form.html", form=form
+        )
+    else:
+        form = JupiterAttdUpload(request.form)
+        f, download_name = jupiter_midday_analysis(request, form)
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )

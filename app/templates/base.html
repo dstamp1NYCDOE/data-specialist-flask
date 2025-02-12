@@ -52,7 +52,7 @@
         for (var i = 0; i < data.length; i++) {
           var option = document.createElement("option");
           option.value = data[i].StudentID;
-          option.text = data[i].LastName+', '+data[i].FirstName;
+          option.text = data[i].LastName+', '+data[i].FirstName + ' (' + data[i].StudentID + ')';
           select[0].appendChild(option);
         }
       });

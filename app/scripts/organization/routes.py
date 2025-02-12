@@ -90,6 +90,11 @@ def return_organization_reports():
             "report_function": "scripts.return_photo_roster_by_studentid_lst",
             "report_description": "Generate student photo grid from list of StudentID numebers",
         },
+        {
+            "report_title": "Return Student Contact Tracing",
+            "report_function": "scripts.return_contact_tracing",
+            "report_description": "",
+        },        
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports
@@ -288,3 +293,25 @@ def return_photo_roster_by_studentid_lst():
             download_name=download_name,
             mimetype="application/pdf",
         )
+
+from app.main.forms import SelectStudentForm
+from app.scripts.organization.contact_tracing.main import return_contact_tracing_results
+@scripts.route("/organization/contact_tracing", methods=["GET", "POST"])
+def return_contact_tracing():
+    if request.method == "GET":
+        form = SelectStudentForm()
+        return render_template(
+            "organization/templates/organization/contact_tracing/form.html",
+            form=form,
+        )
+    else:
+        form = SelectStudentForm(request.form)
+
+        f, download_name = return_contact_tracing_results(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+

@@ -160,3 +160,15 @@ class FolderLabelsByTeacherForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class StudentPrivilegeSummaryForm(FlaskForm):
+
+    StudentID = SelectField(
+        "Select Student",
+        choices=[(0, "Select Student")],
+        validators=[InputRequired()],
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)

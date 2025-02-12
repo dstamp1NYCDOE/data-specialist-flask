@@ -28,6 +28,11 @@ from app.scripts.attendance.forms import JupiterCourseSelectForm
 def return_attendance_reports():
     reports = [
         {
+            "report_title": "Jupiter Midday Analysis",
+            "report_function": "scripts.return_jupiter_midday_analysis",
+            "report_description": "Download one day's worth of Jupiter Attendance and complete the Midday Analysis",
+        },
+        {
             "report_title": "Student Attendance Analysis",
             "report_function": "scripts.return_RATR_analysis",
             "report_description": "Analyze student daily attendance using ATS report RATR",
