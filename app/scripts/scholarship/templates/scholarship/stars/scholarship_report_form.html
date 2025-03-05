@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_scholarship_reports')}}">Scholarship</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('scripts.return_scholarship_stars_report')}}">STARS</a></li>
+    <li class="breadcrumb-item active">Scholarship Report</li>
+  </ol>
+</nav>
+
+<h1>Return Scholarship Report</h1>
+
+
+<form action="{{url_for('scripts.return_stars_scholarship_report')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+  {{ form.hidden_tag() }}
+
+  <div class="form-group p-1 g-col-12">
+    {{ form.staff_member.label(class_="form-label") }}
+    {{ form.staff_member(class_="form-select") }}
+  </div>  
+
+  <div class="form-group p-1 g-col-12 d-grid">
+      <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
+</div>
+{% endblock %}

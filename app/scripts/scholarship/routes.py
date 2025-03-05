@@ -21,6 +21,11 @@ def return_scholarship_reports():
             "report_description": "Reports related student transcripts",
         },
         {
+            "report_title": "STARS Reports",
+            "report_function": "scripts.return_scholarship_stars_report",
+            "report_description": "Return STARS reports",
+        },
+        {
             "report_title": "Jupiter Grades Analysis",
             "report_function": "scripts.return_jupiter_analysis_reports",
             "report_description": "Reports based on Jupiter Grades",
@@ -63,6 +68,21 @@ def return_jupiter_analysis_reports():
             "report_title": "Jupiter Grades Senior Checkup",
             "report_function": "scripts.return_jupiter_grads_senior_checkup",
             "report_description": "Analyze jupiter grades for seniors by teacher",
+        },
+        {
+            "report_title": "Jupiter Grades Student Checkup By Cohort",
+            "report_function": "scripts.return_jupiter_grades_students_checkup_by_counselor",
+            "report_description": "Analyze jupiter grades by cohort",
+        },
+        {
+            "report_title": "Jupiter Grades Student Checkup By Teacher",
+            "report_function": "scripts.return_jupiter_grades_students_checkup_by_teacher",
+            "report_description": "Analyze jupiter grades by teacher",
+        },
+        {
+            "report_title": "Jupiter Grades Student Checkup By Department",
+            "report_function": "scripts.return_jupiter_grades_students_checkup_by_dept",
+            "report_description": "Analyze jupiter grades by Department",
         },
     ]
     return render_template(
@@ -232,3 +252,36 @@ def return_jupiter_grades_teacher_analysis():
             ]
         }
         return render_template("viewReport.html", data=data)
+
+
+from app.scripts.scholarship.jupiter.student_checkup_by_counselor import (
+    main as jupiter_grades_student_checkup_by_counselor,
+)
+
+
+@scripts.route("/scholarship/jupiter/student_checkup_by_counselor")
+def return_jupiter_grades_students_checkup_by_counselor():
+    f, download_name = jupiter_grades_student_checkup_by_counselor()
+    return send_file(f, as_attachment=True, download_name=download_name)
+
+
+from app.scripts.scholarship.jupiter.student_checkup_by_teacher import (
+    main as jupiter_grades_student_checkup_by_teacher,
+)
+
+
+@scripts.route("/scholarship/jupiter/student_checkup_by_teacher")
+def return_jupiter_grades_students_checkup_by_teacher():
+    f, download_name = jupiter_grades_student_checkup_by_teacher()
+    return send_file(f, as_attachment=True, download_name=download_name)
+
+
+from app.scripts.scholarship.jupiter.student_checkup_by_dept import (
+    main as jupiter_grades_student_checkup_by_dept,
+)
+
+
+@scripts.route("/scholarship/jupiter/student_checkup_by_dept")
+def return_jupiter_grades_students_checkup_by_dept():
+    f, download_name = jupiter_grades_student_checkup_by_dept()
+    return send_file(f, as_attachment=True, download_name=download_name)

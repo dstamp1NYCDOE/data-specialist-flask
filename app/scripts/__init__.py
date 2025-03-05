@@ -54,6 +54,7 @@ from app.scripts.progress_towards_graduation import routes
 from app.scripts.scholarship import routes
 from app.scripts.scholarship.reportcards import routes
 from app.scripts.scholarship.egg import routes
+from app.scripts.scholarship.stars import routes
 
 from app.scripts.summer import routes
 from app.scripts.summer.attendance import routes

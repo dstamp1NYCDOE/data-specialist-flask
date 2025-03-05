@@ -83,6 +83,14 @@ def process_spreadsheet(form, request):
             CHOICE_A = student_sessions[0]
             CHOICE_B = student_sessions[1]
 
+            if CHOICE_A == CHOICE_B:
+                try:
+                    CHOICE_B = student_sessions[2]
+                except:
+                    CHOICE_B = sorted(
+                        session_rosters, key=lambda k: len(session_rosters[k]["Session2"])
+                    )[0]
+
             CHOICE_A_SESSION1_NUM = len(session_rosters[CHOICE_A]["Session1"])
             CHOICE_A_SESSION2_NUM = len(session_rosters[CHOICE_A]["Session2"])
 
@@ -152,6 +160,16 @@ def process_spreadsheet(form, request):
         SESSION2 = sorted(
             session_rosters, key=lambda k: len(session_rosters[k]["Session2"])
         )[0]
+
+        if SESSION1 == SESSION2:
+            if StudentID % 2 == 0:
+                SESSION2 = sorted(
+                    session_rosters, key=lambda k: len(session_rosters[k]["Session2"])
+                )[1]
+            else:
+                SESSION1 = sorted(
+                    session_rosters, key=lambda k: len(session_rosters[k]["Session1"])
+                )[1]                            
 
         session_rosters[SESSION1]["Session1"].append(StudentID)
         session_rosters[SESSION2]["Session2"].append(StudentID)
