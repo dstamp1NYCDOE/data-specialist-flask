@@ -25,6 +25,7 @@ from io import BytesIO
 from flask import session, current_app
 
 from app.scripts.reportlab_utils import reportlab_letter_head, reportlab_closing
+from app.scripts import scripts, files_df, photos_df
 import app.scripts.utils as utils
 
 styles = getSampleStyleSheet()
@@ -59,8 +60,7 @@ def main(form, request):
     df = df.fillna({"Room#": "202"})
     df["Session"] = df["Room"].str.extract(r"([AaPp][Mm])")
     df["ExamDate"] = df["Room"].apply(lambda x: exam_date)
-
-    print(df)
+    df = df.merge(photos_df, on=["StudentID"], how="left")
 
     return generate_letters(df)
 
@@ -110,8 +110,7 @@ def generate_student_letter(student_row):
     flowables.append(paragraph)
 
     try:
-        path = os.path.join(current_app.root_path, f"data/StudentPhotos")
-        photo_str = os.path.join(path, f"{int(StudentID)}.jpg")
+        photo_str = student_row["photo_filename"]
         I = Image(photo_str)
         I.drawHeight = 3.0 * inch
         I.drawWidth = 3.0 * inch
@@ -141,6 +140,31 @@ def generate_student_letter(student_row):
         styles["Heading1"],
     )
     flowables.append(paragraph)
+
+    paragraph = Paragraph(
+        f"On test day, being prepared will help you perform your best on the Digital {exam_title}. Here's what you need to bring: (1) Your photo ID (driver's license, school ID, or passport), (2) Snacks and water for breaks and (3) Extra pencils and scratch paper (which will be provided, but having extras doesn't hurt). ",
+        styles["BodyText"],
+    )
+    flowables.append(paragraph)
+
+    paragraph = Paragraph(
+        f"Before the exam, complete the Bluebook app's practice test to familiarize yourself with the digital format. Get a good night's sleep, eat a nutritious breakfast, and arrive at least 30 minutes early.",
+        styles["BodyText"],
+    )
+    flowables.append(paragraph)
+
+    paragraph = Paragraph(
+        f"Remember, the Digital {exam_title} is adaptive, so pace yourself carefully and answer each question thoughtfully before moving on.",
+        styles["BodyText"],
+    )
+    flowables.append(paragraph)
+
+    paragraph = Paragraph(
+        f"Good luck! You've got this. ",
+        styles["BodyText"],
+    )
+    flowables.append(paragraph)
+
 
     flowables.append(PageBreak())
     return flowables

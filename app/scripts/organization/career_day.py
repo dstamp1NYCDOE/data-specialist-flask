@@ -16,7 +16,12 @@ def process_spreadsheet(form, request):
     survey_responses = request.files[form.survey_responses.name]
     surveys_dict = pd.read_excel(survey_responses, sheet_name=None)
 
+
     surveys_df = pd.concat(surveys_dict.values())
+
+    canceled_presentations = ['Ashley Masse: Fashion & Lifestyle Blogger']
+
+    surveys_df = surveys_df[~surveys_df['Which Career Day presenter are you signing up for?'].isin(canceled_presentations)]
 
     filename = utils.return_most_recent_report(files_df, "3_07")
     student_info_df = utils.return_file_as_df(filename)
@@ -27,7 +32,7 @@ def process_spreadsheet(form, request):
     students_with_invalid_student_ids = surveys_df[
         ~surveys_df["StudentID"].isin(student_info_df["StudentID"])
     ]["StudentID"].unique()
-    print(students_with_invalid_student_ids)
+    
 
     surveys_df = surveys_df.drop_duplicates(
         subset=["StudentID", "Which Career Day presenter are you signing up for?"]
@@ -44,13 +49,15 @@ def process_spreadsheet(form, request):
             session_rosters[session] = {"Session1": [], "Session2": []}
 
     session_one_only = [
-        "Hilary Bagdonas, Gordana Hudock, Brandon Loura: Club Monaco Team",
-        "Jordan Potter: Senior Director @ Lede PR",
+        "Jordie McFarquhar : Fashion Designer",
+        "Musa Jackson: Model, Writer, and Producer",
     ]
+    
     for session in session_one_only:
         session_rosters[session]["Session2"] = [x for x in range(999)]
 
     session_two_only = ["Ty-Ron Mayes: Celebrity Stylist"]
+    session_two_only = []
     for session in session_two_only:
         session_rosters[session]["Session1"] = [x for x in range(999)]
 
@@ -199,10 +206,10 @@ def process_spreadsheet(form, request):
         values="StudentID",
         aggfunc="count",
     )
-    print(counts_df)
+    
 
     assignments_df = assignments_df.merge(
-        locations_df, on=["Presenter"], how="left"
+        locations_df[['Room','Final Session Title']], left_on=["Presenter"], right_on=['Final Session Title'], how="left"
     ).fillna({"Room": 829, "Final Session Title": "Working Career Day"})
 
     assignments_df["Room"] = assignments_df["Room"].astype(int)
@@ -213,6 +220,27 @@ def process_spreadsheet(form, request):
 def return_assignments_as_spreadsheet(assignments_df):
     f = BytesIO()
     writer = pd.ExcelWriter(f)
+
+    assignments_df = assignments_df.pivot(
+        index="StudentID", columns="Session", values=["Final Session Title", "Room"]
+    ).reset_index()
+    assignments_df.columns = [
+        "StudentID",
+        "Session1",
+        "Session2",
+        "Session1Location",
+        "Session2Location",
+    ]
+
+    filename = utils.return_most_recent_report(files_df, "3_07")
+    student_info_df = utils.return_file_as_df(filename)
+    student_info_df = student_info_df[
+        ["StudentID", "LastName", "FirstName", "Student DOE Email"]
+    ]
+
+    assignments_df = assignments_df.merge(
+        student_info_df, on=["StudentID"], how="left"
+    ).fillna("")
 
     assignments_df.to_excel(writer)
 
@@ -277,6 +305,7 @@ qr_flowable = QRCodeImage(feedback_url, size=2.2 * inch)
 
 
 def return_student_flowables(student_row):
+    
     StudentID = student_row["StudentID"]
     FirstName = student_row["FirstName"]
     LastName = student_row["LastName"]
@@ -308,25 +337,25 @@ def return_student_flowables(student_row):
     flowables.append(paragraph)
     paragraph = Paragraph(f"Room: {Session1Location}")
     flowables.append(paragraph)
-    paragraph = Paragraph(
-        f"At the end of the session, scan the QR code below to provide feedback on the session and reflect on what you learned. Your responses will be shared with your CTE teacher."
-    )
-    flowables.append(paragraph)
+    # paragraph = Paragraph(
+    #     f"At the end of the session, scan the QR code below to provide feedback on the session and reflect on what you learned. Your responses will be shared with your CTE teacher."
+    # )
+    # flowables.append(paragraph)
 
-    qr_flowable = QRCodeImage(Session1_feedback_url, size=2.2 * inch)
-    flowables.append(qr_flowable)
+    # qr_flowable = QRCodeImage(Session1_feedback_url, size=2.2 * inch)
+    # flowables.append(qr_flowable)
 
     flowables.append(Spacer(width=0, height=0.25 * inch))
     paragraph = Paragraph(f"Session #2 (10:45am - 11:30am): {Session2}")
     flowables.append(paragraph)
     paragraph = Paragraph(f"Room: {Session2Location}")
     flowables.append(paragraph)
-    paragraph = Paragraph(
-        f"At the end of the session, scan the QR code below to provide feedback on the session and reflect on what you learned. Your responses will be shared with your CTE teacher."
-    )
-    flowables.append(paragraph)
-    qr_flowable = QRCodeImage(Session2_feedback_url, size=2.2 * inch)
-    flowables.append(qr_flowable)
+    # paragraph = Paragraph(
+    #     f"At the end of the session, scan the QR code below to provide feedback on the session and reflect on what you learned. Your responses will be shared with your CTE teacher."
+    # )
+    # flowables.append(paragraph)
+    # qr_flowable = QRCodeImage(Session2_feedback_url, size=2.2 * inch)
+    # flowables.append(qr_flowable)
 
     flowables.extend(closing)
     flowables.append(PageBreak())

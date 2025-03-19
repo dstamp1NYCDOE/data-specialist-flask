@@ -45,6 +45,7 @@ def return_stars_scholarship_report():
         )
     else:
         form = StaffMemberDropDown(request.form)
+        return scholarship_report(form, request)
         f, download_name = scholarship_report(form, request)
         return send_file(
             f,

@@ -77,7 +77,7 @@ def main():
     student_info_df = cr_3_07_df[student_info_cols]
     student_info_df["Phone"] = student_info_df["Phone"].apply(lambda x: str(int(x)))
     student_info_df["Phone"] = student_info_df["Phone"].str.replace(
-        "^(\d{3})(\d{3})(\d{4})$", r"(\1)\2-\3"
+        r"^(\d{3})(\d{3})(\d{4})$", r"(\1)\2-\3"
     )
 
     
