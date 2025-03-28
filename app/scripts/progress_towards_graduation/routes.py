@@ -23,7 +23,7 @@ def return_progress_towards_graduation_reports():
         {
             "report_title": "Analyze Progress Towards Graduation",
             "report_function": "analyze_progress_towards_graduation",
-            "report_description": "Return student facing letters for missing + low assignments in the single course they are failing",
+            "report_description": "Analyzes the most up to date CR1.68 file uploaded to the database",
             "report_form":PlaceholderForm(meta={'title':'MissingAssignmentsForFailingOneCourseForm','type':'placeholder'}),
         },
     ]

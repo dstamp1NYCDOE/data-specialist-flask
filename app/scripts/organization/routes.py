@@ -94,7 +94,12 @@ def return_organization_reports():
             "report_title": "Return Student Contact Tracing",
             "report_function": "scripts.return_contact_tracing",
             "report_description": "",
-        },        
+        }, 
+        {
+            "report_title": "Return Enhanced Line Schedule from List",
+            "report_function": "scripts.return_enhanced_line_schedule_from_list",
+            "report_description": "",
+        },                
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports
@@ -315,3 +320,24 @@ def return_contact_tracing():
             download_name=download_name,
         )
 
+
+from app.scripts.organization.enhanced_line_schedule.forms import EnhancedLineScheduleForm
+from app.scripts.organization.enhanced_line_schedule import main as enhanced_line_schedule
+@scripts.route("/organization/enhanced_line_schedule", methods=["GET", "POST"])
+def return_enhanced_line_schedule_from_list():
+    if request.method == "GET":
+        form = EnhancedLineScheduleForm()
+        return render_template(
+            "organization/templates/organization/enhanced_line_schedule/form.html",
+            form=form,
+        )
+    else:
+        form = EnhancedLineScheduleForm(request.form)
+        f, download_name = enhanced_line_schedule.main(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+            mimetype="application/pdf",
+        )

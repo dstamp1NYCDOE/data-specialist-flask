@@ -51,7 +51,7 @@ from app.scripts.programming.jupiter.return_master_schedule import (
 
 ## files needed
 # 1_01
-# 1_32
+# 1_32 save as .xlsx
 # 1_40
 # 1_49
 # 3_07
@@ -690,13 +690,13 @@ def return_attendance_sentence_paragraphs(student_RATR_df):
     )
     if num_of_days_late == 0:
         paragraph = Paragraph(
-            f"<b>Lates:</b> Zero days so far this school year. Keep it up!",
+            f"<b>Lates:</b> Zero days so far this semester. Keep it up!",
             styles["Normal"],
         )
         paragraphs.append(paragraph)
     else:
         paragraph = Paragraph(
-            f"<b>Lates:</b> {num_of_days_late} days ({days_late_frequency_str}) so far this school year: {days_late_lst_str}",
+            f"<b>Lates:</b> {num_of_days_late} days ({days_late_frequency_str}) so far this semester: {days_late_lst_str}",
             styles["Normal"],
         )
         paragraphs.append(paragraph)
@@ -710,13 +710,13 @@ def return_attendance_sentence_paragraphs(student_RATR_df):
 
     if num_of_days_absent == 0:
         paragraph = Paragraph(
-            f"<b>Absences:</b> Zero days so far this school year. Keep it up!",
+            f"<b>Absences:</b> Zero days so far this semester. Keep it up!",
             styles["Normal"],
         )
         paragraphs.append(paragraph)
     else:
         paragraph = Paragraph(
-            f"<b>Absences:</b> {num_of_days_absent} days ({days_absent_frequency_str}) so far this school year: {days_absent_lst_str}",
+            f"<b>Absences:</b> {num_of_days_absent} days ({days_absent_frequency_str}) so far this semester: {days_absent_lst_str}",
             styles["Normal"],
         )
         paragraphs.append(paragraph)

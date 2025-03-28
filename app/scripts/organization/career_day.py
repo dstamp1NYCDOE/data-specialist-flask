@@ -5,8 +5,15 @@ from app.scripts import scripts, files_df
 from io import BytesIO
 import urllib.parse
 
+from flask import session
+
+
+
 
 def process_spreadsheet(form, request):
+
+
+
     locations = request.files[form.locations_file.name]
     locations_df = pd.read_csv(locations)
 
@@ -304,7 +311,7 @@ feedback_url = f"https://docs.google.com/forms/d/e/1FAIpQLSfYEug9GL8X_8BRAP5rMMV
 qr_flowable = QRCodeImage(feedback_url, size=2.2 * inch)
 
 
-def return_student_flowables(student_row):
+def return_student_flowables(student_row, current_year):
     
     StudentID = student_row["StudentID"]
     FirstName = student_row["FirstName"]
@@ -327,7 +334,7 @@ def return_student_flowables(student_row):
     Session2Location = student_row["Session2Location"]
 
     paragraph = Paragraph(
-        f"You have been assigned to the following sessions for Career Day 2024. Please be on time! Show this letter at the door as your admission ticket",
+        f"You have been assigned to the following sessions for Career Day {current_year}. Please be on time! Show this letter at the door as your admission ticket",
     )
 
     flowables.append(paragraph)
@@ -363,7 +370,15 @@ def return_student_flowables(student_row):
 
 
 def return_student_letters(assignments_df):
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
 
+    if term == 1:
+        current_year = school_year
+    else:
+        current_year = school_year + 1
+        
     assignments_df = assignments_df.pivot(
         index="StudentID", columns="Session", values=["Final Session Title", "Room"]
     ).reset_index()
@@ -391,7 +406,7 @@ def return_student_letters(assignments_df):
         )
 
     assignments_df = assignments_df.sort_values(by=["LastName", "FirstName"])
-    assignments_df["flowables"] = assignments_df.apply(return_student_flowables, axis=1)
+    assignments_df["flowables"] = assignments_df.apply(return_student_flowables, args=(current_year,), axis=1)
     flowables = assignments_df["flowables"].explode().to_list()
 
     f = BytesIO()
