@@ -96,10 +96,12 @@ def return_CTE_major(course):
         return "Photo"
     if curriculum == "BN":
         return "FMM"
+    if curriculum == "BN":
+        return "FMM"
     if curriculum == "BM":
         return "VP"
     if curriculum == "TQ":
-        return "FMM"
+        return "SD"
 
 
 def return_if_CTE(course):

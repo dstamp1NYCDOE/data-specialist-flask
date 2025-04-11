@@ -33,8 +33,9 @@ def main():
         files_df, "1_49", year_and_semester
     )
     cr_1_49_df = utils.return_file_as_df(filename)
-    cr_1_49_df = cr_1_49_df[["StudentID", "Counselor", "OffClass"]]
+    cr_1_49_df = cr_1_49_df[["StudentID", "Counselor", "OffClass","Grade"]]
     cr_1_68_df = cr_1_68_df.merge(cr_1_49_df, on="StudentID", how="left")
+    cr_1_68_df = cr_1_68_df.rename(columns={'Grade_y':'Grade'})
 
     filename = utils.return_most_recent_report_by_semester(
         files_df, "3_07", year_and_semester
@@ -70,6 +71,7 @@ def main():
         "LastName",
         "FirstName",
         "OffClass",
+        "Grade","Cohort",
         "Counselor",
         "IEP",
         "Counselor Certification (Final)",
@@ -116,18 +118,18 @@ def main():
     workbook = writer.book
     worksheet = writer.sheets["StudentsByCounselor"]
     worksheet.data_validation(
-        1, 7, 1000, 8, {"validate": "list", "source": ["Y", "N", "Maybe", ""]}
+        1, 9, 1000, 10, {"validate": "list", "source": ["Y", "N", "Maybe", ""]}
     )
     worksheet.data_validation(
-        1, 10, 1000, 10, {"validate": "list", "source": ["AR", "R", "L", ""]}
-    )
-
-    worksheet.data_validation(
-        1, 9, 1000, 9, {"validate": "list", "source": [True, False]}
+        1, 12, 1000, 12, {"validate": "list", "source": ["AR", "R", "L", ""]}
     )
 
     worksheet.data_validation(
-        1, 11, 1000, 19, {"validate": "list", "source": [True, False]}
+        1, 11, 1000, 11, {"validate": "list", "source": [True, False]}
+    )
+
+    worksheet.data_validation(
+        1, 13, 1000, 21, {"validate": "list", "source": [True, False]}
     )
 
     for sheet in writer.sheets:

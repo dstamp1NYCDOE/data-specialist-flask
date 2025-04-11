@@ -10,6 +10,20 @@ def main(student, student_transcript, student_iep):
         else:
             PE_courses = ["PHS21", "PPS83"]
     if year_in_hs == 3:
+        PE_courses = ["PPS85"]
+
+    if year_in_hs == 4:
+        PE_courses = ["PPS87"]
+
+    return PE_courses
+
+
+    if year_in_hs == 2:
+        if health_earned >= 1:
+            PE_courses = ["PPS83"]
+        else:
+            PE_courses = ["PHS21", "PPS83"]
+    if year_in_hs == 3:
         if pe_earned >= 1.5:
             PE_courses = ["PPS85", "GAS85"]
             PE_courses = ["PPS85"]
@@ -24,5 +38,3 @@ def main(student, student_transcript, student_iep):
             PE_courses = ["PHS11", "PPS87", "GQS22"]
         else:
             PE_courses = ["PHS21", "PPS87", "GQS22"]
-
-    return PE_courses

@@ -3,6 +3,8 @@ def main(student, student_transcript, student_iep):
 
     LE_earned = student_transcript["SL_earned"]
     ES_earned = student_transcript["SE_earned"]
+    Bio_earned = student_transcript["SB_earned"]
+    ESS_earned = student_transcript["SJ_earned"]    
     Chem_earned = student_transcript["SC_earned"]
     Phys_earned = student_transcript["SP_earned"]
 
@@ -11,6 +13,8 @@ def main(student, student_transcript, student_iep):
 
     LE_attempted = student_transcript["SL_attempted"]
     ES_attempted = student_transcript["SE_attempted"]
+    Bio_attempted = student_transcript["SB_attempted"]
+    ESS_attempted = student_transcript["SJ_attempted"]    
     Chem_attempted = student_transcript["SC_attempted"]
     Phys_attempted = student_transcript["SP_attempted"]
 
@@ -20,10 +24,10 @@ def main(student, student_transcript, student_iep):
     total_science_earned = student_transcript["S_earned"]
 
     if year_in_hs == 2:
-        if LE_attempted == 0:
-            output_course = "SLS21"
-        elif ES_attempted == 0:
-            output_course = "SES21"
+        if (LE_attempted + Bio_attempted) == 0:
+            output_course = "SBS21"
+        elif (ES_attempted + ESS_attempted) == 0:
+            output_course = "SJS21"
         elif Chem_attempted == 0:
             output_course = "SCS21"
         elif Phys_attempted == 0:
@@ -31,13 +35,13 @@ def main(student, student_transcript, student_iep):
         else:
             output_course = "SWS21"
     if year_in_hs == 3:
-        if LE_attempted == 0:
-            output_course = "SLS21"
-        elif ES_attempted == 0:
-            output_course = "SES21"
-        elif Chem_attempted == 0 and LE_earned >= 2 and ES_earned >= 2:
+        if (LE_attempted + Bio_attempted) == 0:
+            output_course = "SBS21"
+        elif (ES_attempted + ESS_attempted) == 0:
+            output_course = "SJS21"
+        elif Chem_attempted == 0 and (LE_earned + Bio_earned) >= 2 and (ES_earned + ESS_earned) >= 2:
             output_course = "SCS21"
-        elif Phys_attempted == 0 and LE_earned >= 2 and ES_earned >= 2:
+        elif Phys_attempted == 0 and (LE_earned + Bio_earned) >= 2 and (ES_earned + ESS_earned) >= 2:
             output_course = "SPS21"
         else:
             if life_elective_attempted == 0:
@@ -55,10 +59,10 @@ def main(student, student_transcript, student_iep):
             output_course = ""
             return [output_course]
         else:
-            if LE_attempted == 0:
-                output_course = "SLS21"
-            elif ES_attempted == 0:
-                output_course = "SES21"
+            if (LE_attempted + Bio_attempted) == 0:
+                output_course = "SBS21"
+            elif (ES_attempted + ESS_attempted) == 0:
+                output_course = "SJS21"
             else:
                 output_course = "SDS21"
 

@@ -10,10 +10,13 @@ from flask import current_app, session
 
 
 def main():
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
 
     filename = utils.return_most_recent_report(files_df, "3_07")
     students_df = utils.return_file_as_df(filename)
-    school_year = session["school_year"]
+    
 
     students_df["year_in_hs"] = students_df["GEC"].apply(
         utils.return_year_in_hs, args=(school_year,)
@@ -80,8 +83,8 @@ def main():
 
     ## most recent semester attendance
     ## Analyze attendance
-    jupiter_attd_filename = utils.return_most_recent_report(
-        files_df, "jupiter_period_attendance"
+    jupiter_attd_filename = utils.return_most_recent_report_by_semester(
+        files_df, "jupiter_period_attendance", year_and_semester=year_and_semester
     )
     attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
@@ -90,6 +93,7 @@ def main():
 
     ## convert date and insert marking period
     attendance_marks_df["Date"] = pd.to_datetime(attendance_marks_df["Date"])
+    print(attendance_marks_df)
 
     periods_df = attendance_marks_df[["Period"]].drop_duplicates()
     periods_df["Pd"] = periods_df["Period"].apply(utils.return_pd)

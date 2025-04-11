@@ -85,12 +85,13 @@ def return_dataframe_of_files():
 
     return files_df
 
+
 def return_most_recent_report_per_semester(files_df, report):
     files_df = return_dataframe_of_files()
     files_df = files_df[files_df["report"] == report]
     files_df = files_df.sort_values(by=["download_date"])
-    files_df = files_df.drop_duplicates(subset='year_and_semester')
-    return files_df['filename'].to_list()
+    files_df = files_df.drop_duplicates(subset="year_and_semester")
+    return files_df["filename"].to_list()
 
 
 def return_most_recent_report(files_df, report):
@@ -271,7 +272,24 @@ def set_df_to_dataframe(output_df, spreadsheet_id, sheet="Output"):
 
 def return_home_lang_code_table(files_df):
     filename = return_most_recent_report(files_df, "TBLD150")
-    df = return_file_as_df(filename, skiprows=3)   
-    df = df.rename(columns={'Code':'HomeLangCode','Description':'HomeLang'})
-    
-    return df[['HomeLangCode','HomeLang']] 
+    df = return_file_as_df(filename, skiprows=3)
+    df = df.rename(columns={"Code": "HomeLangCode", "Description": "HomeLang"})
+
+    return df[["HomeLangCode", "HomeLang"]]
+
+
+ms_teams_HSFI_support_webhook_url = os.getenv("ms_teams_HSFI_support_webhook_url")
+from requests import post
+
+
+def post_to_ms_teams(posts, method):
+    body = {
+        "method": method,
+        "posts": posts,
+    }
+    response = post(
+        ms_teams_HSFI_support_webhook_url,
+        json=body,
+        headers={"Content-Type": "application/json"},
+    )
+    return response

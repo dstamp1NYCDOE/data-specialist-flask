@@ -164,7 +164,12 @@ from app.scripts.programming.requests import main as requests
 
 @scripts.route("/programming/initial_requests", methods=["GET", "POST"])
 def return_initial_requests():
-    return requests.main()
+    f,download_name =  requests.main()
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )    
 
 
 import app.scripts.programming.request_inform.initial_request_inform as initial_request_inform

@@ -4,11 +4,14 @@ import numpy as np
 from app.scripts.programming.requests.marks import marks_dict
 
 def main(transcript_raw_df):
-    # transcript_raw_df = transcript_raw_df[transcript_raw_df['Credits']>0]
-    transcript_raw_df = transcript_raw_df[~transcript_raw_df['Mark'].isna()]
-
-    transcript_raw_df['passed?'] = transcript_raw_df['Mark']\
+    
+    transcript_raw_df = transcript_raw_df[transcript_raw_df['Credits']>0]
+    
+    transcript_raw_df = transcript_raw_df[~transcript_raw_df['NumericEquivalent'].isna()]
+    
+    transcript_raw_df['passed?'] = transcript_raw_df['NumericEquivalent']\
     .apply(passed_course)
+    
     
     transcript_raw_df['dept'] = transcript_raw_df['Course']\
     .apply(lambda x: x[0])
@@ -88,11 +91,7 @@ def credits_earned(student_row):
         return 0
 
 def passed_course(mark):
-    mark = str(mark).upper()
-    if mark in marks_dict.keys():
-        return marks_dict.get(mark)
-    else:
-        return int(mark) >= 65
+    return int(mark) >= 65
 
 
 if __name__ == '__main__':

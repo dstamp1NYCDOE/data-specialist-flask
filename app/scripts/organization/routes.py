@@ -27,6 +27,7 @@ from app.scripts.organization import class_rosters_from_list
 from app.scripts.organization import career_day
 
 
+
 @scripts.route("/organization")
 def return_organization_reports():
     reports = [

@@ -21,33 +21,47 @@ from app.scripts.attendance.process_RATR import student_lateness_overall
 
 import app.scripts.utils as utils
 from app.scripts import scripts, files_df
+from flask import session
 
+from io import BytesIO
 
 def main():
-    cr_1_14_filename = utils.return_most_recent_report(files_df, "1_14")
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"    
+    cr_1_14_filename = utils.return_most_recent_report_by_semester(files_df, "1_14",year_and_semester=year_and_semester)
     cr_1_14_df = utils.return_file_as_df(cr_1_14_filename)
+
+    ## attach numeric equivalent
+    cr_1_30_filename = utils.return_most_recent_report(files_df, "1_30")
+    cr_1_30_df = utils.return_file_as_df(cr_1_30_filename)
+    cr_1_14_df = cr_1_14_df.merge(
+        cr_1_30_df[["Mark", "NumericEquivalent"]], on=["Mark"], how="left"
+    )
+
+
     transcript_df = process_transcript.main(cr_1_14_df)
 
     students_with_transcripts = cr_1_14_df["StudentID"].unique()
     
 
-    cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
+    cr_3_07_filename = utils.return_most_recent_report_by_semester(files_df, "3_07",year_and_semester=year_and_semester)
     register_df = utils.return_file_as_df(cr_3_07_filename)
     register_df = process_register.main(register_df)
 
     register_df = register_df[register_df["StudentID"].isin(students_with_transcripts)]
 
-    recommended_programs_filename = utils.return_most_recent_report(
-        files_df, "Recommended_Programs"
+    recommended_programs_filename = utils.return_most_recent_report_by_semester(
+        files_df, "Recommended_Programs",year_and_semester=year_and_semester
     )
     iep_df = utils.return_file_as_df(recommended_programs_filename, skiprows=1)
     iep_dict = process_ieps.main(iep_df)
 
-    cr_1_01_filename = utils.return_most_recent_report(files_df, "1_01")
+    cr_1_01_filename = utils.return_most_recent_report_by_semester(files_df, "1_01",year_and_semester=year_and_semester)
     programs_df = utils.return_file_as_df(cr_1_01_filename)
     majors_dict = process_majors.main(programs_df)
 
-    RATR_filename = utils.return_most_recent_report(files_df, "RATR")
+    RATR_filename = utils.return_most_recent_report_by_semester(files_df, "RATR",year_and_semester=year_and_semester)
     RATR_df = utils.return_file_as_df(RATR_filename)
     student_lateness_df = student_lateness_overall(RATR_df)
     
@@ -147,15 +161,25 @@ def main():
         margins=True,
     ).fillna(0)
 
-    with pd.ExcelWriter("app/data/Fall2023_Requests_Output.xlsx") as writer:
-        wide_format_df.to_excel(writer, sheet_name="WideFormat", index=False)
-        long_format_df.to_excel(writer, sheet_name="LongFormat", index=False)
-        requests_pivot_tbl.to_excel(
-            writer,
-            sheet_name="counts",
-        )
+    f = BytesIO()
+    writer = pd.ExcelWriter(f)
 
-    return requests_pivot_tbl.to_html()
+    wide_format_df.to_excel(writer, sheet_name="WideFormat", index=False)
+    long_format_df.to_excel(writer, sheet_name="LongFormat", index=False)
+    requests_pivot_tbl.to_excel(
+        writer,
+        sheet_name="counts",
+    )
+
+    for sheet in writer.sheets:
+        worksheet = writer.sheets[sheet]
+        worksheet.autofit()
+
+    writer.close()
+
+    f.seek(0)
+    download_name = f"Fall_{school_year+1}_course_requests.xlsx"
+    return f, download_name
 
 
 if __name__ == "__main__":

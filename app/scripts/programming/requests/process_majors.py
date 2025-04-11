@@ -13,6 +13,7 @@ def main(programs_df):
         "AUS11TA": "A&D",
         "AFS62TF": "FD",
         "AFS64TD": "FD",
+        "AFS64TDA": "FD",
         "AFS64TDB": "FD",
         "AFS64TDC": "FD",
         "AFS66QC": "FD",

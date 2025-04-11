@@ -92,8 +92,6 @@ def return_photo_roster_pdf(students_df, lst_title):
         image_dim = 0.75
         nCols = 4
 
-    image_dim = 1
-    nCols = 3
 
     for index, student in students_df.iterrows():
         photo_path = student["photo_filename"]
