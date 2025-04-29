@@ -53,6 +53,8 @@ def main():
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
     )
 
+    print(registrations_df)
+
     ## attach lab eligibility
     registrations_df = registrations_df.merge(
         lab_eligibility_df, on=["StudentID", "Curriculum"], how="left"
@@ -162,6 +164,15 @@ def main():
     registrations_df = registrations_df.merge(sections_df, on=flags_cols)
     registrations_df["Section"] = registrations_df.apply(remove_lab_ineligible, axis=1)
 
+    ## swap in "distributed" for Teacher1 name for those exams to minimize number of sections
+    def swap_teacher_name(row):
+        if row["DistributedScoring"] == True:
+            return "Distributed"
+        else:
+            return row["Teacher1"]
+        
+    registrations_df["Teacher1"] = registrations_df.apply(swap_teacher_name,axis=1)
+
     ## number_of_students_per_section
     registrations_df["running_total"] = (
         registrations_df.sort_values(by=["Teacher1", "LastName", "FirstName"])
@@ -169,6 +180,9 @@ def main():
         .cumcount()
         + 1
     )
+
+    
+
 
     ## adjust sections based on enrollment
 

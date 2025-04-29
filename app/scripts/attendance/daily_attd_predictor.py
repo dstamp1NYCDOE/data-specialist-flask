@@ -199,8 +199,14 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
         aggfunc="count",
     ).fillna(0)
     pvt_tbl["total"] = pvt_tbl.sum(axis=1)
-    pvt_tbl["late_%"] = pvt_tbl["L"] / (pvt_tbl["P"] + pvt_tbl["L"])
-    pvt_tbl["absence_%"] = pvt_tbl["A"] / pvt_tbl["total"]
+    if 'L' in pvt_tbl.columns:
+        pvt_tbl["late_%"] = pvt_tbl["L"] / (pvt_tbl["P"] + pvt_tbl["L"])
+    else:
+        pvt_tbl["late_%"] = 0
+    if 'A' in pvt_tbl.columns:        
+        pvt_tbl["absence_%"] = pvt_tbl["A"] / pvt_tbl["total"]
+    else:
+        pvt_tbl["absence_%"] = 0
 
     pvt_tbl = pvt_tbl.reset_index()
 

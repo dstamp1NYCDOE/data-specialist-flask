@@ -65,6 +65,7 @@ class AttendanceWeekOfForm(FlaskForm):
         
         dates_df['label'] = dates_df['Date'].apply(lambda x:f'Week of {x}')
         df = dates_df[['week_number','label']]
+        df = df.sort_values(by=['week_number'],ascending=[False])
         self.week_of.choices = list(zip(*df.values.T))
 
 class AttendanceDayOfForm(FlaskForm):
@@ -84,6 +85,7 @@ class AttendanceDayOfForm(FlaskForm):
         attendance_marks_df = utils.return_file_as_df(jupiter_attd_filename)
 
         dates_df = attendance_marks_df[['Date']].drop_duplicates()
-
+        dates_df = dates_df.sort_values(by=['Date'],ascending=[False])
         df = dates_df[['Date','Date']]
+        
         self.day_of.choices = list(zip(*df.values.T))            

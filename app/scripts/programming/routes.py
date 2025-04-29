@@ -48,6 +48,12 @@ def return_programming_reports():
             "route": "scripts.return_initial_request_inform",
         },
         {
+            "Title": "CTE Major Notification Letter",
+            "Description": "Return form letter for rising 10th grade students to inform them of their CTE major",
+            "form": initial_request_inform_letter_form,
+            "route": "scripts.return_cte_major_notification",
+        },        
+        {
             "Title": "Final Fall Request Inform Letters",
             "Description": "Return PDF of final notice letters for Fall Requests",
             "form": final_request_inform_letter_form,
@@ -223,6 +229,33 @@ def return_final_request_inform():
         download_name=download_name,
         mimetype="application/pdf",
     )
+
+import app.scripts.programming.request_inform.cte_major_change_inform as cte_major_change_inform
+
+
+@scripts.route("/programming/cte_major_notification", methods=["GET", "POST"])
+def return_cte_major_notification():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    form = InitialRequestInformLetters(request.form)
+    data = {
+        "date_of_letter": form.date_of_letter.data,
+        "due_date": form.due_date.data,
+    }
+
+    f = cte_major_change_inform.main(data)
+    f.seek(0)
+
+    download_name = f"{school_year}_{term}_cte_major_change_inform_letters.pdf"
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        mimetype="application/pdf",
+    )
+
 
 
 from app.scripts.programming.cte_major_reapplication import (

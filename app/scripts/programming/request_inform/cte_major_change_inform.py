@@ -84,13 +84,13 @@ def main(data):
     closing = [
         Spacer(width=0, height=0.25*inch),
         Paragraph('Warmly,', styles['Normal_RIGHT']),
-        Paragraph('Derek Stampone', styles['Normal_RIGHT']),
-        Paragraph('Assistant Principal, Programming', styles['Normal_RIGHT']),
+        Paragraph('Kate Boulmaali', styles['Normal_RIGHT']),
+        Paragraph('Assistant Principal, CTE', styles['Normal_RIGHT']),
     ]
 
     flowables = []
 
-    students_df = student_requests_df[student_requests_df['year_in_hs'] <= 4].sort_values(by=['Counselor','LastName','FirstName'])
+    students_df = student_requests_df[student_requests_df['year_in_hs'] == 2].sort_values(by=['Counselor','LastName','FirstName'])
     students_df = students_df.groupby(['StudentID', 'LastName', 'FirstName', 'year_in_hs'])
 
     for group, registered_courses_df in students_df:
@@ -125,9 +125,6 @@ def main(data):
         
         flowables.append(paragraph)
 
-        flowables.append(Spacer(width=0, height=0.25*inch))
-        flowables.append(return_courses_as_table(registered_courses_df))
-        flowables.append(Spacer(width=0, height=0.25*inch))
 
         paragraph = Paragraph(
             f"Your CTE major is: {student_major}",
@@ -136,57 +133,18 @@ def main(data):
         flowables.append(paragraph)
 
         paragraph = Paragraph(
-            "Scan the QR code below to access surveys to:",
+            "Scan the QR code below to access confirm your CTE major or indicate interest in changing your major. Complete this survey by {due_date}",
             styles['Body_Justify']
         )
         flowables.append(paragraph)
 
-        if year_in_hs > 2:
-  
-            list_flowable = ListFlowable(
-            [
-                ListItem(Paragraph('Apply to be on early schedule',
-                         styles['Body_Justify']), bulletColor='black', value='square'),
-                ListItem(Paragraph(
-                    'Indicate interest for advanced coursework such as honors or Advanced Placement', styles['Body_Justify']), bulletColor='black', value='square')
-            ],bulletType='bullet')
 
-        else:
-            list_flowable = ListFlowable(
-                [
-                    ListItem(Paragraph('Reapply for your CTE major or change your major',
-                                       styles['Body_Justify']), bulletColor='black', value='square'),
-                    ListItem(Paragraph(
-                        'Indicate interest for advanced coursework such as honors or Advanced Placement', styles['Body_Justify']), bulletColor='black', value='square')
-                ], bulletType='bullet')
-
-        flowables.append(list_flowable)
-
-        paragraph = Paragraph(
-            f"Complete the surveys by {due_date} to receive priority consideration.",
-            styles['Body_Justify']
-        )
-        flowables.append(paragraph)
-
-        paragraph = Paragraph(
-            "Your overall attendance and attending school on time will be a factor in selection.",
-            styles['Body_Justify']
-        )
-        flowables.append(paragraph)
-
-        paragraph = Paragraph(
-            "If you have any questions, contact your counselor in the wellness center or attend a Programming Office student office hours.",
-            styles['Body_Justify']
-        )
-        flowables.append(paragraph)
-
-        qr_code_url = f"https://hsfi-data-dashboard.herokuapp.com/programming/fall/surveys?StudentID={StudentID}&year_in_hs={int(year_in_hs)}&year={school_year}&FirstName={FirstName}&LastName={LastName}"
-
-        qr = QRCodeImage(qr_code_url, size=60 * mm)
+        qr_code_url = f"https://docs.google.com/forms/d/e/1FAIpQLSew8piWXdUc0Fobc0gNYWWMzL5JaYOQMht7qMHevM3PFOrLvA/viewform?usp=pp_url&entry.648454978={StudentID}&entry.980800493={FirstName}&entry.552248270={LastName}&entry.1340060027=Yes"
+        qr = QRCodeImage(qr_code_url, size=50 * mm)
         qr.hAlign = 'CENTER'
         flowables.append(qr)
 
-        # flowables.extend(closing)
+        flowables.extend(closing)
         flowables.append(PageBreak())
 
     my_doc.build(flowables)

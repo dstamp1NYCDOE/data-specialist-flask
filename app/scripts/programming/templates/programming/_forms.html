@@ -7,7 +7,9 @@
 
     {% elif form_card.Title == "Initial Fall Request Inform Letters" %}
         {{initial_request_inform_letter_form(form_card.form,form_card.route)}}  
-    
+    {% elif form_card.Title == "CTE Major Notification Letter" %}
+        {{initial_request_inform_letter_form(form_card.form,form_card.route)}}  
+
     {% elif form_card.Title == "Final Fall Request Inform Letters" %}
         {{final_request_inform_letter_form(form_card.form,form_card.route)}}  
 

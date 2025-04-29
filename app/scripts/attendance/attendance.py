@@ -27,86 +27,91 @@ from app.scripts.attendance.forms import JupiterCourseSelectForm
 @scripts.route("/attendance")
 def return_attendance_reports():
     reports = [
-        {
-            "report_title": "Jupiter Midday Analysis",
-            "report_function": "scripts.return_jupiter_midday_analysis",
-            "report_description": "Download one day's worth of Jupiter Attendance and complete the Midday Analysis",
-        },
-        {
-            "report_title": "Student Attendance Analysis",
-            "report_function": "scripts.return_RATR_analysis",
-            "report_description": "Analyze student daily attendance using ATS report RATR",
-        },
-        {
-            "report_title": "Confirmation Sheets Cover Page Generator",
-            "report_function": "scripts.return_confirmation_sheets_cover_page",
-            "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
-        },
-        {
-            "report_title": "RDAL Analysis",
-            "report_function": "scripts.return_rdal_analysis_spreadsheet",
-            "report_description": "Analysis daily RDAL file and return file to upload",
-        },
+        # {
+        #     "report_title": "Jupiter Midday Analysis",
+        #     "report_function": "scripts.return_jupiter_midday_analysis",
+        #     "report_description": "Download one day's worth of Jupiter Attendance and complete the Midday Analysis",
+        # },
+        # {
+        #     "report_title": "Student Attendance Analysis",
+        #     "report_function": "scripts.return_RATR_analysis",
+        #     "report_description": "Analyze student daily attendance using ATS report RATR",
+        # },
+        # {
+        #     "report_title": "Confirmation Sheets Cover Page Generator",
+        #     "report_function": "scripts.return_confirmation_sheets_cover_page",
+        #     "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
+        # },
+        # {
+        #     "report_title": "RDAL Analysis",
+        #     "report_function": "scripts.return_rdal_analysis_spreadsheet",
+        #     "report_description": "Analysis daily RDAL file and return file to upload",
+        # },
         {
             "report_title": "Student Attendance Tiers",
             "report_function": "scripts.return_attd_tiers_from_RATR",
             "report_description": "Return Student Attendance Tiers using ATS report RATR",
         },
-        {
-            "report_title": "Jupiter Attd Analysis By Teacher",
-            "report_function": "scripts.return_jupiter_attd_analysis_by_teacher",
-            "report_description": "Analyze student Jupiter attendance by teacher",
-        },
-        {
-            "report_title": "Jupiter Attd Analysis By Student",
-            "report_function": "scripts.return_jupiter_attd_analysis_by_student",
-            "report_description": "Analyze student Jupiter attendance by student",
-        },
-        {
-            "report_title": "Jupiter Attd Benchmark Analysis By Student",
-            "report_function": "scripts.return_jupiter_attd_benchmark_analysis",
-            "report_description": "Analyze student Jupiter attendance by student and return benchmark",
-        },
-        {
-            "report_title": "Jupiter Period Attendance Completion By Teacher",
-            "report_function": "scripts.return_teacher_jupiter_attd",
-            "report_description": "Return Jupiter Attendance Completion by teacher for current term",
-        },
-        {
-            "report_title": "Jupiter Attendance Patterns",
-            "report_function": "scripts.return_jupiter_attd_patterns",
-            "report_description": "Return Jupiter Attendance Patterns",
-        },
+        # {
+        #     "report_title": "Jupiter Attd Analysis By Teacher",
+        #     "report_function": "scripts.return_jupiter_attd_analysis_by_teacher",
+        #     "report_description": "Analyze student Jupiter attendance by teacher",
+        # },
+        # {
+        #     "report_title": "Jupiter Attd Analysis By Student",
+        #     "report_function": "scripts.return_jupiter_attd_analysis_by_student",
+        #     "report_description": "Analyze student Jupiter attendance by student",
+        # },
+        # {
+        #     "report_title": "Jupiter Attd Benchmark Analysis By Student",
+        #     "report_function": "scripts.return_jupiter_attd_benchmark_analysis",
+        #     "report_description": "Analyze student Jupiter attendance by student and return benchmark",
+        # },
+        # {
+        #     "report_title": "Jupiter Period Attendance Completion By Teacher",
+        #     "report_function": "scripts.return_teacher_jupiter_attd",
+        #     "report_description": "Return Jupiter Attendance Completion by teacher for current term",
+        # },
+        # {
+        #     "report_title": "Jupiter Attendance Patterns",
+        #     "report_function": "scripts.return_jupiter_attd_patterns",
+        #     "report_description": "Return Jupiter Attendance Patterns",
+        # },
         {
             "report_title": "Daily Attd Predictor",
             "report_function": "scripts.return_daily_attd_predictor",
             "report_description": "Return Daily Attd Predictor",
         },
-        {
-            "report_title": "Cut Analysis",
-            "report_function": "scripts.return_cut_analysis",
-            "report_description": "Return Cut Analysis",
-        },
-        {
-            "report_title": "Cut Analysis reports",
-            "report_function": "scripts.return_jupiter_cut_analysis_reports",
-            "report_description": "Return Cut Analysis reports based on Jupiter",
-        },
-        {
-            "report_title": "Late Analysis Reports",
-            "report_function": "scripts.return_jupiter_late_analysis_reports",
-            "report_description": "Return Late Analysis reports based on Jupiter",
-        },
-        {
-            "report_title": "Historical Jupiter Attd Reports",
-            "report_function": "scripts.return_historical_jupiter_attd_reports",
-            "report_description": "Return historical period attendance reports based on Jupiter",
-        },
+        # {
+        #     "report_title": "Cut Analysis",
+        #     "report_function": "scripts.return_cut_analysis",
+        #     "report_description": "Return Cut Analysis",
+        # },
+        # {
+        #     "report_title": "Cut Analysis reports",
+        #     "report_function": "scripts.return_jupiter_cut_analysis_reports",
+        #     "report_description": "Return Cut Analysis reports based on Jupiter",
+        # },
+        # {
+        #     "report_title": "Late Analysis Reports",
+        #     "report_function": "scripts.return_jupiter_late_analysis_reports",
+        #     "report_description": "Return Late Analysis reports based on Jupiter",
+        # },
+        # {
+        #     "report_title": "Historical Jupiter Attd Reports",
+        #     "report_function": "scripts.return_historical_jupiter_attd_reports",
+        #     "report_description": "Return historical period attendance reports based on Jupiter",
+        # },
         {
             "report_title": "CAASS Reports",
             "report_function": "scripts.return_caass_reports",
             "report_description": "Return CAASS reports",
         },
+        {
+            "report_title": "Jupiter Reports",
+            "report_function": "scripts.return_jupiter2_attd_reports",
+            "report_description": "Return Jupiter reports",
+        },        
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports

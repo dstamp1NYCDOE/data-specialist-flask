@@ -18,19 +18,22 @@ from reportlab_qrcode import QRCodeImage
 
 def main(data):
     school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"  
+    filename = utils.return_most_recent_report_by_semester(files_df, "3_07", year_and_semester=year_and_semester)
+    register_raw_df = utils.return_file_as_df(filename)
+    
     school_year = int(school_year)+1
+    year_and_semester = f"{school_year}-1"
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "CodeDeck", year_and_semester=year_and_semester)
+    code_deck_df = utils.return_file_as_df(filename)
+    filename = utils.return_most_recent_report_by_semester(files_df, "4_01", year_and_semester=year_and_semester)
+    student_requests_df = utils.return_file_as_df(filename)
 
     date_of_letter = data['date_of_letter'].strftime('%e %b %Y')
     
 
-    filename = utils.return_most_recent_report(files_df, "4_01")
-    student_requests_df = utils.return_file_as_df(filename)
-
-    filename = utils.return_most_recent_report(files_df, "code_deck")
-    code_deck_df = utils.return_file_as_df(filename)
-    
-    filename = utils.return_most_recent_report(files_df, "3_07")
-    register_raw_df = utils.return_file_as_df(filename)
 
     
     register_raw_df['year_in_hs'] = register_raw_df['GEC'].apply(return_year_in_hs)
@@ -147,7 +150,7 @@ def main(data):
         flowables.append(paragraph)
 
 
-        flowables.extend(closing)
+        # flowables.extend(closing)
         flowables.append(PageBreak())
 
     my_doc.build(flowables)
