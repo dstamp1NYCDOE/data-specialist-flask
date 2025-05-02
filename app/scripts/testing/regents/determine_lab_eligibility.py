@@ -30,8 +30,17 @@ def main():
     filename = utils.return_most_recent_report(files_df, "1_01")
     cr_1_01_df = utils.return_file_as_df(filename)
 
-    filename = utils.return_most_recent_report(files_df, "1_08")
-    cr_1_08_df = utils.return_file_as_df(filename)
+    year_and_semester = f"{year}-{term}"
+
+
+    path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
+    regents_calendar_df = pd.read_excel(path, sheet_name=f"{year}-{term}")
+    regents_courses = regents_calendar_df['CourseCode']
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_01", year_and_semester=year_and_semester)
+    cr_1_01_df = utils.return_file_as_df(filename)
+    cr_1_08_df = cr_1_01_df[['StudentID', 'LastName', 'FirstName', 'Section', 'Course','Room']]
+    cr_1_08_df = cr_1_08_df[cr_1_08_df['Course'].isin(regents_courses)]
 
     ## previously lab eligible
     science_courses_df = cr_1_14_df[cr_1_14_df["Course"].str[0] == "S"]

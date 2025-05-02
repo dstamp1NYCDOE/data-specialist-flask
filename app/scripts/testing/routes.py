@@ -265,6 +265,7 @@ def return_regents_exam_invitations():
         school_year += 1
     if term == 2:
         month = "June"
+        school_year += 1
 
     f = create_exam_invitation.main()
     testing_period = f"{month}{school_year}"

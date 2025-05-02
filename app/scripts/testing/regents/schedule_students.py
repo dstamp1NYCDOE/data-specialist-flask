@@ -9,7 +9,11 @@ from flask import current_app, session
 def main():
     school_year = session["school_year"]
     term = session["term"]
-    year_and_semester = f"{school_year}-{term}" 
+    year_and_semester = f"{school_year}-{term}"
+    if term == 1:
+        month = "January"
+    if term == 2:
+        month = "June"
 
     dataframe_dict = {}
 
@@ -18,8 +22,7 @@ def main():
     if term == 2:
         month = "June"
 
-    filename = utils.return_most_recent_report_by_semester(files_df, "1_08", year_and_semester=year_and_semester)
-    registrations_df = utils.return_file_as_df(filename)
+
     cols = [
         "StudentID",
         "LastName",
@@ -36,11 +39,15 @@ def main():
     ]
     section_properties_df = pd.read_excel(path, sheet_name="SectionProperties")
 
-    registrations_df["senior?"] = registrations_df["Grade"].apply(lambda x: x == "12")
 
-    ## drop inactivies
-    registrations_df = registrations_df[registrations_df["Status"] == True]
-    registrations_df = registrations_df[cols]
+
+    regents_courses = regents_calendar_df['CourseCode']
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_01", year_and_semester=year_and_semester)
+    cr_1_01_df = utils.return_file_as_df(filename)
+    cr_1_08_df = cr_1_01_df[['StudentID', 'LastName', 'FirstName', 'Course','Grade']]
+    registrations_df = cr_1_08_df[cr_1_08_df['Course'].isin(regents_courses)]
+    registrations_df["senior?"] = registrations_df["Grade"].apply(lambda x: x == "12")
 
     ## get lab eligibility
     filename = utils.return_most_recent_report_by_semester(files_df, "lab_eligibility", year_and_semester=year_and_semester)
@@ -162,6 +169,7 @@ def main():
 
     ## attach default_section_number
     registrations_df = registrations_df.merge(sections_df, on=flags_cols)
+    print(registrations_df)
     registrations_df["Section"] = registrations_df.apply(remove_lab_ineligible, axis=1)
 
     ## swap in "distributed" for Teacher1 name for those exams to minimize number of sections
