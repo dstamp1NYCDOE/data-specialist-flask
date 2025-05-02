@@ -36,8 +36,10 @@ def main():
     cr_1_30_filename = utils.return_most_recent_report(files_df, "1_30")
     cr_1_30_df = utils.return_file_as_df(cr_1_30_filename)
     cr_1_14_df = cr_1_14_df.merge(
-        cr_1_30_df[["Mark", "NumericEquivalent"]], on=["Mark"], how="left"
+        cr_1_30_df[["Mark", "NumericEquivalent","PassFailEquivalent"]], on=["Mark"], how="left"
     )
+
+
 
 
     transcript_df = process_transcript.main(cr_1_14_df)

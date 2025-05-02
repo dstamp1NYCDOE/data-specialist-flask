@@ -10,10 +10,15 @@ def main(student, student_transcript, student_iep):
         else:
             PE_courses = ["PHS21", "PPS83"]
     if year_in_hs == 3:
-        PE_courses = ["PPS85"]
+        if pe_earned >= 1.5:
+            PE_courses = ["PPS85"]
+        elif health_earned == 0:
+            PE_courses = ["PHS21", "PPS83"]
+        else:
+            PE_courses = ["PPS85", "PPS87"]
 
     if year_in_hs == 4:
-        PE_courses = ["PPS87"]
+        PE_courses = ["PPS87","GQS22"]
 
     return PE_courses
 

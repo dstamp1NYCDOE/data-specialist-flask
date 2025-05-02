@@ -78,6 +78,9 @@ credits_dict = {
     "PPS83": 0.5,
     "PPS85": 0.5,
     "PPS87": 0.5,
+    "SDS21QT": 1.0,
+    "SDS21": 1.0,
+    "SDS21QM": 1.0,
     "SCS21": 1.0,
     "SCS21QP": 1.0,
     "SCS21QT": 1.0,
@@ -85,9 +88,17 @@ credits_dict = {
     "SES21QM": 1.0,
     "SES21QP": 1.0,
     "SES21QT": 1.0,
+    "SJS21": 1.0,
+    "SJS21QM": 1.0,
+    "SJS21QP": 1.0,
+    "SJS21QT": 1.0,    
     "SLS21": 1.0,
     "SLS21QP": 1.0,
     "SLS21QT": 1.0,
+    "SBS21": 1.0,
+    "SBS21QP": 1.0,
+    "SBS21QM": 1.0,
+    "SBS21QT": 1.0,    
     "SPS21": 1.0,
     "SWS21": 1.0,
     "SWS21QM": 1.0,
@@ -95,6 +106,8 @@ credits_dict = {
     "SWS21QT": 1.0,
     "TUS21TA": 2.0,
     "TQS21TQW": 2.0,
+    'TQS21TQS':2.0,
+    'TQS11QE':1.0,
     "ZA": 9.0,
     "ZL": 1.0,
     "ZM18": 1.0,
@@ -108,17 +121,26 @@ def finalize_student_requests(
 ):
     year_in_hs = student["year_in_hs"]
 
-    if return_total_credits(student_courses) <= 8:
-        return add_math_or_science(student_courses, student_iep)
-    if return_total_credits(student_courses) in [8.5, 9]:
+
+    if return_total_credits(student_courses) <= 7:
+        student_courses = add_math_and_science(student_courses, student_iep)
+        student_courses = list(set(student_courses))
         return student_courses
+    elif return_total_credits(student_courses) <= 8:
+        student_courses = add_math_or_science(student_courses, student_iep)
+        student_courses = list(set(student_courses))
+        return student_courses    
+    elif return_total_credits(student_courses) in [8.5, 9]:
+        student_courses = list(set(student_courses))
+        return student_courses        
     if return_total_credits(student_courses) > 9:
         student_courses = drop_science_course(student_courses)
     if return_total_credits(student_courses) > 9:
         student_courses = drop_math_course(student_courses)
     if return_total_credits(student_courses) > 9:
         student_courses = drop_3rd_pd_CTE(student_courses)
-
+    
+    student_courses = list(set(student_courses))
     return student_courses
 
 
@@ -141,12 +163,36 @@ def return_total_credits(student_courses):
 
 def drop_3rd_pd_CTE(student_courses):
     output = []
-    courses_to_drop = ["AFS11QE", "AUS11QE", "BMS11QE", "BNS11QCA"]
+    courses_to_drop = ["AFS11QE", "AUS11QE", "BMS11QE", "BNS11QCA","TQS11QE"]
     for course in student_courses:
         if course not in courses_to_drop:
             output.append(course)
 
     return output
+
+def add_math_and_science(student_courses, student_iep):
+
+    class_depts = [course[0] for course in student_courses]
+    has_math = "M" in class_depts
+    has_sci = "S" in class_depts
+
+    sci_course = "SDS21"
+    if student_iep:
+        sci_course = "SDS21" + student_iep.get("S")
+    math_course = "MQS11"
+    if student_iep:
+        math_course = math_course + student_iep.get("M")
+
+    if not has_math and not has_sci:
+        return student_courses + [math_course, sci_course]
+    if not has_math and has_sci:
+        return student_courses + [math_course]
+    if has_math and not has_sci:
+        return student_courses + [sci_course]
+
+    return student_courses
+
+
 
 
 def add_math_or_science(student_courses, student_iep):
@@ -163,7 +209,11 @@ def add_math_or_science(student_courses, student_iep):
         if student_iep:
             math_course = math_course + student_iep.get("M")
         return student_courses + [math_course]
-    return student_courses
+    #generic class to fill space
+    sci_course = "SDS21"
+    if student_iep:
+        sci_course = "SDS21" + student_iep.get("S")
+    return student_courses + [sci_course]
 
 
 def drop_math_course(student_courses):
