@@ -2,9 +2,9 @@ import pandas as pd
 import random
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
+from app.scripts.date_to_marking_period import return_mp_from_date
 
-
-def main(RATR_df):
+def main(RATR_df,school_year):
     calendar_filename = "app/data/SchoolCalendar.xlsx"
     calendar_df = pd.read_excel(calendar_filename)
     calendar_df["Holiday?"] = calendar_df["Holiday?"].astype("bool")
@@ -12,7 +12,7 @@ def main(RATR_df):
     calendar_df = calendar_df[calendar_df["SchoolDay?"]]
     all_school_days = calendar_df["Date"].to_list()
 
-    RATR_df = clean(RATR_df)
+    RATR_df = clean(RATR_df,school_year)
     school_days_already = RATR_df["Date"].to_list()
 
     cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
@@ -80,7 +80,7 @@ def return_student_pvt_by_subcolumn(RATR_df, subcolumn):
     return pvt_tbl
 
 
-def clean(RATR_df):
+def clean(RATR_df,school_year):
     RATR_df["STUDENT ID"] = RATR_df["STUDENT ID"].astype(str)
     RATR_df["StudentID"] = RATR_df["STUDENT ID"].str.extract("(\d{9})")
     RATR_df["StudentID"] = RATR_df["StudentID"].astype(int)
@@ -88,6 +88,10 @@ def clean(RATR_df):
     RATR_df["Date"] = pd.to_datetime(RATR_df["Date"])
     RATR_df["Weekday"] = RATR_df["Date"].dt.weekday
     RATR_df["Month"] = RATR_df["Date"].apply(lambda x: x.strftime("%Y-%m"))
+
+    RATR_df["Term"] = RATR_df["Date"].apply(
+        return_mp_from_date, args=(school_year,)
+    )
     return RATR_df
 
 

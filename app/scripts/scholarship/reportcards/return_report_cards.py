@@ -67,9 +67,13 @@ def main(form, request):
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
     marking_period = form.marking_period.data
+
+    
     students_df = return_students_df(marking_period).sort_values(
         by=["LastName", "FirstName"]
     )
+    zltas = return_zltas()
+    students_df = students_df[~students_df['StudentID'].isin(zltas)]
 
     dfs_dict = return_dfs_dict(marking_period)
     f = generate_letters(students_df, dfs_dict, marking_period)
@@ -108,6 +112,7 @@ def return_students_df(marking_period):
 
 
 from app.scripts.attendance.process_RATR import main as process_RATR
+from app.scripts.attendance.process_RATR import clean as clean_RATR
 
 from app.scripts.privileges.attendance_benchmark.attendance_benchmark import (
     return_overall_attd_benchmark,
@@ -124,8 +129,26 @@ def return_dfs_dict(marking_period):
     year_and_semester = f"{school_year}-{term}"
 
     RATR_df = return_df_by_title("RATR", year_and_semester)
+    RATR_Summary_df = process_RATR(RATR_df,school_year)
+    RATR_df = clean_RATR(RATR_df,school_year)
+
+    ratr_str = [f'S{term}-MP1', f'S{term}-MP2', f'S{term}-MP3']
+    RATR_df = RATR_df[RATR_df['Term'].isin(ratr_str)]
+
     smartpass_df = return_df_by_title("SmartPassExport", year_and_semester)
     smartpass_df = process_smartpass_data(smartpass_df)
+    attd_benchmark_df = return_overall_attd_benchmark()
+    jupiter_term_str = ['Full Semester']
+    
+    
+    if marking_period == "1":
+        jupiter_term_str.append(f"S{term}-MP1")
+    if marking_period == "2":
+        jupiter_term_str.append(f"S{term}-MP2")
+    if marking_period == "3":
+        jupiter_term_str.append(f"S{term}-MP3")
+    attd_benchmark_df = attd_benchmark_df[attd_benchmark_df['Term'].isin(jupiter_term_str)]
+
     dfs_dict = {
         "1_01": return_student_grades(),
         "HonorRoll": return_df_by_title("HonorRoll", year_and_semester),
@@ -134,10 +157,10 @@ def return_dfs_dict(marking_period):
             "jupiter_period_attendance", year_and_semester
         ),
         "jupiter_attd_summary_df": return_jupiter_attd_pvt(),
-        "RATR_Summary_df": process_RATR(RATR_df),
+        "RATR_Summary_df": RATR_Summary_df,
         "jupiter_missing_assignment_pvt": return_jupiter_assignment_missing_pvt(),
         "RATR_df": RATR_df,
-        "attd_benchmark_df": return_overall_attd_benchmark(),
+        "attd_benchmark_df": attd_benchmark_df,
         "smartpass_df": return_total_time_per_period_by_student(smartpass_df),
     }
 
@@ -225,6 +248,15 @@ def swap_attd_marks_on_jupiter(attd_mark):
     }
     return attd_mark_dict.get(attd_mark)
 
+def return_zltas():
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
+    cr_1_01_df = return_df_by_title("1_01", year_and_semester)
+    cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"] == "ZA"]
+    
+    return cr_1_01_df['StudentID'].to_list()
 
 def return_student_grades():
     school_year = session["school_year"]
@@ -622,7 +654,7 @@ def return_left_flowables(student_row, dfs_dict, marking_period):
             student_smartpass_df.iloc[0]["Total"]
         )
         paragraph = Paragraph(
-            f"<b>Bathroom Passes by Period:</b> Since the beginning of the school year, you have missed {total_time_str} of classtime -- this is equivalent to {class_periods_equivalent_str} class periods",
+            f"<b>Bathroom Passes by Period:</b> So far this semester, you have missed {total_time_str} of class time with passes to the bathroom (excludes passes from cafeteria or to other locations)-- this is equivalent to {class_periods_equivalent_str} class periods",
             styles["Normal"],
         )
         flowables.append(paragraph)
@@ -659,6 +691,8 @@ def return_out_to_lunch_paragraph(attd_benchmark, minimum_grade):
 
 def return_attendance_sentence_paragraphs(student_RATR_df):
     total_days = len(student_RATR_df)
+
+    
 
     if total_days == 0:
         paragraph = Paragraph(
