@@ -90,7 +90,11 @@ def main(data):
 
     flowables = []
 
+    lta_students = student_requests_df[student_requests_df['Course']=='ZA']['StudentID'].to_list()
+
+
     students_df = student_requests_df[student_requests_df['year_in_hs'] <= 4].sort_values(by=['Counselor','LastName','FirstName'])
+    students_df = students_df[~students_df['StudentID'].isin(lta_students)]
     students_df = students_df.groupby(['StudentID', 'LastName', 'FirstName', 'year_in_hs'])
 
     for group, registered_courses_df in students_df:
@@ -223,7 +227,7 @@ def return_CTE_major(list_of_courses):
         if vp_course in list_of_courses:
             return 'Visual Presentation'
 
-    for fmm_course in ['TUS21TA', 'BRS11TF', 'BNS21TV']:
+    for fmm_course in ['BQS11T','TUS21TA', 'BRS11TF', 'BNS21TV']:
         if fmm_course in list_of_courses:
             return 'Fashion Marketing & Management'
 
@@ -231,7 +235,7 @@ def return_CTE_major(list_of_courses):
         if wd_course in list_of_courses:
             return 'Software Development'
 
-    for photo_course in ['ACS21T', 'ACS22T', 'ALS21TP']:
+    for photo_course in ['ACS21T', 'ACS21TD', 'ACS22T', 'ALS21TP']:
         if photo_course in list_of_courses:
             return 'Photography'
 
