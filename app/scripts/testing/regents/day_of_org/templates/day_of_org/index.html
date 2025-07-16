@@ -24,6 +24,7 @@
       <th scope="col">Student Labels</th>
       <th scope="col">Folder Labels</th>
       <th scope="col">ENL Rosters</th>
+      <th scope="col">Checkout Rosters</th>
       <th scope="col">Bag Labels</th>
       <th scope="col">Bathroom Passes</th>
       <th scope="col">Direction Labels</th>
@@ -39,6 +40,7 @@
       <td>{{form_with_dropdown(exam,'Rooms','StudentLabels')}} {{form_with_dropdown(exam,'Sections','StudentLabels')}}</td>
       <td>{{form_without_dropdown(exam, 'FolderLabels')}}</td>
       <td>{{form_without_dropdown(exam, 'ENLRosters')}}</td>
+      <td>{{form_without_dropdown(exam, 'CheckoutRoster')}}</td>
       <td>{{form_without_dropdown(exam, 'BagLabels')}}</td>
       <td>{{form_without_dropdown(exam, 'BathroomPasses')}}</td>
       <td>{{form_without_dropdown(exam, 'DirectionLabels')}}</td>
@@ -52,6 +54,7 @@
         <td>{{form_with_dropdown({'Course':'All'},'Rooms','StudentLabels')}} {{form_with_dropdown({'Course':'All'},'Sections','StudentLabels')}}</td>
         <td>{{form_without_dropdown({'Course':'All'}, 'FolderLabels')}}</td>
         <td>{{form_without_dropdown({'Course':'All'},'ENLRosters')}}</td>
+        <td>{{form_without_dropdown({'Course':'All'},'CheckoutRoster')}}</td>
         <td>{{form_without_dropdown({'Course':'All'},'BagLabels')}}</td>
         <td>{{form_without_dropdown({'Course':'All'},'BathroomPasses')}}</td>
         <td>{{form_without_dropdown({'Course':'All'},'DirectionLabels')}}</td>

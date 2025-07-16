@@ -5,10 +5,15 @@ import app.scripts.testing.regents.proctoring.utils as utils
 
 
 def main(exam_book_df):
+    print(exam_book_df)
     ## drop empty sections
     exam_book_df = exam_book_df[exam_book_df["Active"] > 0]
     ## drop lab ineligible holding
     exam_book_df = exam_book_df[exam_book_df["Section"] != 88]
+    ## drop Technology holding
+    exam_book_df = exam_book_df[exam_book_df["Section"] != 87]    
+
+    
 
     exam_book_df["assignment_difficulty"] = exam_book_df.apply(
         utils.return_assignment_difficulty, axis=1
@@ -16,7 +21,7 @@ def main(exam_book_df):
     exam_book_df = exam_book_df.sort_values(by=["assignment_difficulty"])
 
     rooms_df = exam_book_df.drop_duplicates(
-        subset=["Day", "Time", "Course", "Room"], keep="last"
+        subset=["Day", "Time", "Course Code", "Room"], keep="last"
     )
 
     rooms_df["number_of_proctors_needed"] = rooms_df.apply(
@@ -49,6 +54,9 @@ def main(exam_book_df):
 
 def return_hall_proctor_need(rooms_df):
     rooms_df = rooms_df.copy()
+    ## keep rooms on upper floors only
+    rooms_df = rooms_df[rooms_df['Room']>399]
+    
     rooms_df["Room"] = rooms_df["Room"].apply(lambda x: str(x)[0] + "th Floor")
     rooms_df = rooms_df.sort_values(by=["assignment_difficulty"])
 

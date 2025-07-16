@@ -4,13 +4,13 @@ from flask import session
 import app.scripts.utils as utils
 from app.scripts import files_df
 
-from app.scripts.attendance.jupiter import process as process_jupiter_data
+from app.scripts.attendance.jupiter.process import process_local_file as process_jupiter_data
 
 from app.scripts.attendance.attendance_tiers import return_attd_tier
 
 
 def main():
-    attendance_marks_df = process_jupiter_data.main()
+    attendance_marks_df = process_jupiter_data()
 
     students_df = attendance_marks_df.drop_duplicates(
         subset=["StudentID", "Course", "Pd"]

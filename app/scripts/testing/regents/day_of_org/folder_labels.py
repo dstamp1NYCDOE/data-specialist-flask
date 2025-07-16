@@ -74,16 +74,13 @@ def main(course, request):
                 "Type": "",
             }
             section_99_labels.append(section_99_dict)
+        for i in range(30 - len(labels_to_make) % 30):
+            labels_to_make.append({})
 
     sheet = labels.Sheet(specs, draw_label, border=True)
     sheet.add_labels(labels_to_make)
 
-    # pad to put section 99 on a separate sheet
-    blank_labels = []
-    for i in range(30 - len(labels_to_make) % 30):
-        blank_labels.append({})
 
-    sheet.add_labels(blank_labels)
     sheet.add_labels(section_99_labels)
 
     f = BytesIO()
@@ -93,28 +90,29 @@ def main(course, request):
 
 
 def draw_label(label, width, height, obj):
-    exam_title = obj.get("ExamTitle")
-    type = obj.get("Type")
-    room = obj.get("Room")
-    Day = obj.get("Day")
-    Time = obj.get("Time")
-    Part = obj.get("Part")
+    if obj:
+        exam_title = obj.get("ExamTitle")
+        type = obj.get("Type")
+        room = obj.get("Room")
+        Day = obj.get("Day")
+        Time = obj.get("Time")
+        Part = obj.get("Part")
 
-    label.add(shapes.String(4, 52, f"{exam_title}", fontName="Helvetica", fontSize=18))
-    label.add(
-        shapes.String(125, 55, f"{Day}-{Time}", fontName="Helvetica", fontSize=10)
-    )
-
-    label.add(shapes.String(125, 30, f"{Part}", fontName="Helvetica", fontSize=18))
-
-    label.add(shapes.String(4, 4, f"{room}", fontName="Helvetica", fontSize=40))
-    label.add(shapes.String(125, 4, f"{type}", fontName="Helvetica", fontSize=7))
-
-    label.add(
-        shapes.String(
-            4, 38, f"Section: {obj.get('Section')}", fontName="Helvetica", fontSize=11
+        label.add(shapes.String(4, 52, f"{exam_title}", fontName="Helvetica", fontSize=18))
+        label.add(
+            shapes.String(125, 55, f"{Day}-{Time}", fontName="Helvetica", fontSize=10)
         )
-    )
+
+        label.add(shapes.String(125, 30, f"{Part}", fontName="Helvetica", fontSize=18))
+
+        label.add(shapes.String(4, 4, f"{room}", fontName="Helvetica", fontSize=40))
+        label.add(shapes.String(125, 4, f"{type}", fontName="Helvetica", fontSize=7))
+
+        label.add(
+            shapes.String(
+                4, 38, f"Section: {obj.get('Section')}", fontName="Helvetica", fontSize=11
+            )
+        )
 
 
 def return_exam_name(course):

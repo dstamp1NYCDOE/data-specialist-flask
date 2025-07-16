@@ -79,6 +79,11 @@ def return_summer_school_testing_routes():
             "report_function": "scripts.return_summer_school_earth_science_practical",
             "report_description": "Process CR 1.08 and CR 1.01 to schedule earth science lab practical",
         },
+        {
+            "report_title": "Generate August Exam Only Spreadsheet",
+            "report_function": "scripts.return_summer_exam_only_spreadsheet",
+            "report_description": "Upload last year's exam only spreadsheet, combined 3_07, and the latest 4_01 to generate exam only signup spreadsheet",
+        },
     ]
     return render_template(
         "summer/templates/summer/testing/index.html", reports=reports
@@ -141,16 +146,18 @@ def return_summer_exam_only_students():
 
 
 from app.scripts.summer.testing.forms import (
-    ProcessRegentsPreregistrationSpreadsheetForm,
+    GenerateExamOnlySpreadsheetForm,
 )
 
-import app.scripts.summer.testing.schedule_pre_registered_students as schedule_registered_students
+import app.scripts.summer.testing.create_walkin_spreadsheet as create_walkin_spreadsheet
 
 
-@scripts.route("/summer/testing/process_preregistration", methods=["GET", "POST"])
-def return_summer_regents_preregistration():
+@scripts.route(
+    "/summer/testing/create_exam_only_spreadsheet_v2", methods=["GET", "POST"]
+)
+def return_exam_only_spreadsheet():
     if request.method == "GET":
-        form = ProcessRegentsPreregistrationSpreadsheetForm()
+        form = GenerateExamOnlySpreadsheetForm()
         return render_template(
             "/summer/templates/summer/testing/exam_preregistration_scheduling_form.html",
             form=form,
@@ -299,5 +306,54 @@ def return_summer_yabc_regents_scheduling():
 
         school_year = session["school_year"]
         download_name = f"Regents_Sections{school_year+1}.xlsx"
+
+        return send_file(f, as_attachment=True, download_name=download_name)
+
+
+import app.scripts.summer.testing.schedule_pre_registered_students as schedule_registered_students
+
+from app.scripts.summer.testing.forms import (
+    ProcessRegentsPreregistrationSpreadsheetForm,
+)
+
+
+@scripts.route("/summer/testing/process_preregistration", methods=["GET", "POST"])
+def return_summer_regents_preregistration():
+    if request.method == "GET":
+        form = ProcessRegentsPreregistrationSpreadsheetForm()
+        return render_template(
+            "/summer/templates/summer/testing/exam_preregistration_scheduling_form.html",
+            form=form,
+        )
+    else:
+
+        form = ProcessRegentsPreregistrationSpreadsheetForm(request.form)
+        f = schedule_registered_students.main(form, request)
+
+        school_year = session["school_year"]
+        download_name = f"Upload_Regents_Registration_Summer_{school_year+1}.xlsx"
+
+        return send_file(f, as_attachment=True, download_name=download_name)
+
+
+from app.scripts.summer.testing.forms import GenerateExamOnlySpreadsheetForm
+import app.scripts.summer.testing.create_walkin_spreadsheet as create_walkin_spreadsheet
+
+
+@scripts.route("/summer/testing/create_exam_only_spreadsheet", methods=["GET", "POST"])
+def return_summer_exam_only_spreadsheet():
+    if request.method == "GET":
+        form = GenerateExamOnlySpreadsheetForm()
+        return render_template(
+            "/summer/templates/summer/testing/generate_exam_only_spreadsheet_form.html",
+            form=form,
+        )
+    else:
+
+        form = GenerateExamOnlySpreadsheetForm(request.form)
+        f = create_walkin_spreadsheet.main(form, request)
+
+        school_year = session["school_year"]
+        download_name = f"RegentsRegistration_Summer_{school_year+1}.xlsx"
 
         return send_file(f, as_attachment=True, download_name=download_name)

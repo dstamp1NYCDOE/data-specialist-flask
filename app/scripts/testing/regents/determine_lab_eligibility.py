@@ -32,15 +32,18 @@ def main():
 
     year_and_semester = f"{year}-{term}"
 
-
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{year}-{term}")
-    regents_courses = regents_calendar_df['CourseCode']
+    regents_courses = regents_calendar_df["CourseCode"]
 
-    filename = utils.return_most_recent_report_by_semester(files_df, "1_01", year_and_semester=year_and_semester)
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "1_01", year_and_semester=year_and_semester
+    )
     cr_1_01_df = utils.return_file_as_df(filename)
-    cr_1_08_df = cr_1_01_df[['StudentID', 'LastName', 'FirstName', 'Section', 'Course','Room']]
-    cr_1_08_df = cr_1_08_df[cr_1_08_df['Course'].isin(regents_courses)]
+    cr_1_08_df = cr_1_01_df[
+        ["StudentID", "LastName", "FirstName", "Section", "Course", "Room"]
+    ]
+    cr_1_08_df = cr_1_08_df[cr_1_08_df["Course"].isin(regents_courses)]
 
     ## previously lab eligible
     science_courses_df = cr_1_14_df[cr_1_14_df["Course"].str[0] == "S"]
@@ -71,6 +74,10 @@ def main():
     lab_courses = [
         "SLS22QL",
         "SES22QL",
+        "SCS22QL",
+        "SPS22QL",
+        "SBS22QL",
+        "SJS22QL",
         "SCS22QL",
         "SPS22QL",
     ]
@@ -105,11 +112,9 @@ def main():
         writer, index=False, sheet_name="previous_lab_eligibility"
     )
 
-    combined_df = pd.concat([lab_eligibility_df,current_lab_courses_df])
-    combined_df['LabEligible'] = combined_df['LabEligible'].astype(bool)
-    combined_df.to_excel(
-        writer, index=False, sheet_name="combined_lab_eligibility"
-    )
+    combined_df = pd.concat([lab_eligibility_df, current_lab_courses_df])
+    combined_df["LabEligible"] = combined_df["LabEligible"].astype(bool)
+    combined_df.to_excel(writer, index=False, sheet_name="combined_lab_eligibility")
 
     writer.close()
 

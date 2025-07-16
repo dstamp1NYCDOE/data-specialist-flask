@@ -44,8 +44,8 @@ def main(form, request):
 
 
     if form.student_list_source.data == "teacher_and_room_list":
-        
-
+        sort_by_df["Room"] = sort_by_df["Room"].fillna(125)        
+        sort_by_df["Room"] = sort_by_df["Room"].astype(int)
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Room"]
         sort_by_df["sort_by_col"] = (

@@ -293,3 +293,49 @@ def post_to_ms_teams(posts, method):
         headers={"Content-Type": "application/json"},
     )
     return response
+
+
+def return_peace_teacher_email(StudentID):
+    PEACE_TEACHER_1 = "IDeLaRo@schools.nyc.gov"
+    PEACE_TEACHER_2 = "BCorby@schools.nyc.gov"
+    PEACE_TEACHER_3 = "JMatelus@schools.nyc.gov"
+
+    if StudentID % 3 == 0:
+        return PEACE_TEACHER_1
+    if StudentID % 3 == 1:
+        return PEACE_TEACHER_2
+    if StudentID % 3 == 2:
+        return PEACE_TEACHER_3
+
+
+def return_attendance_teacher_email(cohort):
+
+    ATTENDANCE_TEACHER_1 = "ACabrera5@schools.nyc.gov"
+    ATTENDANCE_TEACHER_2 = "POvalles@schools.nyc.gov"
+    ATTENDANCE_TEACHER_3 = "TGuillot@schools.nyc.gov"
+    ATTENDANCE_TEACHER_4 = "MAmeh2@schools.nyc.gov"
+
+    if cohort in ["4"]:
+        return ATTENDANCE_TEACHER_1
+    if cohort in ["3"]:
+        return ATTENDANCE_TEACHER_2
+    if cohort in ["2"]:
+        return ATTENDANCE_TEACHER_3
+    if cohort in ["1"]:
+        return ATTENDANCE_TEACHER_4
+    else:
+        return ATTENDANCE_TEACHER_4
+    
+ 
+def return_counselor_email_address(counselor_name):
+    counselor_email_dict = {'MARIN BETH':'bmarin3@schools.nyc.gov',
+     'DE LEON ANGELINA':'ADeleon23@schools.nyc.gov',
+     'WEISS JESSICA':'jweiss4@schools.nyc.gov',
+     'DUKE JOSHUA':'jduke@schools.nyc.gov',
+     'POWIS TAFARI':'tpowis@schools.nyc.gov',
+     'PADRON AMANDA':'APadron@schools.nyc.gov',
+     'CASTELLANO ASHLEY':'ACastellano7@schools.nyc.gov',
+     'CARTER ANIKA':'ACarter15@schools.nyc.gov',
+     'SAN JORGE AMELIA':'asanjorge@schools.nyc.gov',}
+    
+    return counselor_email_dict.get(counselor_name, '')

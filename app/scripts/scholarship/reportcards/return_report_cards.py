@@ -225,6 +225,9 @@ def return_jupiter_attd_pvt():
     jupiter_period_attendance_df = return_df_by_title(
         "jupiter_period_attendance", year_and_semester
     )
+    # remove released days
+    jupiter_period_attendance_df = jupiter_period_attendance_df[jupiter_period_attendance_df['Attendance']!='R']
+
     jupiter_period_attendance_df["ATTD"] = jupiter_period_attendance_df["Type"].apply(
         swap_attd_marks_on_jupiter
     )

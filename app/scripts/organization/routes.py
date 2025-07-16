@@ -25,12 +25,18 @@ from app.scripts.organization import class_list_counts_from_list
 from app.scripts.organization import class_rosters_from_list
 
 from app.scripts.organization import career_day
+from app.scripts.organization import geocoding
 
 
 
 @scripts.route("/organization")
 def return_organization_reports():
     reports = [
+        {
+            "report_title": "Return Geocoding Reports",
+            "report_function": "scripts.return_geocoding_reports",
+            "report_description": "",
+        },
         {
             "report_title": "Return Teacher Input per Student Spreadsheet",
             "report_function": "scripts.return_gather_teacher_input_per_student_spreadsheet",
@@ -82,6 +88,11 @@ def return_organization_reports():
             "report_description": "Generate Mailing Labels to go with a PDF of student records",
         },
         {
+            "report_title": "Student Mailing Labels by Period",
+            "report_function": "scripts.return_mailing_labels_by_period",
+            "report_description": "Generate Mailing Labels by period",
+        },
+        {
             "report_title": "Student Mailing Labels for StudentID List",
             "report_function": "scripts.return_mailing_labels_by_student_list",
             "report_description": "Generate Mailing Labels to go with a list of StudentIDs",
@@ -100,7 +111,17 @@ def return_organization_reports():
             "report_title": "Return Enhanced Line Schedule from List",
             "report_function": "scripts.return_enhanced_line_schedule_from_list",
             "report_description": "",
-        },                
+        },  
+        {
+            "report_title": "Return Student Staff Assignment",
+            "report_function": "scripts.return_student_staff_assignment",
+            "report_description": "",
+        },                        
+        {
+            "report_title": "iLog Automation Form",
+            "report_function": "scripts.return_ilog_automation",
+            "report_description": "",
+        },         
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports
@@ -342,3 +363,16 @@ def return_enhanced_line_schedule_from_list():
             download_name=download_name,
             mimetype="application/pdf",
         )
+    
+
+from app.scripts.organization.student_staff_assignment import main as student_staff_assignment
+@scripts.route("/organization/student_staff_assignment", methods=["GET", "POST"])
+def return_student_staff_assignment():
+
+    f, download_name = student_staff_assignment.main()
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )

@@ -58,8 +58,8 @@ def main(form, request):
         f,
         pagesize=letter,
         topMargin=0.25 * inch,
-        leftMargin=1.00 * inch,
-        rightMargin=1.00 * inch,
+        leftMargin=0.5 * inch,
+        rightMargin=0.5 * inch,
         bottomMargin=0.25 * inch,
     )
 
@@ -80,20 +80,21 @@ def main(form, request):
     cols = ['StudentID','LastName','FirstName','photo_filename',"school_name"]
     cols_header = ['StudentID','Last Name', 'First Name', 'Photo', 'Sending School']
     colwidths = [1*inch,1.5*inch,1.5*inch,0.75*inch,2.25*inch]
+
     for (teacher,period,cycle), class_list_df in student_programs_df.groupby(["Teacher1","Period","Cycle"]):
         course = class_list_df.iloc[0]["Course Name"]
         paragraph = Paragraph(
-            f"Summer School {int(school_year)+1} at HSFI", styles["Heading2"]
+            f"Summer School {int(school_year)+1} at HSFI --- {generated_string}", styles["Heading2"]
         )
         flowables.append(paragraph)
         paragraph = Paragraph(
-            f"{teacher} - {cycle} - Period {period} - {course} - {generated_string}", styles["Heading3"]
+            f"{teacher} - {cycle} - Period {period} - {course}", styles["Heading3"]
         )
         flowables.append(paragraph)
-
         
         B = return_balanced_grid_of_class_list(class_list_df)
         flowables.append(B)
+
         flowables.append(PageBreak())
 
     my_doc.build(flowables)
@@ -115,8 +116,8 @@ def return_balanced_grid_of_class_list(class_list_df):
         
         try:
             I = Image(photo_path)
-            I.drawHeight = 1 * inch
-            I.drawWidth = 1 * inch
+            I.drawHeight = 1.2 * inch
+            I.drawWidth = 1.2 * inch
             I.hAlign = "CENTER"
 
         except:
@@ -137,8 +138,8 @@ def return_balanced_grid_of_class_list(class_list_df):
                         ],
                     ]
                 ],
-                colWidths=[1 * inch,  1* inch],
-                rowHeights=[1 * inch],
+                colWidths=[1.2 * inch,  0.9* inch],
+                rowHeights=[1.2 * inch],
                 style=chart_style,
             )
         )

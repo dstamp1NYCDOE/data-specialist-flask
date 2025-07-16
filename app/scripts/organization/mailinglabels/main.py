@@ -197,3 +197,28 @@ def main(form, request):
 
     
     return f
+
+
+
+def by_student_class_list(form, request):
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "3_07", year_and_semester=year_and_semester
+    )
+    student_info_df = utils.return_file_as_df(filename).fillna("")
+    
+    student_info_df["Zip"] = student_info_df["Zip"].apply(lambda x: str(x).zfill(5)[0:5])
+
+    labels_to_make = student_info_df.to_dict('records')
+
+    sheet = labels.Sheet(specs, draw_label, border=True)
+    sheet.add_labels(labels_to_make)
+    f = BytesIO()
+    sheet.save(f)
+    f.seek(0)
+
+    
+    return f

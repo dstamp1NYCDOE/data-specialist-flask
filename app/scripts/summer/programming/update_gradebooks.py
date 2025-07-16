@@ -118,7 +118,6 @@ def main(form, request):
     for index, gradebook in summer_school_gradebooks_hub_df.iterrows():
         gradebook_url = gradebook["Gradebook URL"]
         teacher_name = gradebook["TeacherName"]
-        print(teacher_name)
         df = cr_1_01_df[cr_1_01_df["Teacher1"] == teacher_name]
         df = df[teacher_cols]
         df = df.sort_values(by=["Period", "Cycle", "LastName", "FirstName"])
@@ -128,6 +127,7 @@ def main(form, request):
             wks = sh.worksheet_by_title(sheet_name)
         except:
             wks = sh.add_worksheet(sheet_name)
+        print(sh)
         wks.clear()
         wks.set_dataframe(df.fillna(""), "A1")
         wks.frozen_rows = 1

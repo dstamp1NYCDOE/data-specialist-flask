@@ -54,13 +54,11 @@ def main(course, request):
     )
     cr_1_08_df = pd.read_csv(cr_1_08_filename)
 
-    if course != 'All':
+    if course != "All":
         cr_1_08_df = cr_1_08_df[cr_1_08_df["Course"] == course]
         download_name = f"{course}_Student_Labels.pdf"
     else:
         download_name = f"All_Student_Labels.pdf"
-
-    
 
     if "Rooms" in request.args.keys():
         if request.args.get("Rooms") == "ALL":
@@ -87,8 +85,7 @@ def main(course, request):
     for (day, time, exam_title), students_df in registered_students_df.groupby(
         ["Day", "Time", "ExamTitle"]
     ):
-        print(students_df)
-        
+
         for room, students_in_room_df in students_df.groupby("Room_y"):
             previous_remainder = len(labels_to_make) % 30
             exam_code = students_in_room_df.iloc[0]["Course"]
@@ -130,7 +127,6 @@ def main(course, request):
     sheet = labels.Sheet(specs, draw_label, border=True)
     sheet.add_labels(labels_to_make)
 
-    
     f = BytesIO()
     sheet.save(f)
     f.seek(0)

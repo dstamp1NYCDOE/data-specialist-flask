@@ -47,6 +47,10 @@ from app.scripts.testing.regents.day_of_org.proctors_and_room_grid import (
     main as return_proctors_and_room_grid,
 )
 
+from app.scripts.testing.regents.day_of_org.checkout_roster import (
+    main as return_checkout_roster,
+)
+
 
 @scripts.route("/testing/regents/day_of_org/<course>/<file>")
 def return_regents_day_of_org_files(course, file):
@@ -65,6 +69,8 @@ def return_regents_day_of_org_files(course, file):
         f, download_name = return_direction_labels(course, request)
     if file == "ProctorsAndRoomGrid":
         f, download_name = return_proctors_and_room_grid(course, request)
+    if file == "CheckoutRoster":
+        f, download_name = return_checkout_roster(course, request)        
     return send_file(
         f,
         as_attachment=True,

@@ -32,6 +32,8 @@ gc = pygsheets.authorize(service_account_env_var="GDRIVE_API_CREDENTIALS")
 load_dotenv()
 
 
+from app.scripts.summer.programming import programming_utils
+
 def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
@@ -39,6 +41,7 @@ def main(form, request):
 
     PDF = request.files[form.student_records_pdf.name]
     orientation_flag = form.student_records_pdf_orientation.data
+    distribution_mode_flag = form.distribution_mode.data
 
     StudentID_Regex = r"\d{9}"
     StudentIDRegex = re.compile(StudentID_Regex)
@@ -66,33 +69,46 @@ def main(form, request):
                 StudentID_dict[StudentID] = [page_num]
 
     
-    summer_school_gradebooks_hub_url = utils.return_gsheet_url_by_title(
-        gsheets_df, "summer_school_gradebooks_hub", year_and_semester
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
+
+    ## process current class list
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "MasterSchedule", year_and_semester
     )
-
-    gradebook_df = utils.return_google_sheet_as_dataframe(
-        summer_school_gradebooks_hub_url, sheet="AllStudentsBySchool"
+    master_schedule_df = utils.return_file_as_df(filename)
+    master_schedule_df = master_schedule_df.rename(columns={"Course Code": "Course"})
+    master_schedule_df["Cycle"] = master_schedule_df["Days"].apply(
+        programming_utils.convert_days_to_cycle
     )
-    gradebook_df = gradebook_df.dropna(subset="FinalMark")
-    gradebook_df = gradebook_df.dropna(subset="StudentID")
+    code_deck = master_schedule_df[["Course", "Course Name"]].drop_duplicates()
+    master_schedule_df = master_schedule_df[["Course", "Section", "Cycle"]]
 
-    path = os.path.join(current_app.root_path, f"data/DOE_High_School_Directory.csv")
-    dbn_df = pd.read_csv(path)
-    dbn_df["Sending school"] = dbn_df["dbn"]
-    dbn_df = dbn_df[["Sending school", "school_name"]]
-
-    gradebook_df = gradebook_df.merge(dbn_df, on="school_name", how="left").fillna(
-        "NoSendingSchool"
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "1_01", year_and_semester
     )
-    
-    gradebook_df = gradebook_df.sort_values(by=["Period"], ascending=True)
+    cr_1_01_df = utils.return_file_as_df(filename)
+    cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"].str[0] != "Z"] #remove dummy codes
+    cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"].str[1:3] != "XR"] #remove regents exams
 
-
-    gradebook_df["sort_by_col"] = gradebook_df.apply(
-        distribute_by_this_period, args=(gradebook_df,), axis=1
+    cr_1_01_df = cr_1_01_df.merge(
+        master_schedule_df, on=["Course", "Section"], how="left"
     )
-    sort_by_df = gradebook_df[gradebook_df["sort_by_col"]]
+    cr_1_01_df = cr_1_01_df.merge(code_deck, on=["Course"], how="left")
+
+    cr_1_01_df["sort_by_col"] = cr_1_01_df.apply(
+        distribute_by_this_period, args=(cr_1_01_df,distribution_mode_flag), axis=1
+    )
+    sort_by_df = cr_1_01_df[cr_1_01_df["sort_by_col"]]
+
     sort_by_df['sort_by_col'] = sort_by_df['Teacher1'] + ' - Period' + sort_by_df['Period'].astype(str)
+
+
+    print(sort_by_df)
+
+    
     sort_by_list = sort_by_df['sort_by_col'].unique().tolist()
     
 
@@ -129,7 +145,7 @@ def main(form, request):
     
     return f
 
-def distribute_by_this_period(student_row, cr_1_01_df):
+def distribute_by_this_period(student_row, cr_1_01_df,distribution_mode_flag):
     StudentID = student_row["StudentID"]
     Period = student_row["Period"]
     student_courses_df = cr_1_01_df[cr_1_01_df["StudentID"] == StudentID]
@@ -139,8 +155,12 @@ def distribute_by_this_period(student_row, cr_1_01_df):
     if len(non_pe_classes_df) == 0:
         return True
     else:
-        last_period = non_pe_classes_df["Period"].max()
-        return Period == last_period
+        if distribution_mode_flag == "first_period":
+            first_period = non_pe_classes_df["Period"].min()
+            return Period == first_period
+        elif distribution_mode_flag == "last_period":
+            last_period = non_pe_classes_df["Period"].max()
+            return Period == last_period
 
 
 def generate_sortby_dict_landscape(sort_by_list):

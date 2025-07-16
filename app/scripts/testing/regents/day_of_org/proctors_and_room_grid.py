@@ -147,14 +147,14 @@ def return_blank_labels(labels_to_make):
 
 
 def draw_room_label(label, width, height, obj):
-    course_code = obj.get("Course")
-    type = obj.get("Type")
-    room = obj.get("Room", "")
-    Day = obj.get("Day")
-    Time = obj.get("Time")
+    course_code = obj.get("Course","")
+    type = obj.get("Type","")
+    room = obj.get("Room","")
+    Day = obj.get("Day","")
+    Time = obj.get("Time","")
 
-    Proctor = obj.get("Proctor")
-    Flag = obj.get("Flag")
+    Proctor = obj.get("Proctor","")
+    Flag = obj.get("Flag","")
 
     if Flag:
         label.add(
@@ -182,10 +182,10 @@ def draw_room_label(label, width, height, obj):
 
 def draw_proctor_label(label, width, height, obj):
     Type = obj.get("Type", "SUB PROCTOR")
-    nickname = obj.get("Proctor")
-    Time = obj.get("Time")
-    Day = obj.get("Day")
-    Room = obj.get("Room", "")
+    nickname = obj.get("Proctor","")
+    Time = obj.get("Time","")
+    Day = obj.get("Day","")
+    Room = obj.get("Room", "","")
 
     label.add(shapes.String(4, 55, f"{Day}-{Time}", fontName="Helvetica", fontSize=10))
 

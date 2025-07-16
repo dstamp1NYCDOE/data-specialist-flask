@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from io import BytesIO
+import datetime as dt
 
 import app.scripts.utils as utils
 from app.scripts import scripts, files_df
@@ -14,9 +15,10 @@ import app.scripts.summer.attendance.update_RDAL_spreadsheets as update_rdal_spr
 def main(form, request):
     filename = request.files[form.rdal_file.name]
     class_date = form.class_date.data
+    
     f, rdal_df = process_rdal_csv_and_save(filename, class_date)
+    
     download_name = f"RDAL_{class_date}.csv"
-
     
     return f, download_name
 

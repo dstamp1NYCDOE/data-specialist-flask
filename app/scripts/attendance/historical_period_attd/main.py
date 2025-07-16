@@ -119,17 +119,18 @@ def create():
     attd_by_student = attd_by_student.fillna(0)
     attd_by_student = attd_by_student.reset_index()
     students_df = students_df.merge(attd_by_student, on=["StudentID"], how='left') 
-
+    students_df = students_df[students_df['StudentID'].isin(students_lst)]
     
 
 
     students_pvt_df = pd.pivot_table(students_df,index=['StudentID','LastName','FirstName','year_in_hs'], columns=['Term','Pd'],values=['%_late','%_absent'],aggfunc='max').fillna('')
     students_pvt_df = students_pvt_df.reorder_levels([1,2,0],axis=1)
     students_pvt_df = students_pvt_df.sort_values(by=['year_in_hs','LastName','FirstName','StudentID'])
+    
     f = BytesIO()
-    # students_pvt_df[students_pvt_df['StudentID'].isin(students_lst)].to_excel(f, sheet_name='CurrentStudentsByPeriod')
+    students_pvt_df.to_excel(f, sheet_name='CurrentStudentsByPeriod')
 
-    cuts_by_teacher_pvt.reset_index().to_excel(f,sheet_name='cuts_by_teacher')
+    # cuts_by_teacher_pvt.reset_index().to_excel(f,sheet_name='cuts_by_teacher')
 
     f.seek(0)
     download_name = 'HistoricalJupiterAnalysis.xlsx'

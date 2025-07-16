@@ -91,6 +91,8 @@ def main(jupiter_attd_df, week_number=None, day_of=None):
         aggfunc="count",
     ).fillna(0)
 
+    
+
     attd_by_date_by_student["in_school?"] = attd_by_date_by_student.apply(
         in_school, axis=1
     )

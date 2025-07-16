@@ -11,6 +11,11 @@ def main(proctor_assignments_df, proctor_availability_df):
         convert_dept_to_code
     )
 
+    preferred_session_df = proctor_availability_df[['Name','Session']].reset_index(drop=True)
+    preferred_session_df = preferred_session_df.rename(columns={'Name': 'Proctor','Session': 'Preferred_Session'})
+
+    proctor_assignments_df['priority'] = proctor_assignments_df.apply(return_priority, axis=1)
+
     proctors_dict = {}
     assigned_proctors_by_day = {}
     proctor_assignments_list = []
@@ -22,11 +27,10 @@ def main(proctor_assignments_df, proctor_availability_df):
         ]
 
         assignments_to_make = assignments_to_make.sort_values(
-            by=["Time", "proctor#", "assignment_difficulty"],
-            ascending=[False, True, False],
+            by=["priority"],
+            ascending=[True],
         )
 
-        print(assignments_to_make)
 
         if len(assignments_to_make) == 0:
             continue
@@ -51,13 +55,13 @@ def main(proctor_assignments_df, proctor_availability_df):
             "AM": {
                 1: AM_possible_proctors,
                 2: AM_possible_proctors,
-                3: AM_possible_proctors + PM_possible_proctors,
-                4: AM_possible_proctors + PM_possible_proctors,
-                5: AM_possible_proctors + PM_possible_proctors,
-                6: AM_possible_proctors + PM_possible_proctors,
-                7: AM_possible_proctors + PM_possible_proctors,
-                8: AM_possible_proctors + PM_possible_proctors,
-                9: AM_possible_proctors + PM_possible_proctors,
+                3: AM_possible_proctors,
+                4: AM_possible_proctors,
+                5: AM_possible_proctors,
+                6: AM_possible_proctors,
+                7: AM_possible_proctors,
+                8: AM_possible_proctors,
+                9: AM_possible_proctors,
             },
             "PM": {
                 1: PM_possible_proctors,
@@ -86,9 +90,9 @@ def main(proctor_assignments_df, proctor_availability_df):
             ]
 
             if len(proctors_to_pick_from) == 0:
-                if time == 'AM':
+                if time == 'AM' and proctor_type == 2:
                     proctors_to_pick_from = proctors_by_assignment_type['PM'][proctor_type]
-                elif time == 'PM':
+                elif time == 'PM' and proctor_type == 2:
                     proctors_to_pick_from = proctors_by_assignment_type['AM'][proctor_type]
                 proctors_to_pick_from = [
                     teacher
@@ -121,6 +125,7 @@ def main(proctor_assignments_df, proctor_availability_df):
                 "proctor#": proctor_type,
                 "Proctor": assigned_proctor,
                 "assignment_difficulty": assignment_difficulty,
+                "priority": proctor_assignment['priority'],
             }
             proctor_assignments_list.append(temp_dict)
             proctor_availability_df.at[assigned_proctor, "total_difficulty"] = (
@@ -138,8 +143,40 @@ def main(proctor_assignments_df, proctor_availability_df):
     proctor_assignments_dff = proctor_assignments_dff.sort_values(
         by=["Day", "Time", "Course", "Room", "proctor#"]
     )
+    proctor_assignments_dff = proctor_assignments_dff.merge(preferred_session_df, on=['Proctor'], how='left')
+    proctor_assignments_dff['Alignment'] = proctor_assignments_dff.apply(return_alignment, axis=1)
     return proctor_assignments_dff
 
+def return_alignment(proctor_assignment):
+    preferred_session = proctor_assignment['Preferred_Session']
+    time = proctor_assignment['Time']
+
+    if time == 'AM' and preferred_session == 'Early':
+        return True
+    if time == 'PM' and preferred_session == 'Late':
+        return True
+    if time == 'AM' and preferred_session == 'Late':
+        return 'Late on AM' 
+    if time == 'PM' and preferred_session == 'Early':
+        return 'Early on PM'        
+
+def return_priority(proctor_assignment):
+    
+    exam_title = proctor_assignment['ExamTitle']
+    proctor_num = proctor_assignment['proctor#']
+    proctor_difficulty = proctor_assignment['assignment_difficulty']
+    room_number = proctor_assignment['Room']
+    if exam_title == 'HallProctor':
+        return 99
+    if proctor_num == 1:
+        return 1
+    if proctor_num == 2 and proctor_difficulty == 1:
+        return 98 + (room_number % 100)/100
+    if proctor_num == 2 and proctor_difficulty == 1:
+        return 98 + (room_number % 100)/100    
+    
+    return 2
+    
 
 def convert_dept_to_code(dept):
     dept_to_code_dict = {

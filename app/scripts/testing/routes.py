@@ -162,6 +162,12 @@ def return_regents_reports():
             "files_needed": ["1_01", "1_08", "1_14"],
         },
         {
+            "report_title": "Move Lab Ineligible Students",
+            "report_function": "scripts.return_lab_ineligibles",
+            "report_description": "Return file to remove lab ineligible students",
+            "files_needed": ["1_01"],
+        },
+        {
             "report_title": "Schedule Students For Exams",
             "report_function": "scripts.return_students_scheduled_for_regents",
             "report_description": "Schedule students for sections based on testing accommodations and teacher of record",
@@ -205,6 +211,27 @@ def return_regents_reports():
         "testing/templates/testing/regents/index.html",
         reports=reports,
         files_needed=files_needed,
+    )
+
+
+from app.scripts.testing.regents import (
+    move_lab_ineligibles as move_lab_ineligibles,
+)
+
+
+@scripts.route("/testing/regents/return_lab_ineligibles")
+def return_lab_ineligibles():
+    school_year = session["school_year"]
+    term = session["term"]
+
+    f = move_lab_ineligibles.main()
+    download_name = f"{school_year}_{term}_lab_ineligible.xlsx"
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+        # mimetype="application/pdf",
     )
 
 

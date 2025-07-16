@@ -13,6 +13,7 @@ from flask import current_app, session
 def main(form, request):
     mapping_file = request.files[form.mapping_file.name]
     mapping_df = pd.read_excel(mapping_file)
+    print(mapping_df)
     mapping_df["StudentID"] = mapping_df["Image file name"].apply(
         return_StudentID_from_filename
     )

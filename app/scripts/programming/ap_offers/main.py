@@ -69,7 +69,7 @@ def main(form, request):
         student_courses = student_requests['Course'].to_list()
         if 'ZM18' in student_courses:
             student_session_dict[StudentID] = '1-8 Schedule'
-        if 'ZM29' in student_courses:
+        elif 'ZM29' in student_courses:
             student_session_dict[StudentID] = '2-9 Schedule'
         else:
             student_session_dict[StudentID] = '1-9 Schedule'
@@ -85,13 +85,6 @@ def main(form, request):
     ap_vetting_df = ap_vetting_df[["StudentID", "Course", "decision"]]
 
     ap_vetting_df = ap_vetting_df[ap_vetting_df["StudentID"].isin(students_on_register)]
-
-    ap_vetting_df = ap_vetting_df.merge(
-        code_deck_df[["CourseCode", "CourseName"]],
-        left_on=["Course"],
-        right_on=["CourseCode"],
-        how="left",
-    )
 
     students_to_receive_letters = ap_vetting_df["StudentID"].unique()
 
@@ -188,7 +181,7 @@ def main(form, request):
         flowables.append(paragraph)
 
         flowables.append(Spacer(width=0, height=0.25 * inch))
-        cols = ["CourseName", "decision"]
+        cols = ["Course", "decision"]
         flowables.append(return_courses_as_table(student_vetting_df, cols=cols))
 
         if num_of_ap_courses == 0:

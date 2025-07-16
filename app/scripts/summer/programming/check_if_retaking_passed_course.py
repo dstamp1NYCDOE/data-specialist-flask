@@ -71,7 +71,7 @@ def main():
     passed_courses_df = passed_courses_df[passed_courses_df["Credits"] > 0]
     passed_courses_df = passed_courses_df[passed_courses_df["Course"].str[0] != "P"]
 
-    df = cr_1_01_df.merge(
+    df = cr_4_01_df.merge(
         passed_courses_df,
         left_on=["StudentID", "Course"],
         right_on=["StudentID", "SummerCode"],

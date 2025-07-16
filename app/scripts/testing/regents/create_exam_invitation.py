@@ -272,10 +272,14 @@ def return_full_exam_title(exam_code):
         "MXRC": "Algebra I",
         "MXRF": "Algebra I",
         "MXRK": "Geometry",
+        "MXRJ": "Geometry",
         "MXRN": "Algebra II/Trigonometry",
         "SXRK": "Living Environment",
         "SXRU": "Earth Science",
         "SXRX": "Chemistry",
         "SXRP": "Physics",
+        "SXR3": "Biology",
+        "SXR2": "Earth and Space Science",
+        "FXTS": "Spanish WL"
     }
     return exam_title_dict.get(exam_code)

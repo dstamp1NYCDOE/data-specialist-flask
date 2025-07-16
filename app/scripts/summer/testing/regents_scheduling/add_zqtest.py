@@ -38,9 +38,11 @@ def main():
 
     exam_only_df = exams_pvt[exams_pvt['exam_only']][['StudentID']]
     
-    students_already_with_zqtest = cr_1_01_df[cr_1_01_df['Course']=='ZQTEST']['StudentID']
     
+    students_already_with_zqtest = cr_1_01_df[cr_1_01_df['Course']=='ZQTEST']['StudentID']
+
     students_who_need_zqtest_df = exam_only_df[~exam_only_df['StudentID'].isin(students_already_with_zqtest)]
+    
 
     students_who_need_zqtest_df = students_who_need_zqtest_df.merge(students_df, on='StudentID',how='left')
 

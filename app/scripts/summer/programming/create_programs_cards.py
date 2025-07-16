@@ -47,7 +47,8 @@ styles.add(
 )
 
 
-def main():
+
+def main(lst_of_students=[]):
     flowables_dict = {}
 
     school_year = session["school_year"]
@@ -132,6 +133,11 @@ def main():
     student_classes_df = student_classes_df.fillna({"Room": 0})
     student_classes_df["Room"] = student_classes_df["Room"].apply(lambda x: int(x))
 
+    if lst_of_students:
+        student_classes_df = student_classes_df[
+            student_classes_df["StudentID"].isin(lst_of_students)
+        ]
+
     flowables_lst = []
     for (dbn, LastName, FirstName, StudentID), classes_df in student_classes_df.groupby(
         group_by_cols
@@ -152,19 +158,20 @@ def main():
 
     flowables_df = pd.DataFrame(flowables_lst)
 
-    list_of_files = []
-    ## create alpha list
-    flowables_df = flowables_df[flowables_df["taking_classes?"]]
-    flowables_df = flowables_df.sort_values(by=["LastName", "FirstName"])
+    
+    # ## create alpha list
+    # flowables_df = flowables_df[flowables_df["taking_classes?"]]
+    # flowables_df = flowables_df.sort_values(by=["LastName", "FirstName"])
 
-    flowables = []
-    for last_name_initial, students_df in flowables_df.groupby("LastNameInitial"):
-        folder_flowables = return_students_in_folder_flowables(students_df)
-        flowables.extend(folder_flowables)
+    # flowables = []
+    # for last_name_initial, students_df in flowables_df.groupby("LastNameInitial"):
+    #     folder_flowables = return_students_in_folder_flowables(students_df)
+    #     flowables.extend(folder_flowables)
 
-        temp_student_flowables = students_df["flowables"].explode().to_list()
-        flowables.extend(temp_student_flowables)
-
+    #     temp_student_flowables = students_df["flowables"].explode().to_list()
+    #     flowables.extend(temp_student_flowables)
+    
+    flowables = flowables_df["flowables"].explode().to_list()
     f = BytesIO()
     my_doc = SimpleDocTemplate(
         f,

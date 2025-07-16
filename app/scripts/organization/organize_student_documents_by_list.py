@@ -160,7 +160,7 @@ def generate_sortby_dict_portrait(sort_by_list):
         buffer = BytesIO()
         c = canvas.Canvas(buffer, pagesize=letter)
         c.setFont("Times-Roman", 12)
-        c.drawString(1 * inch, 1 * inch, sort_by)
+        c.drawString(5.5 * inch, 1 * inch, sort_by)
         c.save()
 
         pdfWatermarkReader = PyPDF2.PdfReader(buffer)

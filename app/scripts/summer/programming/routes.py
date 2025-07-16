@@ -25,6 +25,16 @@ def return_summer_school_programming_routes():
             "report_description": "Return summer school program cards",
         },
         {
+            "report_title": "Return Program Cards By List",
+            "report_function": "scripts.return_summer_school_program_cards_by_list",
+            "report_description": "Return summer school program cards by list",
+        },        
+        {
+            "report_title": "Return Program Card Labels",
+            "report_function": "scripts.return_summer_school_program_card_labels",
+            "report_description": "Return summer school program labels",
+        },        
+        {
             "report_title": "Update Summer School Gradebooks",
             "report_function": "scripts.return_update_summer_gradebooks",
             "report_description": "Update Summer School Gradebooks",
@@ -68,8 +78,6 @@ def return_summer_school_check_if_passed_course():
 
 
 import app.scripts.summer.programming.create_programs_cards as create_programs_cards
-
-
 @scripts.route("/summer/programming/program_cards")
 def return_summer_school_program_cards():
     school_year = session["school_year"]
@@ -85,6 +93,48 @@ def return_summer_school_program_cards():
         download_name=download_name,
     )
 
+from app.scripts.summer.programming.forms import ProgramsByListOfStudentsForm 
+@scripts.route("summer/programming/program_cards_by_lst", methods=["GET", "POST"])
+def return_summer_school_program_cards_by_list():
+    if request.method == "GET":
+        form = ProgramsByListOfStudentsForm()
+        return render_template(
+            "/summer/templates/summer/programming/programs_by_lst_of_students.html",
+            form=form,
+        )
+    else:
+        form = ProgramsByListOfStudentsForm(request.form)
+        student_lst_str = form.student_lst.data
+        student_lst = []
+        if student_lst_str != '':
+            student_lst = student_lst_str.split("\r\n")
+            student_lst = [int(x) for x in student_lst]
+        f = create_programs_cards.main(student_lst)
+        school_year = session["school_year"]
+        download_name = f"SummerSchool{school_year+1}.pdf"
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
+
+import app.scripts.summer.programming.create_program_labels as create_program_labels
+@scripts.route("/summer/programming/program_card_labels")
+def return_summer_school_program_card_labels():
+    school_year = session["school_year"]
+    f = create_program_labels.main()
+
+    # return f
+
+    download_name = f"ProgramCardLabelsSummer{school_year+1}.pdf"
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )
 
 from app.scripts.summer.programming.forms import UpdateGradebooksForm
 import app.scripts.summer.programming.update_gradebooks as update_gradebooks

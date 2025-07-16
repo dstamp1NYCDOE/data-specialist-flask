@@ -22,7 +22,6 @@ def main():
     if term == 2:
         month = "June"
 
-
     cols = [
         "StudentID",
         "LastName",
@@ -39,19 +38,24 @@ def main():
     ]
     section_properties_df = pd.read_excel(path, sheet_name="SectionProperties")
 
+    regents_courses = regents_calendar_df["CourseCode"]
 
-
-    regents_courses = regents_calendar_df['CourseCode']
-
-    filename = utils.return_most_recent_report_by_semester(files_df, "1_01", year_and_semester=year_and_semester)
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "1_01", year_and_semester=year_and_semester
+    )
     cr_1_01_df = utils.return_file_as_df(filename)
-    cr_1_08_df = cr_1_01_df[['StudentID', 'LastName', 'FirstName', 'Course','Grade']]
-    registrations_df = cr_1_08_df[cr_1_08_df['Course'].isin(regents_courses)]
+    cr_1_08_df = cr_1_01_df[
+        ["StudentID", "LastName", "FirstName", "Course", "Grade", "Section"]
+    ]
+    cr_1_08_df = cr_1_08_df[cr_1_08_df["Course"].isin(regents_courses)]
+    cr_1_08_df["OldSection"] = cr_1_08_df["Section"]
+    registrations_df = cr_1_08_df[cr_1_08_df["Course"].isin(regents_courses)]
     registrations_df["senior?"] = registrations_df["Grade"].apply(lambda x: x == "12")
+    registrations_df["LabEligible?"] = registrations_df["Section"].apply(
+        lambda x: x != 88
+    )
 
-    ## get lab eligibility
-    filename = utils.return_most_recent_report_by_semester(files_df, "lab_eligibility", year_and_semester=year_and_semester)
-    lab_eligibility_df = utils.return_file_as_df(filename)
+    registrations_df = registrations_df.drop(columns=["Section"])
 
     # ## exam_info
 
@@ -60,17 +64,11 @@ def main():
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
     )
 
-    print(registrations_df)
-
-    ## attach lab eligibility
-    registrations_df = registrations_df.merge(
-        lab_eligibility_df, on=["StudentID", "Curriculum"], how="left"
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "rosters_and_grades", year_and_semester=year_and_semester
     )
-    
-
-    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
     rosters_df = utils.return_file_as_df(filename)
-    # rosters_df = rosters_df[rosters_df['Term']==f"S{term}"]
+    
     rosters_df = rosters_df[["StudentID", "Course", "Teacher1"]].drop_duplicates(
         subset=["StudentID", "Course"]
     )
@@ -82,7 +80,11 @@ def main():
     ).fillna("")
 
     ## attach testing accommodations info
-    filename = utils.return_most_recent_report_by_semester(files_df, "testing_accommodations_processed", year_and_semester=year_and_semester)
+    filename = utils.return_most_recent_report_by_semester(
+        files_df,
+        "testing_accommodations_processed",
+        year_and_semester=year_and_semester,
+    )
     testing_accommodations_df = utils.return_file_as_df(filename)
     testing_accommodations_df = testing_accommodations_df.drop_duplicates(
         keep="first", subset=["StudentID"]
@@ -169,54 +171,50 @@ def main():
 
     ## attach default_section_number
     registrations_df = registrations_df.merge(sections_df, on=flags_cols)
-    print(registrations_df)
     registrations_df["Section"] = registrations_df.apply(remove_lab_ineligible, axis=1)
 
     ## swap in "distributed" for Teacher1 name for those exams to minimize number of sections
     def swap_teacher_name(row):
         if row["DistributedScoring"] == True:
             return "Distributed"
+        elif row["Section"] == 3:
+            return "AAA"
+        elif row["Teacher1"] == "":
+            return "AAA"
         else:
             return row["Teacher1"]
-        
-    registrations_df["Teacher1"] = registrations_df.apply(swap_teacher_name,axis=1)
 
-    ## number_of_students_per_section
-    registrations_df["running_total"] = (
-        registrations_df.sort_values(by=["Teacher1", "LastName", "FirstName"])
-        .groupby(["Course", "Section"])["StudentID"]
-        .cumcount()
-        + 1
-    )
-
-    
+    registrations_df["Teacher1"] = registrations_df.apply(swap_teacher_name, axis=1)
 
 
     ## adjust sections based on enrollment
 
     registrations = []
-    for (exam, section), exam_section_df in registrations_df.groupby(
-        ["Course", "Section"]
-    ):
-        if section < 18 or section in [20, 25, 30, 34, 35, 54, 55]:
-            max_capacity = return_gen_ed_section_capacity(exam, month)
-        elif section == 88:
-            max_capacity = 99
-        else:
-            max_capacity = 15
 
-        current_capacity = len(exam_section_df)
+    ENL_SECTIONS = [20, 25, 30, 34, 35, 54, 55]
+    LAB_INELIGIBLE_SECTION = 88
+    for exam, exam_registrations_df in registrations_df.groupby("Course"):
+        ## speciality gen ed sections 
+        speciality_gen_ed_registrations_df =  exam_registrations_df[exam_registrations_df['Section']<5]
+        ## gen ed sections 
+        gen_ed_registrations_df = exam_registrations_df[(exam_registrations_df['Section']>=5) & (exam_registrations_df['Section']<18)]
+        ## small group sections 
+        small_group_sections_df = exam_registrations_df[(exam_registrations_df['Section']!=LAB_INELIGIBLE_SECTION) &(exam_registrations_df['Section']>=18) & (~exam_registrations_df['Section'].isin(ENL_SECTIONS))]
+        ## ENL sections
+        enl_registrations_df = exam_registrations_df[exam_registrations_df['Section'].isin(ENL_SECTIONS)] 
+        ## lab ineligible registrations
+        lab_ineligible_registrations =  exam_registrations_df[exam_registrations_df['Section']==LAB_INELIGIBLE_SECTION]
 
-        if current_capacity <= max_capacity:
-            for index, student in exam_section_df.iterrows():
-                student["NewSection"] = section
-                registrations.append(student)
-        else:
-            current_capacity = 1
-            current_section = section
+        for index, student in lab_ineligible_registrations.iterrows():
+            student["NewSection"] = 88
+            registrations.append(student)
 
-            for teacher, teacher_df in exam_section_df.groupby("Teacher1"):
-                for index, student in teacher_df.iterrows():
+        for section, section_df in enl_registrations_df.groupby("Section"):
+            for teacher, students_by_teacher_df in section_df.groupby("Teacher1"):
+                max_capacity = 33
+                current_capacity = 1   
+                current_section = section          
+                for index, student in students_by_teacher_df.iterrows():
                     if current_capacity < max_capacity:
                         current_capacity += 1
                         section = current_section
@@ -226,11 +224,183 @@ def main():
 
                     student["NewSection"] = section
                     registrations.append(student)
-                if teacher == "":
-                    pass
-                else:
-                    if current_section < 19:
+
+        for section, section_df in small_group_sections_df.groupby("Section"):
+            grouped = section_df.groupby("Teacher1")
+            sorted_group_names = (
+                grouped.size().sort_values(ascending=False).index.tolist()
+            )
+            for teacher in sorted_group_names:
+                students_by_teacher_df = grouped.get_group(teacher)
+                max_capacity = 15
+                current_capacity = 1   
+                current_section = section          
+                for index, student in students_by_teacher_df.iterrows():
+                    if current_capacity < max_capacity:
+                        current_capacity += 1
+                        section = current_section
+                    else:
+                        current_capacity = 1
                         current_section += 1
+
+                    student["NewSection"] = section
+                    registrations.append(student)
+
+        for section, section_df in speciality_gen_ed_registrations_df.groupby("Section"):
+            grouped = section_df.groupby("Teacher1")
+            sorted_group_names = (
+                grouped.size().sort_values(ascending=False).index.tolist()
+            )
+            max_capacity = 33
+            current_capacity = 1  
+            for teacher in sorted_group_names:
+                students_by_teacher_df = grouped.get_group(teacher)
+     
+                current_section = section          
+                for index, student in students_by_teacher_df.iterrows():
+                    if current_capacity < max_capacity:
+                        current_capacity += 1
+                        section = current_section
+                    else:
+                        current_capacity = 1
+                        current_section += 1
+
+                    student["NewSection"] = section
+                    registrations.append(student)
+        
+        # num of available seats from the speciality gen ed sections
+        num_of_gened_speciality_students = len(speciality_gen_ed_registrations_df)
+        num_of_remaining_seats = 33 - num_of_gened_speciality_students % 33
+        
+        ## first, split the gened sections grouped by teacher into a dataframe that is a multiple of 33 and the remainder that isn't
+
+        multiple_of_33_dfs = []
+        remainder_dfs = []
+
+        if len(gen_ed_registrations_df) > 0:
+            for teacher, registrations_by_teacher_df in gen_ed_registrations_df.groupby("Teacher1"):
+                total_rows = len(registrations_by_teacher_df)
+                if total_rows < 33:
+                    df_multiple_33 = pd.DataFrame(columns=registrations_by_teacher_df.columns)  # Empty dataframe with same columns
+                    df_remainder = registrations_by_teacher_df.copy()
+                else:
+                    # Find the largest multiple of 33 that doesn't exceed total_rows
+                    multiple_33_rows = (total_rows // 33) * 33
+                    
+                    # Split the dataframe
+                    df_multiple_33 = registrations_by_teacher_df.iloc[:multiple_33_rows].copy()
+                    print(df_multiple_33)
+                    df_remainder = registrations_by_teacher_df.iloc[multiple_33_rows:].copy()
+                
+                multiple_of_33_dfs.append(df_multiple_33)
+                remainder_dfs.append(df_remainder)
+            
+            multiple_of_33_dfs = pd.concat(multiple_of_33_dfs, ignore_index=True)
+            remainder_dfs = pd.concat(remainder_dfs, ignore_index=True)
+
+            current_capacity = num_of_remaining_seats
+            max_capacity = 33
+            current_section = 5
+            
+            grouped = remainder_dfs.groupby("Teacher1")
+            sorted_group_names = (
+                    grouped.size().sort_values(ascending=False).index.tolist()
+                )
+            for teacher in sorted_group_names:
+                students_by_teacher_df = grouped.get_group(teacher) 
+                for index, student in students_by_teacher_df.iterrows():
+                    if current_capacity < max_capacity:
+                        current_capacity += 1
+                        section = current_section
+                    else:
+                        current_capacity = 1
+                        current_section += 1
+
+                    student["NewSection"] = section
+                    registrations.append(student)        
+
+
+            for section, section_df in multiple_of_33_dfs.groupby("Section"):
+                grouped = section_df.groupby("Teacher1")
+                sorted_group_names = (
+                    grouped.size().sort_values(ascending=False).index.tolist()
+                )
+                max_capacity = 33
+                current_capacity = 1
+                current_section = section + 4  
+                for teacher in sorted_group_names:
+                    students_by_teacher_df = grouped.get_group(teacher)          
+                    for index, student in students_by_teacher_df.iterrows():
+                        if current_capacity < max_capacity:
+                            current_capacity += 1
+                            section = current_section
+                        else:
+                            current_capacity = 1
+                            current_section += 1
+
+                        student["NewSection"] = section
+                        registrations.append(student)
+        
+        
+
+    registrations_df = pd.DataFrame(registrations)
+
+
+    # return ''
+
+
+
+
+    # for (exam, section), exam_section_df in registrations_df.groupby(
+    #     ["Course", "Section"]
+    # ):
+
+    #     num_of_students = len(exam_section_df)
+    #     if section < 5:
+    #         max_capacity = 33
+    #     elif section < 18 or section in [20, 25, 30, 34, 35, 54, 55]:
+    #         max_capacity = return_gen_ed_section_capacity(exam, month, num_of_students)
+    #     elif section == 88:
+    #         max_capacity = 99
+    #     else:
+    #         max_capacity = 15
+
+    #     current_capacity = len(exam_section_df)
+
+    #     if current_capacity <= max_capacity:
+    #         for index, student in exam_section_df.iterrows():
+    #             student["NewSection"] = section
+    #             registrations.append(student)
+    #     else:
+    #         current_capacity = 1
+    #         current_section = section
+
+
+    #         exam_teachers = exam_section_df["Teacher1"].unique()
+
+    #         grouped = exam_section_df.groupby("Teacher1")
+    #         sorted_group_names = (
+    #             grouped.size().sort_values(ascending=False).index.tolist()
+    #         )
+
+    #         for teacher in sorted_group_names:             
+    #             teacher_df = grouped.get_group(teacher)
+    #             for index, student in teacher_df.iterrows():
+    #                 if current_capacity < max_capacity:
+    #                     current_capacity += 1
+    #                     section = current_section
+    #                 else:
+    #                     current_capacity = 1
+    #                     current_section += 1
+
+    #                 student["NewSection"] = section
+    #                 registrations.append(student)
+    #             if teacher == "":
+    #                 pass
+    #             else:
+    #                 if current_section < 19:
+    #                     if teacher != "AAA":
+    #                         current_section += 1
 
     registrations_df = pd.DataFrame(registrations)
     registrations_df = registrations_df.merge(
@@ -249,7 +419,7 @@ def main():
     registrations_df = registrations_df.sort_values(
         by=["Day", "Time", "Course", "NewSection"]
     )
-    print(registrations_df.columns)
+
     cols = [
         "StudentID",
         "LastName",
@@ -275,7 +445,15 @@ def main():
         "NewSection",
         "Action",
     ]
-    dataframe_dict["STARS"] = registrations_df[stars_upload_cols]
+
+    dataframe_dict["STARS"] = registrations_df[
+        registrations_df["OldSection"] != registrations_df["NewSection"]
+    ][stars_upload_cols]
+    STARS_reset_df = registrations_df.copy()
+    STARS_reset_df["NewSection"] = STARS_reset_df["NewSection"].apply(
+        lambda x: 88 if x == 88 else 1
+    )
+    dataframe_dict["STARS-Reset"] = STARS_reset_df[stars_upload_cols]
     students_taking_exams_lst = registrations_df["StudentID"].unique()
 
     accommodations_to_check = testing_accommodations_df[
@@ -283,27 +461,83 @@ def main():
     ]
     dataframe_dict["AccommodationsToCheck"] = accommodations_to_check
 
+    dataframe_dict["Review"] = registrations_df[
+        (registrations_df["Course"] == "HXRCE")
+        & (registrations_df["Teacher1"] == "Trapani, J.")
+    ]
+
     return dataframe_dict
 
 
-def return_gen_ed_section_capacity(exam_code, month):
-
+def return_gen_ed_section_capacity(exam_code, month, num_of_students):
+    return 33
     if month == "January":
         if exam_code[0] == "E":
-            return 33
+            return calculate_class_size(num_of_students)
         else:
-            return 50
+            return calculate_class_size(num_of_students, max_class_size=40)
     if month == "June":
         if exam_code[0] == "E":
-            return 33
+            return calculate_class_size(num_of_students, max_class_size=40)
         else:
-            return 33
+            return calculate_class_size(num_of_students)
+
+
+def calculate_class_size(total_students, max_class_size=33, ideal_class_size=33):
+    """
+    Calculate the optimal class size given total number of students.
+
+    Rules:
+    - Ideal class size is ideal_class_size
+    - Maximum allowed class size is 34, but only if remainder equals number of sections at ideal_class_size
+    - If remainder > number of sections at ideal_class_size, add more sections to balance
+    - Minimize number of sections while avoiding very small last sections
+
+    Returns the maximum class size that will be used.
+    """
+    if total_students <= max_class_size:
+        return ideal_class_size
+
+    # Start with sections of ideal_class_size and see what remainder we get
+    sections_at_ideal = total_students // ideal_class_size
+    remainder = total_students % ideal_class_size
+
+    # If remainder == 0, all sections are ideal_class_size
+    if remainder == 0:
+        return ideal_class_size
+
+    # If remainder equals the number of sections, we can go to max_class_size
+    if remainder == sections_at_ideal:
+        return max_class_size
+
+    # If remainder < number of sections, we can distribute evenly at ideal_class_size and max_class_size
+    if remainder < sections_at_ideal:
+        return max_class_size
+
+    # If remainder > number of sections, we need more sections to balance
+    # Find the minimum number of sections where all are reasonably balanced
+    min_sections = sections_at_ideal + 1
+
+    while True:
+        base_size = total_students // min_sections
+        section_remainder = total_students % min_sections
+
+        # If base_size > max_class_size, we need even more sections
+        if base_size > max_class_size:
+            min_sections += 1
+            continue
+
+        # Check if this gives us a reasonable distribution
+        if section_remainder == 0:
+            return base_size
+        else:
+            return base_size + 1
 
 
 def remove_lab_ineligible(row):
     course = row["CourseCode"]
-    LabEligible = row["LabEligible"]
-    if course[0] == "S" and LabEligible == 0:
+    LabEligible = row["LabEligible?"]
+    if course[0] == "S" and LabEligible == False:
         return 88
     else:
         return row["Section"]
@@ -338,8 +572,10 @@ def return_section_number(row):
             else:
                 return 5
 
-    if scribe or Technology or one_on_one:
+    if scribe:
         return 89
+    if Technology:
+        return 87
 
     temp_str = ""
     for attribute in [senior, conflict, ENL, QR, time_and_a_half, double_time]:

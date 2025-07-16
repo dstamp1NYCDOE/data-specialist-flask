@@ -38,6 +38,8 @@ from app.scripts.organization.metrocards import routes
 from app.scripts.organization.mailinglabels import routes
 from app.scripts.organization.ms_teams import routes
 from app.scripts.organization.gather_teacher_input_per_student_spreadsheet import routes
+from app.scripts.organization.geocoding import routes
+from app.scripts.organization.ilog import routes
 
 from app.scripts.pbis import routes
 from app.scripts.pbis.smartpass import routes

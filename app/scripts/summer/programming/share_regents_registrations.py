@@ -77,11 +77,13 @@ def main():
     exams_pvt = exams_pvt >= 1
     exams_pvt = exams_pvt.replace({True:'Y',False:'N'})
     
-    
+    exams_lst = exams_pvt.columns.tolist()
     exams_pvt = exams_pvt.reset_index()
-    print(exams_pvt)
     
-    cr_1_01_df = cr_1_01_df.merge(exams_pvt, on='StudentID',how='left').fillna('N')
+    
+
+    cr_1_01_df = cr_1_01_df.merge(exams_pvt, on='StudentID',how='left').fillna('')
+    cr_1_01_df.replace("N", "", inplace=True)
 
     teacher_cols = [
         "StudentID",
@@ -94,11 +96,7 @@ def main():
         "Cycle",
         "school_name",
         "Student DOE Email",
-        'ALGEBRA I REG AUG', 'CC ALGEBRA II REG AUG', 'CC ELA REG AUG',
-        'CC GEOMETRY REG AUG', 'CHEMISTRY REG AUG', 'FRAMEWORK US HIST REG AUG',
-       'GLOBAL II REG AUG', 'LIVING ENV REG AUG', 'PHSET ES REG AUG',
-       'PHYSICS REG AUG'
-    ]
+    ] + exams_lst
 
     ## get gsheet
 

@@ -46,6 +46,12 @@ class OrganizeStudentRecordsForm(FlaskForm):
         validators=[FileRequired()],
     )
 
+    distribution_mode = SelectField(
+        "Distribution Mode",
+        choices=[("first_period","First Period of the Day"), ("last_period","Last Period of the Day")],
+        validators=[InputRequired()],
+    )
+
     student_records_pdf_orientation = SelectField(
         "Student Records PDF Page Orientation",
         choices=[("landscape", "Landscape"), ("portrait", "Portrait")],

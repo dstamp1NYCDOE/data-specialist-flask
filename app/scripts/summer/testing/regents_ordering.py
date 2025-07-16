@@ -13,10 +13,8 @@ def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
 
-    student_exam_registration = request.files[
-        form.combined_regents_registration_spreadsheet.name
-    ]
-    df_dict = pd.read_excel(student_exam_registration, sheet_name=None)
+    registrations = request.files[form.combined_regents_registration_spreadsheet.name]
+    df_dict = pd.read_excel(registrations, sheet_name=None)
 
     sheets_to_ignore = ["Directions", "HomeLangDropdown"]
     dfs_lst = [
@@ -24,6 +22,7 @@ def main(form, request):
     ]
     df = pd.concat(dfs_lst)
     df = df.dropna(subset="StudentID")
+
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
@@ -54,8 +53,9 @@ def main(form, request):
             aggfunc="count",
             values="StudentID",
         )
+        
         if large_print_pvt.to_dict():
-            exam_dict["num_of_exams"] = large_print_pvt.loc[True, "StudentID"]
+            exam_dict["large_print"] = large_print_pvt.loc[True, "StudentID"]
 
         enl_count_pvt = pd.pivot_table(
             df[df["ENL?"] & df[exam]],
@@ -74,5 +74,15 @@ def main(form, request):
         exam_dict = exam_dict | enl_count_pvt
         exam_dict_lst.append(exam_dict)
 
+
     df = pd.DataFrame(exam_dict_lst).fillna(0)
+    cols_to_convert = df.columns[1:]
+    # Create a dictionary mapping these columns to 'int'
+    dtype_mapping = {col: int for col in cols_to_convert}
+    # Apply the conversion
+    df = df.astype(dtype_mapping)
+
+
+    ## signups by DBN
+
     return df

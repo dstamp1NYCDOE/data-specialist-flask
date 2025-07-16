@@ -13,20 +13,18 @@ def main(month):
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
 
-    
     filename = utils.return_most_recent_report_by_semester(
         files_df, "rosters_and_grades", year_and_semester=year_and_semester
     )
     rosters_df = utils.return_file_as_df(filename)
-    rosters_df = rosters_df[rosters_df['Term']==f"S{term}"]
+    rosters_df = rosters_df[rosters_df["Term"] == f"S{term}"]
     rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
-    
 
     regents_max_df = process_regents_max.main()
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    
+
     if month == "January":
         return for_january(rosters_df, regents_max_df, regents_calendar_df)
     if month == "June":
@@ -40,8 +38,8 @@ def for_january(rosters_df, regents_max_df, regents_calendar_df):
 
 def for_june(rosters_df, regents_max_df, regents_calendar_df):
     # exclude AP bio students
-    courses_to_exclude = ['SBS22X']
-    rosters_df = rosters_df[~rosters_df['Course'].isin(courses_to_exclude)]
+    courses_to_exclude = ["SBS22X"]
+    rosters_df = rosters_df[~rosters_df["Course"].isin(courses_to_exclude)]
 
     rosters_df["CulminatingCourse"] = rosters_df["Course"].apply(lambda x: x[0:5])
     rosters_df = rosters_df.merge(
@@ -49,7 +47,7 @@ def for_june(rosters_df, regents_max_df, regents_calendar_df):
         on=["CulminatingCourse"],
         how="inner",
     )
-    
+
     culminating_course_list = rosters_df[["StudentID", "CourseCode"]].to_dict("records")
 
     ela_retakes = regents_max_df[
@@ -57,9 +55,8 @@ def for_june(rosters_df, regents_max_df, regents_calendar_df):
         | (regents_max_df["NumericEquivalent"] < 75)
     ]
     ela_retakes = ela_retakes[ela_retakes["CourseCode"] == "EXRC"]
-    ela_retakes = ela_retakes[ela_retakes["year_in_hs"] == 3]
+    ela_retakes = ela_retakes[ela_retakes["year_in_hs"] >= 3]
     ela_retakes["CourseCode"] = ela_retakes["CourseCode"].apply(lambda x: x + "E")
-
 
     ela_retakes_lst = ela_retakes[["StudentID", "CourseCode"]].to_dict("records")
     exam_registrations = culminating_course_list + ela_retakes_lst

@@ -37,10 +37,6 @@ def main():
 
     
     
-
-    ## drop inactivies
-    registrations_df = registrations_df[registrations_df["Status"] == True]
-    
     ## attach exam info to registrations
     registrations_df = registrations_df.merge(
         regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"

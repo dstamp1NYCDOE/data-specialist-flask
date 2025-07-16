@@ -52,8 +52,10 @@ def main(form, request):
         ("USH", "HXRKG"),
         ("ES", "SXRUG"),
         ("Chem", "SXRXG"),
-        ("Geo", "MXRKG"),
+        ("Geo", "MXRJG"),
         ("LE", "SXRKG"),
+        ("Bio", "SXR3G"),
+        ("ESS", "SXR2G"),
     ]
 
     output_df_lst = []
