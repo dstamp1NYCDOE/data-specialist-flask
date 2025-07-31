@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 from app.scripts.testing.regents import create_walkin_signup_spreadsheet

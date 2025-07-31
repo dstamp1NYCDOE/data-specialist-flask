@@ -7,7 +7,7 @@ from reportlab.graphics import shapes
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import datetime as dt
 
 import labels

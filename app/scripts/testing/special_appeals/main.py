@@ -6,7 +6,7 @@ import app.scripts.programming.requests.process_transcript as process_transcript
 
 from app.scripts.testing.regents import process_regents_max
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 

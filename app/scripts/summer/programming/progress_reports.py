@@ -14,7 +14,7 @@ from zipfile import ZipFile
 from io import BytesIO
 from flask import current_app, session
 from dotenv import load_dotenv
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import pygsheets
 from app.scripts import scripts, files_df, photos_df, gsheets_df
 

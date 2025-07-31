@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 
 def main(RATR_df):

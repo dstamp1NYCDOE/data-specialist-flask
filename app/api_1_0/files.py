@@ -1,6 +1,6 @@
 from flask import jsonify, request
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.api_1_0 import api, files_df
 
 @api.route("/files")

@@ -1,5 +1,5 @@
 import pandas as pd
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 import PyPDF2
 from reportlab.pdfgen import canvas

@@ -7,7 +7,7 @@ from flask import render_template, request, send_file, session, current_app
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 import app.scripts.college_and_career.scripts.IPR_monitoring.main as IPR_monitoring
 from app.scripts.college_and_career.scripts.IPR_monitoring.forms import IPRMonitoringForm

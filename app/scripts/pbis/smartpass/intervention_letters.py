@@ -44,7 +44,7 @@ from io import BytesIO
 from flask import session, current_app
 
 from app.scripts.reportlab_utils import reportlab_letter_head, reportlab_closing
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 from app.scripts.pbis.smartpass.main import process_smartpass_data, return_total_time_per_period_by_student

@@ -3,7 +3,7 @@ from sklearn.linear_model import LinearRegression
 
 import random
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 from itertools import pairwise
 

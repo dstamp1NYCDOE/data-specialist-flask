@@ -23,7 +23,7 @@ from io import BytesIO
 from flask import session
 
 from app.scripts.reportlab_utils import reportlab_letter_head, reportlab_closing
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 styles = getSampleStyleSheet()
 

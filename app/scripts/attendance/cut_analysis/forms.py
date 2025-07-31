@@ -12,7 +12,7 @@ from wtforms.widgets import TextArea
 
 import datetime as dt
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import pandas as pd
 
 from flask import session

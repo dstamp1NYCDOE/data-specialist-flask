@@ -4,7 +4,7 @@ from io import BytesIO
 
 import pandas as pd
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 from flask import session

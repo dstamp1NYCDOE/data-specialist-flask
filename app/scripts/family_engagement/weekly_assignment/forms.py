@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import pandas as pd
 
 class AttendanceWeekOfForm(FlaskForm):

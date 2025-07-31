@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts.date_to_marking_period import return_mp_from_date
 
 def main(RATR_df,school_year):

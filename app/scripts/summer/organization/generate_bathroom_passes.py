@@ -11,7 +11,7 @@ from reportlab.lib.units import mm, inch
 from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, TableStyle
 from reportlab.platypus import SimpleDocTemplate
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df, photos_df
 
 

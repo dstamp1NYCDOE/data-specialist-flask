@@ -15,7 +15,7 @@ from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, Table
 from reportlab.platypus import SimpleDocTemplate
 
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import labels
 import numpy as np
 import pandas as pd

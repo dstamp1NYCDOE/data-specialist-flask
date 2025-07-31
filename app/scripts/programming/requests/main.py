@@ -19,7 +19,7 @@ import app.scripts.programming.requests.finalize_requests as finalize_requests
 
 from app.scripts.attendance.process_RATR import student_lateness_overall
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 from flask import session
 

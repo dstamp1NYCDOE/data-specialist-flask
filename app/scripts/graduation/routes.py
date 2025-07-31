@@ -7,7 +7,7 @@ from flask import render_template, request, send_file, session, current_app
 
 
 from app.scripts import files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 
 from app.scripts.graduation import graduation

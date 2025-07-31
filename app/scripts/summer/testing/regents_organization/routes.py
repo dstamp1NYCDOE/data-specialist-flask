@@ -15,7 +15,7 @@ from flask import (
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 from app.scripts.summer.testing.regents_organization.forms import *
 

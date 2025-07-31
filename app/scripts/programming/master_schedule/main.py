@@ -18,7 +18,7 @@ from app.scripts import gsheets_df
 
 from flask import session
 
-from app.scripts.utils.utils import return_gsheet_url_by_title
+from app.scripts.utils import return_gsheet_url_by_title
 
 def main():
 

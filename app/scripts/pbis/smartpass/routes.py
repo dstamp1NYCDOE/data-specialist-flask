@@ -6,7 +6,7 @@ from io import BytesIO
 from flask import render_template, request, send_file
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 from app.scripts.pbis.smartpass.forms import SmartPassDataUploadForm
 from app.scripts.pbis.smartpass import main as smartpass

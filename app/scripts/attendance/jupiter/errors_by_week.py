@@ -14,7 +14,7 @@ from reportlab.platypus import SimpleDocTemplate
 import PyPDF2
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import pandas as pd
 
 from app.scripts.attendance.jupiter.process import process_local_file as process_jupiter

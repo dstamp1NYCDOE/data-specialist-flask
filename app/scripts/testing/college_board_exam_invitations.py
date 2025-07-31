@@ -26,7 +26,7 @@ from flask import session, current_app
 
 from app.scripts.reportlab_utils import reportlab_letter_head, reportlab_closing
 from app.scripts import scripts, files_df, photos_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 styles = getSampleStyleSheet()
 

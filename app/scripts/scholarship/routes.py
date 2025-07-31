@@ -5,7 +5,7 @@ from flask import render_template, request, send_file
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 import app.scripts.scholarship.grade_point_trajectory as grade_point_trajectory
 import app.scripts.scholarship.jupiter_grades_benchmark_analysis as jupiter_grades_benchmark_analysis

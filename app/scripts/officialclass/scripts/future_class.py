@@ -4,7 +4,7 @@ import pandas as pd
 import datetime as dt
 from io import BytesIO
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 

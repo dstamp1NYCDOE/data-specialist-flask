@@ -1,5 +1,5 @@
 import pandas as pd
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 from app.scripts.testing.regents import process_regents_max

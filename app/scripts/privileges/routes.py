@@ -5,7 +5,7 @@ from flask import render_template, request, send_file, session, url_for, redirec
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 from app.main.forms import SelectStudentForm
 from app.scripts.privileges.forms import StudentPrivilegeSummaryForm

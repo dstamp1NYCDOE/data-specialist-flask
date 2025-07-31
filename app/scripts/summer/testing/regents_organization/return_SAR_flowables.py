@@ -14,7 +14,7 @@ from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, Table
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus.flowables import BalancedColumns
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df, photos_df
 from app.scripts.summer import utils as summer_utils
 

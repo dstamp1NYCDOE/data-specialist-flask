@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 
 scripts = Blueprint("scripts", __name__, template_folder="")
 files_df = utils.return_dataframe_of_files()

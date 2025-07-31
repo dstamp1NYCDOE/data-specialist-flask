@@ -4,7 +4,7 @@ import pandas as pd
 
 from io import BytesIO
 import datetime as dt
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 from app.scripts import scripts, files_df
 
 from app.scripts.date_to_marking_period import return_mp_from_date

@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.units import mm, inch
 from reportlab.platypus import SimpleDocTemplate
 
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import app.scripts.commutes.utils as commute_utils
 
 from app.scripts import scripts, files_df

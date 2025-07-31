@@ -11,7 +11,7 @@ from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate
 from werkzeug.utils import secure_filename
-import app.scripts.utils.utils as utils
+import app.scripts.utils as utils
 import labels
 
 import pandas as pd
