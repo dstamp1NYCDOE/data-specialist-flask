@@ -6,7 +6,7 @@ from io import BytesIO
 from flask import render_template, request, send_file
 
 from app.scripts import scripts, files_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from app.scripts.organization.geocoding.process_addresses import main as process_addresses
 from app.scripts.organization.geocoding.process_community_districts import main as process_community_districts

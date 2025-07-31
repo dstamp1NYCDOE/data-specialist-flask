@@ -15,7 +15,7 @@ from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, Table
 from reportlab.platypus import SimpleDocTemplate
 
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 import labels
 import numpy as np
 import pandas as pd
@@ -58,8 +58,8 @@ def main(form, request):
 
 def draw_label(label, width, height, obj):
     if obj:
-        username = obj['username']
-        password = obj['password']
+        username = obj['Kiosk Username']
+        password = obj['Kiosk Password']
         label.add(
             shapes.String(5, 55, f"Username:", fontName="Courier", fontSize=14)
         )

@@ -1,7 +1,7 @@
 import pandas as pd
 from flask import session
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 from app.scripts.date_to_marking_period import return_mp_from_date

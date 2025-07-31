@@ -5,7 +5,7 @@ import pandas as pd  #
 from io import BytesIO
 from flask import session, current_app
 import pandas as pd
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 def return_contact_tracing_results(form, request):

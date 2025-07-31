@@ -1,7 +1,7 @@
 from flask import session
 import pandas as pd
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 from app.scripts.attendance.jupiter.stats_by_student import (

@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 from flask import session, current_app
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df, photos_df
 import app.scripts.summer.testing.regents_scheduling.utils as regents_utils
 import pandas as pd

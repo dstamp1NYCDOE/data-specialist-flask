@@ -19,7 +19,7 @@ import datetime as dt
 import os
 
 from app.scripts.attendance.process_RATR import main as process_RATR
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 
 from app.scripts import scripts, files_df

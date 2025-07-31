@@ -1,7 +1,7 @@
 import pandas as pd
 from flask import session
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import files_df
 
 from app.scripts.attendance.jupiter.process import process_local_file as process_jupiter_data

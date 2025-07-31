@@ -7,7 +7,7 @@ from flask import render_template, request, send_file, redirect, url_for, flash,
 from werkzeug.utils import secure_filename
 
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 

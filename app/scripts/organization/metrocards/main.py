@@ -8,7 +8,7 @@ import labels
 from reportlab.graphics import shapes
 from reportlab.lib import colors
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 from flask import current_app, session

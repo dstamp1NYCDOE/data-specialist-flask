@@ -3,7 +3,7 @@ from flask import session
 import pandas as pd 
 from sklearn.linear_model import LinearRegression
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 def main():

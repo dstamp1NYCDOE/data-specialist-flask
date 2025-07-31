@@ -9,7 +9,7 @@ from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, Table
 from reportlab.platypus import SimpleDocTemplate
 
 import pandas as pd
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 
 import os

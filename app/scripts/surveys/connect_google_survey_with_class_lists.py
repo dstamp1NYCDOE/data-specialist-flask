@@ -2,7 +2,7 @@ import pandas as pd
 from flask import flash, send_file
 from io import BytesIO
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 files_df = utils.return_dataframe_of_files()
 

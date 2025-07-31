@@ -7,7 +7,7 @@ from flask import render_template, request, send_file, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 
 from app.scripts import scripts, files_df
@@ -26,6 +26,12 @@ def return_progress_towards_graduation_reports():
             "report_description": "Analyzes the most up to date CR1.68 file uploaded to the database",
             "report_form":PlaceholderForm(meta={'title':'MissingAssignmentsForFailingOneCourseForm','type':'placeholder'}),
         },
+        {
+            "report_title": "Analyze Regents Max Report (CR 1_42)",
+            "report_function": "analyze_regents_max",
+            "report_description": "Analyzes the most up to date CR1.42 file uploaded to the database",
+            "report_form":PlaceholderForm(meta={'title':'MissingAssignmentsForFailingOneCourseForm','type':'placeholder'}),
+        },        
     ]
     return render_template(
         "progress_towards_graduation/templates/progress_towards_graduation/index.html", reports=reports
@@ -43,4 +49,11 @@ def return_progress_towards_graduation_report(report_function):
         f = analyze_progress_towards_graduation.main(data)
         
         download_name = f"ProgressTowardsGraduationAnalysis.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
+    if report_function == 'analyze_regents_max':
+        from app.scripts.utils.stars import analyze_regents_max
+        cr_1_42_filename = utils.return_most_recent_report_by_semester(files_df, "1_42")
+        cr_1_42_df = utils.return_file_as_df(cr_1_42_filename)
+        f, download_name = analyze_regents_max.main(cr_1_42_df)
+        return f.to_html()
         return send_file(f, as_attachment=True, download_name=download_name)

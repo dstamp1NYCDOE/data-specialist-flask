@@ -44,19 +44,19 @@ def main():
     output_list = []
     for course_code, period in functional_course_list:
         if course_code in ["ZLYL"]:
-            for cycle_day in ["'01010", "'00101"]:
+            for cycle_day in ["01010", "00101"]:
                 output_list.append(create_course(course_code, period, cycle_day))
         elif course_code in ["ZQCAPS"]:
-            output_list.append(create_course(course_code, period, "'10000"))
+            output_list.append(create_course(course_code, period, "10000"))
         elif course_code in ["ZL9"]:
-            output_list.append(create_course(course_code, period, "'10000"))
+            output_list.append(create_course(course_code, period, "10000"))
         else:
             output_list.append(create_course(course_code, period))
 
     return output_list
 
 
-def create_course(course_code, period, cycle_day="'11111"):
+def create_course(course_code, period, cycle_day="11111"):
     school_year = session["school_year"]
     term = session["term"]
     school_year_str = f"{int(school_year)}-{int(school_year)+1}"
@@ -104,9 +104,9 @@ def return_mapped_section(course_code, period):
 def return_section_number(course_code, period, cycle=None):
     if course_code == "ZA":
         return 1
-    if cycle == "'01010":
+    if cycle == "01010":
         return 10 + period
-    elif cycle == "'00101":
+    elif cycle == "00101":
         return 20 + period
     else:
         return period
@@ -115,7 +115,7 @@ def return_section_number(course_code, period, cycle=None):
 def return_capacity(course_code, period):
     if course_code == "ZL":
         return 425
-    if course_code == 'ZQCAPS':
+    if course_code == "ZQCAPS":
         return 30
     if course_code == "ZLYL":
         ZLYL_dict = {
@@ -162,7 +162,7 @@ def return_hard_coded():
             "CourseCode": "GQS11",
             "SectionID": "1",
             "PeriodID": "0",
-            "Cycle Day": "'10000",
+            "Cycle Day": "10000",
             "Capacity": 50,
             "Remaining Capacity": 50,
             "Teacher Name": "ARCAMAY J",
@@ -172,7 +172,7 @@ def return_hard_coded():
             "CourseCode": "ZJS11QA",
             "SectionID": "1",
             "PeriodID": "0",
-            "Cycle Day": "'11111",
+            "Cycle Day": "11111",
             "Capacity": 8,
             "Remaining Capacity": 8,
             "Teacher Name": "MCGUINNESS B",
@@ -182,7 +182,7 @@ def return_hard_coded():
             "CourseCode": "ZJS11QB",
             "SectionID": "1",
             "PeriodID": "1",
-            "Cycle Day": "'11111",
+            "Cycle Day": "11111",
             "Capacity": 8,
             "Remaining Capacity": 8,
             "Teacher Name": "GURUNG S",
@@ -192,7 +192,7 @@ def return_hard_coded():
             "CourseCode": "ZJS11QB",
             "SectionID": "9",
             "PeriodID": "9",
-            "Cycle Day": "'11111",
+            "Cycle Day": "11111",
             "Capacity": 8,
             "Remaining Capacity": 8,
             "Teacher Name": "SMITHBROWN S",

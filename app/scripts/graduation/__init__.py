@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 graduation = Blueprint("graduation", __name__, template_folder="")
 

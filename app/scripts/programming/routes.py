@@ -5,7 +5,7 @@ from flask import render_template, request, send_file, session, url_for, redirec
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from app.scripts.programming.forms import (
     StudentVettingForm,
@@ -40,6 +40,12 @@ def return_programming_reports():
             "Description": "Return spreadsheet initial student requests",
             "form": initial_request_form,
             "route": "scripts.return_initial_requests",
+        },
+        {
+            "Title": "Updated Fall Requests",
+            "Description": "Return spreadsheet updated student requests based on math and science results",
+            "form": initial_request_form,
+            "route": "scripts.return_updated_requests",
         },
         {
             "Title": "Initial Fall Request Inform Letters",
@@ -164,6 +170,17 @@ def return_processed_advanced_course_survey():
             download_name=download_name,
         )
 
+
+
+from app.scripts.programming.requests.update_requests import main as update_requests
+@scripts.route("/programming/update_requests", methods=["GET", "POST"])
+def return_updated_requests():
+    f,download_name =  update_requests()
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )    
 
 from app.scripts.programming.requests import main as requests
 

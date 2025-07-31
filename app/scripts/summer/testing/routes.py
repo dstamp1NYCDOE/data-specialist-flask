@@ -7,7 +7,7 @@ from flask import render_template, request, send_file, session, current_app
 
 
 from app.scripts import scripts, files_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 import app.scripts.summer.utils as summer_utils
 
 
@@ -25,10 +25,20 @@ def return_summer_school_testing_routes():
             "report_description": "Process exam registration spreadsheet and determine exam order",
         },
         {
+            "report_title": "August Regents Anticipated Proctor Need",
+            "report_function": "scripts.return_summer_school_anticipated_proctor_need",
+            "report_description": "Process exam registration spreadsheet and determine anticipated proctor need",
+        },
+        {
             "report_title": "August Regents Exam Only Admit List",
             "report_function": "scripts.return_summer_exam_only_students",
             "report_description": "Process exam registration spreadsheet and return students not already admitted",
         },
+        {
+            "report_title": "August Regents Exam Only Admit Automation (TRAF)",
+            "report_function": "scripts.return_exam_only_admit_automation",
+            "report_description": "Copy and paste StudentID numbers to admit students into ATSSUM with TRAF",
+        },        
         {
             "report_title": "August Regents Process Pre-Registration",
             "report_function": "scripts.return_summer_regents_preregistration",
@@ -125,6 +135,25 @@ def return_summer_school_regents_ordering():
         df = regents_ordering.main(form, request)
         return df.to_html()
 
+import app.scripts.summer.testing.regents_scheduling.anticipated_proctor_need as anticipated_proctor_need
+from app.scripts.summer.testing.forms import RegentsOrderingForm
+
+
+@scripts.route("/summer/testing/anticipated_proctor_need", methods=["GET", "POST"])
+def return_summer_school_anticipated_proctor_need():
+    if request.method == "GET":
+        form = RegentsOrderingForm()
+        return render_template(
+            "/summer/templates/summer/testing/anticipated_proctor_need_form.html",
+            form=form,
+        )
+    else:
+
+        form = RegentsOrderingForm(request.form)
+        f = anticipated_proctor_need.main(form, request)
+        school_year = session["school_year"]
+        download_name = f"AnticipatedProctorNeed_{school_year+1}_7.xlsx"
+        return send_file(f, as_attachment=True, download_name=download_name)
 
 import app.scripts.summer.testing.identify_students_to_admit_exam_only as identify_students_to_admit_exam_only
 from app.scripts.summer.testing.forms import IdentifyExamOnlyForm

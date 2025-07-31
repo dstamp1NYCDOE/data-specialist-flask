@@ -12,6 +12,43 @@
           <a class="nav-link" href="{{ url_for('main.return_index')}}">Home</a>
         </li>
 
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Quick Menu
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_attendance_reports')}}">Attendance</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_data_specialist_project_reports')}}">Data Specialist Projects</a>
+            </li>                      
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_family_engagement_reports')}}">Family Engagement</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_organization_reports')}}">Organization</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_pbis_reports')}}">PBIS</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_privileges_reports')}}">Privileges</a>
+            </li>                      
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_programming_reports')}}">Programming</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_scholarship_reports')}}">Scholarship</a>
+            </li>            
+            <li>
+              <a class="dropdown-item" href="{{url_for('scripts.return_testing_reports')}}">Testing</a>
+            </li>
+ 
+          </ul>
+        </li>
+
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             File Management
@@ -33,6 +70,11 @@
           </ul>
         </li>
 
+        {% if session.term == 7 %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('scripts.return_summer_school_routes')}}">Summer</a>
+          </li>
+        {% endif %}
 
       </ul>
        <form class="d-flex" role="search" method="Post" action="{{ url_for('main.set_semester')}}">

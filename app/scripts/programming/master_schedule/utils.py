@@ -11,7 +11,7 @@ from app.scripts import gsheets_df
 
 from flask import session
 
-from app.scripts.utils import return_gsheet_url_by_title
+from app.scripts.utils.utils import return_gsheet_url_by_title
 
 gc = pygsheets.authorize(service_account_env_var="GDRIVE_API_CREDENTIALS")
 
@@ -67,7 +67,6 @@ def convert_list_of_names_to_coteachers(list_of_names):
         last_name = name.split()[0]
         output_list.append(last_name)
     return " ".join(output_list)
-
 
 output_cols = [
     "SchoolDBN",

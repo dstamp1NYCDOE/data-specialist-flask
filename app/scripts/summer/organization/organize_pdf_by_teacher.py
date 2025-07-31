@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 from zipfile import ZipFile
 
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 import datetime as dt
 import numpy as np
 import os

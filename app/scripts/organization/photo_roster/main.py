@@ -25,7 +25,7 @@ styles.add(
     )
 )
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 import pandas as pd
 import PyPDF2
 import re

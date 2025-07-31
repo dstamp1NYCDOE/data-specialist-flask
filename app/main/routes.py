@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 import app.main.forms as report_forms
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 import app.scripts.update_from_jupiter as update_from_jupiter
 
 files_df = utils.return_dataframe_of_files()

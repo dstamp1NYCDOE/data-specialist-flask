@@ -11,7 +11,7 @@ import numpy as np
 
 import datetime as dt
 from app.scripts import scripts, files_df, photos_df, gsheets_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from app.scripts.summer.programming import programming_utils
 

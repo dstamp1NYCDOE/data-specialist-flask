@@ -6,7 +6,7 @@ from io import BytesIO
 from flask import render_template, request, send_file
 
 from app.scripts import scripts, files_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from app.scripts.organization.gsheet_classlist.forms import UpdateClassListsOnGoogle
 from app.scripts.organization.gsheet_classlist import main as update_gsheet_classlist

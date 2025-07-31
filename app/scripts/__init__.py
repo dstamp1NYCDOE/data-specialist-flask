@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 scripts = Blueprint("scripts", __name__, template_folder="")
 files_df = utils.return_dataframe_of_files()
@@ -40,6 +40,7 @@ from app.scripts.organization.ms_teams import routes
 from app.scripts.organization.gather_teacher_input_per_student_spreadsheet import routes
 from app.scripts.organization.geocoding import routes
 from app.scripts.organization.ilog import routes
+from app.scripts.organization.ats_ocr import routes
 
 from app.scripts.pbis import routes
 from app.scripts.pbis.smartpass import routes
@@ -65,4 +66,5 @@ from app.scripts.summer.organization import routes
 from app.scripts.summer.programming import routes
 from app.scripts.summer.testing import routes
 from app.scripts.summer.testing.regents_organization import routes
+from app.scripts.summer.testing.exam_only_admits import routes
 from app.scripts.testing import routes

@@ -14,7 +14,7 @@ from zipfile import ZipFile
 from io import BytesIO
 from flask import current_app, session
 from dotenv import load_dotenv
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 import pygsheets
 from app.scripts import scripts, files_df, photos_df, gsheets_df
 
@@ -46,6 +46,9 @@ def main(form, request):
         "NoSendingSchool"
     )
 
+    ## keep on academic course; starts with E, M, S, H, or P
+    gradebook_df = gradebook_df[gradebook_df["Course"].str.startswith(("E", "M", "S", "H", "P"))]
+
     if sending_school != "ALL":
         gradebook_df = gradebook_df[gradebook_df["Sending school"] == sending_school]
 
@@ -62,7 +65,7 @@ def main(form, request):
         "school_name",
         "dbn",
     ]
-
+    gradebook_df['Period'] = gradebook_df['Period'].astype(int)
     gradebook_df = gradebook_df.sort_values(by=["Period"], ascending=True)
 
     gradebook_df["Teacher1"] = gradebook_df["Teacher1"].apply(lambda x: str(x)[0:10])
@@ -82,15 +85,15 @@ def main(form, request):
 
     dates_lst = [
         "7/10",
-        "7/11",
+        "7/14",
         "7/15",
         "7/16",
         "7/17",
-        "7/18",
+        "7/21",
         "7/22",
         "7/23",
         "7/24",
-        "7/25"
+        "7/28",
     ]
 
     attendance_output_cols = [

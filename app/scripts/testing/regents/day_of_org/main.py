@@ -7,7 +7,7 @@ from flask import render_template, request, send_file, session, current_app
 
 
 from app.scripts import scripts, files_df, gsheets_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 
 def return_exambook_for_index():

@@ -4,7 +4,7 @@ import os
 from io import BytesIO
 import datetime as dt
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df, photos_df, gsheets_df
 
 from flask import current_app, session, redirect, url_for
@@ -64,7 +64,16 @@ def process_smartpass_data(smartpass_df):
     smartpass_df["endtime"] = smartpass_df["datetime"] + pd.to_timedelta(
         smartpass_df["Duration (sec)"], unit="S"
     )
-    smartpass_df["class_period"] = smartpass_df.apply(return_class_period, axis=1)
+    print(session['term'])
+    if session['term'] == 7:
+        smartpass_df["class_period"] = smartpass_df.apply(
+            return_summer_class_period, axis=1
+        )
+    else:
+        ## return class period based on the time of the pass
+        ## if it is a Monday, then the first period is at 10:20
+        ## otherwise, the first period is at 8:55
+        smartpass_df["class_period"] = smartpass_df.apply(return_class_period, axis=1)
 
     return smartpass_df
 
@@ -328,6 +337,18 @@ def return_total_time_out_of_class_by_origin_by_period(smartpass_df):
 
     return pvt
 
+def return_summer_class_period(pass_row):
+    pass_datetime = pass_row["datetime"]
+    pass_time = pass_datetime.time()
+
+    period_endtimes = [
+        (1, dt.time(9, 48)),
+        (2, dt.time(11, 52)),
+        (3, dt.time(14, 27)),
+    ]
+    for period, period_endtime in period_endtimes:
+        if pass_time <= period_endtime:
+            return period        
 
 def return_class_period(pass_row):
     pass_datetime = pass_row["datetime"]

@@ -4,7 +4,7 @@ from scipy.optimize import linear_sum_assignment
 from collections import defaultdict, Counter
 import networkx as nx
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df
 from flask import session
 

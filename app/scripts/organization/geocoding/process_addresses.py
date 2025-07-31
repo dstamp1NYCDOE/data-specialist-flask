@@ -1,6 +1,6 @@
 from flask import current_app, session
 from app.scripts import scripts, files_df, photos_df, gsheets_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from geopy.geocoders import GoogleV3
 

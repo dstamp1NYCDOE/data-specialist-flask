@@ -3,7 +3,7 @@ from sklearn.linear_model import LinearRegression
 
 import random
 from app.scripts import scripts, files_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from itertools import pairwise
 
@@ -12,6 +12,10 @@ from flask import session
 
 def main(RATR_df):
     school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+    
+
     calendar_filename = "app/data/SchoolCalendar.xlsx"
     calendar_df = pd.read_excel(calendar_filename, sheet_name=f"{school_year}")
     calendar_df["Holiday?"] = calendar_df["Holiday?"].astype("bool")
@@ -19,8 +23,9 @@ def main(RATR_df):
     calendar_df = calendar_df[calendar_df["SchoolDay?"]]
 
     RATR_df = clean(RATR_df)
+    RATR_df["Attd"] = RATR_df["ATTD"].apply(lambda x: 1 if x == "A" else 0)
 
-    cr_3_07_filename = utils.return_most_recent_report(files_df, "3_07")
+    cr_3_07_filename = utils.return_most_recent_report_by_semester(files_df, "3_07", year_and_semester=year_and_semester)
     cr_3_07_df = utils.return_file_as_df(cr_3_07_filename)
     
     cr_3_07_df["year_in_hs"] = cr_3_07_df["GEC"].apply(
@@ -45,6 +50,7 @@ def main(RATR_df):
             RATR_dff = RATR_df
 
         student_attd_df = return_student_attd(RATR_dff)
+        student_rolling_attd_df = return_student_rolling_attd(RATR_dff)
         
 
         student_attd_by_month_df = return_student_pvt_by_subcolumn(RATR_dff, "Month")
@@ -95,8 +101,9 @@ def main(RATR_df):
         student_attd_correl_df = return_student_correlation_to_overall(RATR_df)
 
         output_df = output_df.merge(student_attd_df, on="StudentID")
-        
+        output_df = output_df.merge(student_rolling_attd_df, on="StudentID")
         output_df = output_df.merge(student_attd_correl_df, on="StudentID")
+        
         
         output_df = output_df.merge(month_df, on="StudentID")
         
@@ -422,3 +429,26 @@ def clean(RATR_df):
     RATR_df["Month"] = RATR_df["Date"].apply(lambda x: x.strftime("%Y-%m"))
     RATR_df["Term"] = RATR_df["Date"].apply(return_mp_from_date, args=(school_year,))
     return RATR_df
+
+
+def return_student_rolling_attd(df):
+    
+    df = df[['StudentID','Date','Attd']]
+    df = df.sort_values(by=['StudentID','Date'])
+
+    df['rolling_20d_avg'] = (df.groupby('StudentID')['Attd']
+                            .transform(lambda x: x.rolling(window=20, min_periods=1).mean()))
+
+    wide_df = df.groupby('StudentID').agg({
+            'rolling_20d_avg': list,           
+        }).reset_index()  
+
+    def return_sparkline_formula(lst):
+        lst = [str(x) for x in lst]
+        data_lst = ", ".join(lst)
+        data_lst = "{" + data_lst + "}"
+        options = '{"charttype","line";"ymin",0;"ymax",1;"color","red"}'
+        return f"=sparkline({data_lst},{options})"    
+    
+    wide_df["rolling_20d_avg"] = wide_df['rolling_20d_avg'].apply(return_sparkline_formula)    
+    return wide_df  

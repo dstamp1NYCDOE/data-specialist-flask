@@ -1,6 +1,6 @@
 from io import BytesIO
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import files_df
 
 from flask import session

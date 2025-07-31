@@ -4,7 +4,7 @@ import datetime as dt
 from flask import session, current_app
 import os
 
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 from app.scripts import scripts, files_df, photos_df
 
 

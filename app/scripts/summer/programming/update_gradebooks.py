@@ -11,7 +11,7 @@ import numpy as np
 
 import datetime as dt
 from app.scripts import scripts, files_df, photos_df, gsheets_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 from app.scripts.summer.programming import programming_utils
 
@@ -116,7 +116,10 @@ def main(form, request):
         "DailyGrade",
     ]
     for index, gradebook in summer_school_gradebooks_hub_df.iterrows():
+        
         gradebook_url = gradebook["Gradebook URL"]
+        if gradebook_url == '':
+            continue
         teacher_name = gradebook["TeacherName"]
         df = cr_1_01_df[cr_1_01_df["Teacher1"] == teacher_name]
         df = df[teacher_cols]

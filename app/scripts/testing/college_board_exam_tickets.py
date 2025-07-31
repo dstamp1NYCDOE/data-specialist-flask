@@ -27,7 +27,7 @@ from io import BytesIO
 from flask import session, current_app
 
 from app.scripts import scripts, files_df
-import app.scripts.utils as utils
+import app.scripts.utils.utils as utils
 
 styles = getSampleStyleSheet()
 
