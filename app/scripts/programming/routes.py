@@ -175,6 +175,8 @@ def return_processed_advanced_course_survey():
 from app.scripts.programming.requests.update_requests import main as update_requests
 @scripts.route("/programming/update_requests", methods=["GET", "POST"])
 def return_updated_requests():
+    f = update_requests()
+    return f.to_html()
     f,download_name =  update_requests()
     return send_file(
         f,

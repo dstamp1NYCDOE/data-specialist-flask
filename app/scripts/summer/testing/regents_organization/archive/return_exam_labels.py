@@ -45,38 +45,6 @@ def main(form, request):
     if term == 7:
         month = "August"
 
-    filename = utils.return_most_recent_report(files_df, "1_08")
-    cr_1_08_df = utils.return_file_as_df(filename)
-    cr_1_08_df = cr_1_08_df[cr_1_08_df["Status"] == True]
-    cr_1_08_df = cr_1_08_df.fillna({"Room": 202})
-    cr_1_08_df["Room"] = cr_1_08_df["Room"].astype(int)
-
-    cr_1_08_df["ExamAdministration"] = f"{month} {school_year+1}"
-
-    path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
-    regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    section_properties_df = pd.read_excel(
-        path, sheet_name="SummerSectionProperties"
-    )
-
-    cr_1_08_df = cr_1_08_df.merge(
-        regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
-    )
-    cr_1_08_df = cr_1_08_df.merge(section_properties_df[['Section','Type']], on=["Section"], how="left")
-
-    cr_1_08_df["Day"] = cr_1_08_df["Day"].dt.strftime("%A, %B %e")
-    cr_1_08_df["Exam Title"] = cr_1_08_df["ExamTitle"].apply(return_full_exam_title)
-    cr_1_08_df["Flag"] = "Student"
-
-    ## attach DBN
-    filename = utils.return_most_recent_report_by_semester(
-        files_df, "s_01", year_and_semester
-    )
-    cr_s_01_df = utils.return_file_as_df(filename)
-    cr_s_01_df = cr_s_01_df[["StudentID", "Sending school"]]
-
-    cr_1_08_df = cr_1_08_df.merge(cr_s_01_df, on=["StudentID"], how="left")
-    cr_1_08_df = cr_1_08_df.drop_duplicates(subset=['StudentID','Course'])
 
     cr_1_08_df = regents_organization_utils.return_processed_registrations()
 
@@ -92,73 +60,79 @@ def main(form, request):
         ["Day", "Time", "ExamTitle"]
     ):
         ## Part 1 Org Labels
-        for label_type in ["Part 1 Present", "Part 1 Absent"]:
-            bag_label = {
-                "Day": day,
-                "Time": time,
-                "Exam Title": exam_title,
-                "Room": "",
-                "Flag": label_type,
-                "NumOfStudents": "",
-                "ExamAdministration": f"{month} {school_year+1}",
-                "Sections_lst": students_df[["Section", "Room"]]
-                .drop_duplicates()
-                .sort_values(by="Room")
-                .to_dict("records"),
-            }
-            labels_to_make.append(bag_label)
+        # for label_type in ["Part 1 Present", "Part 1 Absent"]:
+        #     bag_label = {
+        #         "Day": day,
+        #         "Time": time,
+        #         "Exam Title": exam_title,
+        #         "Room": "",
+        #         "Flag": label_type,
+        #         "NumOfStudents": "",
+        #         "ExamAdministration": f"{month} {school_year+1}",
+        #         "Sections_lst": students_df[["Section", "Room"]]
+        #         .drop_duplicates()
+        #         .sort_values(by="Room")
+        #         .to_dict("records"),
+        #     }
+        #     labels_to_make.append(bag_label)
         ## DBN storage Labels by scoring section
-        for dbn, students_from_dbn_df in students_df.groupby("Sending school"):
-            dbn_label = {
-                "Day": day,
-                "Time": time,
-                "Exam Title": exam_title,
-                "Flag": "Storage Label",
-                "Sending School": dbn,
-                "NumOfStudents": len(students_from_dbn_df),
-                "ExamAdministration": f"{month} {school_year+1}",
-                "Sections_lst": students_from_dbn_df[["Section", "Room"]]
-                .drop_duplicates()
-                .sort_values(by="Section")
-                .to_dict("records"),
-            }
-            labels_to_make.append(dbn_label)
-        labels_to_make.extend(
-            return_blank_labels_needed_to_start_new_page(labels_to_make)
-        )
+        # for dbn, students_from_dbn_df in students_df.groupby("Sending school"):
+        #     dbn_label = {
+        #         "Day": day,
+        #         "Time": time,
+        #         "Exam Title": exam_title,
+        #         "Flag": "Storage Label",
+        #         "Sending School": dbn,
+        #         "NumOfStudents": len(students_from_dbn_df),
+        #         "ExamAdministration": f"{month} {school_year+1}",
+        #         "Sections_lst": students_from_dbn_df[["Section", "Room"]]
+        #         .drop_duplicates()
+        #         .sort_values(by="Section")
+        #         .to_dict("records"),
+        #     }
+        #     labels_to_make.append(dbn_label)
+        # labels_to_make.extend(
+        #     return_blank_labels_needed_to_start_new_page(labels_to_make)
+        # )
 
-        for i in range(1 * 30):
-            temp_dict = {
-                "Flag": "Student",
-                "LastName": "_________________",
-                "FirstName": "_____________",
-                "Course": "_______",
-                "Section": "____",
-                "ExamAdministration": f"{month} {school_year+1}",
-                "Exam Title": exam_title,
-                "Sending school": "________",
-                "StudentID": "________________",
-                "Room": "_____",
-            }
-            labels_to_make.append(temp_dict)
+        # for i in range(1 * 30):
+        #     temp_dict = {
+        #         "Flag": "Student",
+        #         "LastName": "_________________",
+        #         "FirstName": "_____________",
+        #         "Course": "_______",
+        #         "Section": "____",
+        #         "ExamAdministration": f"{month} {school_year+1}",
+        #         "Exam Title": exam_title,
+        #         "Sending school": "________",
+        #         "StudentID": "________________",
+        #         "Room": "_____",
+        #     }
+        #     labels_to_make.append(temp_dict)
 
-        for (hub_location,room), students_in_room_df in students_df.groupby(["hub_location","Room"]):
+        # for (hub_location,room), students_in_room_df in students_df.groupby(["hub_location","Room"]):
+        for (room,hub_location), students_in_room_df in students_df.groupby(["Room","hub_location"]):
             ## Bag and Proctor Labels
             for label_type in ["Bag Label", "Folder Label", "Proctor Label"]:
+                section_lst = students_in_room_df[["Section", "Type"]].drop_duplicates().sort_values(by="Section").to_dict("records")
                 bag_label = {
-                    "Day": day,
-                    "Time": time,
-                    "Exam Title": exam_title,
-                    "Room": room,
-                    "Flag": label_type,
-                    "NumOfStudents": len(students_in_room_df),
-                    "ExamAdministration": f"{month} {school_year+1}",
-                    "Sections_lst": students_in_room_df[["Section", "Type"]]
-                    .drop_duplicates()
-                    .sort_values(by="Section")
-                    .to_dict("records"),
-                }
-                labels_to_make.append(bag_label)
+                        "Day": day,
+                        "Time": time,
+                        "Exam Title": exam_title,
+                        "Room": room,
+                        "Flag": label_type,
+                        "NumOfStudents": len(students_in_room_df),
+                        "ExamAdministration": f"{month} {school_year+1}",
+                        "Sections_lst": section_lst,
+                    }
+                if len(section_lst) <= 4:
+                    labels_to_make.append(bag_label)
+                else:
+                    bag_label["Sections_lst"] = section_lst[:4]
+                    labels_to_make.append(bag_label)    
+                    bag_label["Sections_lst"] = section_lst[4:]
+                    bag_label["NumOfStudents"] = ""
+                    labels_to_make.append(bag_label)
 
             for section, students_in_section_df in students_in_room_df.groupby(
                 "Section"
@@ -185,7 +159,9 @@ def main(form, request):
             exam_code = students_in_room_df.iloc[0]["Course"]
             if exam_code[0] in ["M"]:
                 labels_to_make.extend(students_in_room_df.to_dict("records"))
-            elif exam_code[0:4] == "SXRK":
+            elif exam_code[0] in ["E"]:
+                labels_to_make.extend(students_in_room_df.to_dict("records"))                
+            elif exam_code[0:4] in ["SXRK","SXR2","SXR3"]:
                 labels_to_make.extend(students_in_room_df.to_dict("records"))
             else:
                 for student in students_in_room_df.to_dict("records"):
@@ -241,7 +217,9 @@ def return_full_exam_title(ExamTitle):
         "LE": "Living Environment",
         "ES": "Earth Science",
         "Chem": "Chemistry",
-        "Phys": "Physics",
+        "Phys": "Physics", 
+        "ESS": "Earth & Space Science",
+        "Bio": "Biology"
     }
     return exam_title_dict.get(ExamTitle)
 

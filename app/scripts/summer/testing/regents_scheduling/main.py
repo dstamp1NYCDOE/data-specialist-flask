@@ -28,9 +28,7 @@ def main(form, request):
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    regents_calendar_df["exam_num"] = (
-        regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
-    )
+
     section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
     rooms_list = [
         "AM1_ROOM",
@@ -96,13 +94,14 @@ def main(form, request):
     registrations_df = registrations_df.merge(
         testing_accommodations_df, on=["StudentID"], how="left"
     ).fillna(False)
-
+    
     exam_sequence_by_student_by_day_pvt = pd.pivot_table(
         registrations_df.sort_values(by=["Time", "exam_num"]),
         index=["StudentID", "Day"],
         values="exam_id",
         aggfunc=lambda x: "_".join(str(v) for v in x),
     )
+    
     exam_sequence_by_student_by_day_pvt["exam_id"] = (
         exam_sequence_by_student_by_day_pvt["exam_id"].apply(
             lambda x: x if x.count("_") > 0 else "_"
@@ -144,6 +143,20 @@ def main(form, request):
         .fillna("")
     )
 
+    # ## swap to exam id based on if it's _PM3
+    def resolve_exam3_conflict(registration_row):
+        exam_id = registration_row["exam_id"]
+        exam_time = registration_row["Time"]
+
+        if "_PM3" in exam_id:
+            return exam_id.replace("_PM3", "_PM2")
+        return exam_id
+
+    registrations_df["exam_id"] = registrations_df.apply(resolve_exam3_conflict,axis=1)
+
+
+
+
     ## attach conflict flags
 
     registrations_df["AM_Conflict?"] = registrations_df.apply(
@@ -164,7 +177,7 @@ def main(form, request):
         "double_time?",
         "read_aloud?",
         "scribe?",
-        "large_print?",
+        # "large_print?",
         "AM_Conflict?",
         "PM_Conflict?",
         "AM_PM_Conflict?",
@@ -176,6 +189,7 @@ def main(form, request):
     dff = dff.drop(
         columns=["AM1_ROOM", "AM2_ROOM", "PM1_ROOM", "PM2_ROOM", "AM3_ROOM", "PM3_ROOM"]
     )
+    
     df = registrations_df.merge(dff, on=merge_cols, how="left").fillna(1)
 
     ## apply special assignment rules
@@ -316,14 +330,16 @@ def set_final_section(student_row):
         return section
 
     if section == 19:
-        extra_space = 8
+        extra_space = 10
         index = student_row["index"] - extra_space
         if index <= 0:
             return section
     if section == 2:
-        extra_space = 5
+        extra_space = 10
         if exam_code in ["EXRCG", "HXRKG"]:
             extra_space = 15
+        if exam_code in ["EXRCG"]:
+            extra_space = 25            
         if exam_code in ["HXRCG"]:
             extra_space = 10
 

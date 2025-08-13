@@ -3,7 +3,7 @@ import pandas as pd
 import datetime as dt
 from io import BytesIO
 
-from flask import render_template, request, send_file, redirect, url_for, flash
+from flask import render_template, request, send_file, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 
 
@@ -42,6 +42,11 @@ def return_progress_towards_graduation_report(report_function):
     if request.method == 'GET':
         flash(f"Resubmit form to run {report_function}", category="warning")
         return redirect(url_for('scripts.return_progress_towards_graduation_reports'))
+    
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"    
+
     if report_function == 'analyze_progress_towards_graduation':
         data = {
             'form':request.form
@@ -51,9 +56,10 @@ def return_progress_towards_graduation_report(report_function):
         download_name = f"ProgressTowardsGraduationAnalysis.xlsx"
         return send_file(f, as_attachment=True, download_name=download_name)
     if report_function == 'analyze_regents_max':
-        from app.scripts.utils.stars import analyze_regents_max
-        cr_1_42_filename = utils.return_most_recent_report_by_semester(files_df, "1_42")
+        from app.scripts.utils_v2.stars import analyze_regents_max
+        cr_1_42_filename = utils.return_most_recent_report_by_semester(files_df, "1_42", year_and_semester=year_and_semester)
         cr_1_42_df = utils.return_file_as_df(cr_1_42_filename)
-        f, download_name = analyze_regents_max.main(cr_1_42_df)
+        f = analyze_regents_max.main(cr_1_42_df)
+        download_name = f"RegentsMaxAnalysis_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         return f.to_html()
         return send_file(f, as_attachment=True, download_name=download_name)

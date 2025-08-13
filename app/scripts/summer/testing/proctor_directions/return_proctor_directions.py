@@ -49,6 +49,7 @@ def main(form, request):
 
     rooms_df = exam_book_df.drop_duplicates(subset=["Course", "Room"])
 
+
     rooms_df["flowables"] = rooms_df.apply(
         return_proctor_direction_flowables.main, args=(exam_book_df,), axis=1
     )

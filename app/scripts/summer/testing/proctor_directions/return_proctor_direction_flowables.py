@@ -118,7 +118,7 @@ def main(section_row, exam_book_df):
             styles["Normal"],
         ),
         Paragraph(
-            "Standard testing rooms are 3 hours in length. Some extended time rooms may have a mix of 1.5x (4.5 hours) and 2x (6 hours). This info by student is on your testing room photo roster", styles["Normal"]
+            "Standard testing rooms are 3 hours in length. Some extended time rooms may have a mix of 1.5x (4.5 hours) and 2x (6 hours). ENL students receive at least 1.5x (4.5 hours). This info by student is on your testing room photo roster", styles["Normal"]
         ),        
         Paragraph(
             "Record the end time on the board and record here <b>End Time:__________</b>", styles["Normal"]
@@ -170,7 +170,7 @@ def main(section_row, exam_book_df):
                 styles["Normal"],
             ),
             Paragraph(
-                f"Return testing materials to Room 202 and bring the testing bag to Room {hub_location}",
+                f"Return testing materials and bag to Room {hub_location}. If no one is at the hub, return materials to room 202 (testing office).",
                 styles["Normal"],
             ),
         ],
@@ -317,13 +317,10 @@ liv_env_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Test Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile D: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Part 2 Test Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -355,17 +352,11 @@ earth_science_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Answer Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Used Part 2 Question Booklets (does not need to be alphabetized)",
-                styles["Normal"],
-            ),
-            Paragraph(
-                "Pile D: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile E: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Part 2 Answer Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
+            Paragraph("Pile C: Used Question Booklets (does not need to be alphabetized)", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -397,17 +388,11 @@ chemistry_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Answer Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Used Part 2 Question Booklets (does not need to be alphabetized)",
-                styles["Normal"],
-            ),
-            Paragraph(
-                "Pile D: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile E: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Part 2 Answer Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
+            Paragraph("Pile C: Used Question Booklets (does not need to be alphabetized)", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -441,17 +426,11 @@ physics_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Answer Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Used Part 2 Question Booklets (does not need to be alphabetized)",
-                styles["Normal"],
-            ),
-            Paragraph(
-                "Pile D: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile E: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Part 2 Answer Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
+            Paragraph("Pile C: Used Question Booklets (does not need to be alphabetized)", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -481,16 +460,10 @@ Global_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph(
-                "Pile B: Alphabetized Test Booklets with Essay Booklet Inside",
-                styles["Normal"],
-            ),
-            Paragraph(
-                "Pile C: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile D: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Test Booklets with Essay Booklet Inside", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -521,16 +494,10 @@ USH_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph(
-                "Pile B: Alphabetized Test Booklets with Essay Booklet Inside",
-                styles["Normal"],
-            ),
-            Paragraph(
-                "Pile C: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile D: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Test Booklets with Essay Booklet Inside", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -549,7 +516,7 @@ ELA_specific_info = [
     ),
     Paragraph(f"Labels", styles["Heading2"]),
     Paragraph(
-        f"Affix a label to the upper left corner of the test booklet", styles["Normal"]
+        f"Affix a label to the upper left corner of the Essay booklet only", styles["Normal"]
     ),
     Image(
         "app/scripts/summer/testing/proctor_directions/sticker_schematics/ELA_Sticker.png",
@@ -560,17 +527,11 @@ ELA_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Essay Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Used Question Booklets (does not need to be alphabetized)",
-                styles["Normal"],
-            ),
-            Paragraph(
-                "Pile D: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile E: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Essay Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
+            Paragraph("Pile C: Used question booklets", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -605,13 +566,10 @@ alg1_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Test Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile D: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Test Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -647,13 +605,10 @@ geo_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Test Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile D: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Test Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -688,13 +643,10 @@ trig_specific_info = [
     Paragraph(f"End of Exam Organization", styles["Heading2"]),
     ListFlowable(
         [
-            Paragraph("Pile A: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
-            Paragraph("Pile B: Alphabetized Part 2 Test Booklets", styles["Normal"]),
-            Paragraph(
-                "Pile C: Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor",
-                styles["Normal"],
-            ),
-            Paragraph("Pile D: Unused testing materials", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Part 1 Bubble Sheets", styles["Normal"]),
+            Paragraph("Section Folder: Alphabetized Absent Student Part 1 Bubble Sheets -- Bubbled Absent by Proctor.", styles["Normal"]),
+            Paragraph("Pile A: Alphabetized Test Booklets", styles["Normal"]),
+            Paragraph("Pile B: Unused testing materials", styles["Normal"]),
         ],
         bulletType="bullet",
         start="-",
@@ -713,4 +665,6 @@ exam_specific_info_dict = {
     "Algebra I": alg1_specific_info,
     "Geometry": geo_specific_info,
     "Algebra II/Trigonometry": trig_specific_info,
+    "Biology": liv_env_specific_info,
+    "Earth and Space Science": earth_science_specific_info,    
 }

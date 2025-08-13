@@ -16,6 +16,8 @@ exam_title_choices = [
     ("ES", "Earth Science"),
     ("Chem", "Chemistry"),
     ("Phys", "Physics"),
+    ("ESS", "Earth & Space Science"),
+    ("Bio", "Biology")
 ]
 
 
@@ -23,6 +25,13 @@ class RegentsOrganizationExamSelectForm(FlaskForm):
     exam_title = SelectField(
         "Select Exam",
         choices=exam_title_choices,
+        validators=[InputRequired()],
+    )
+
+class RegentsOrganizationAllExamsForm(FlaskForm):
+    exam_title = SelectField(
+        "Select Exam",
+        choices=[("ALL", "ALL"),],
         validators=[InputRequired()],
     )
 

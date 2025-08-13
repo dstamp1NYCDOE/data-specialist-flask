@@ -311,5 +311,7 @@ def return_full_exam_title(ExamTitle):
         "ES": "Earth Science",
         "Chem": "Chemistry",
         "Phys": "Physics",
+        "ESS": "Earth and Space Science",
+        "Bio": "Biology",
     }
     return exam_title_dict.get(ExamTitle)

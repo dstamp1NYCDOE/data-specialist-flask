@@ -48,6 +48,7 @@ INVALID_DBN_WARNING_IMG_PATH = "app/scripts/summer/testing/exam_only_admits/imag
 ETHNIC_STATUS_FIELD_IMG_PATH = "app/scripts/summer/testing/exam_only_admits/images/ETHNIC_STATUS_FIELD.png"
 RISING_9TH_GRADER_IMG_PATH = "app/scripts/summer/testing/exam_only_admits/images/RISING_9TH_GRADER.png"
 NON_DOE_CODE_REQUIRED_IMG_PATH = "app/scripts/summer/testing/exam_only_admits/images/NON_DOE_CODE_REQUIRED.png"
+ALREADY_SHARED_INSTRUCTION_WARNING_IMG_PATH = "app/scripts/summer/testing/exam_only_admits/images/ALREADY_SHARED_INSTRUCTION_WARNING.png"
 
 def traf_atsum(StudentID):
     status_dict = {'StudentID': StudentID,'Status':'Failure'}
@@ -71,11 +72,30 @@ def traf_atsum(StudentID):
         pyautogui.press("f5")
     except pyautogui.ImageNotFoundException:
         pass
+    
     try:
         pyautogui.locateOnScreen(TRAF_WARNING_IMG_PATH,grayscale=True,confidence=0.80,region=right_half)
-        print(f"Student {StudentID} is already admitted elsewhere.")
+
+        # transition to the SIAD screen
         pyautogui.press("f3")
-        status_dict['Status'] = 'Already Admitted Elsewhere'
+        pyautogui.write("15")
+        pyautogui.press("enter")
+        
+        try:
+            pyautogui.locateOnScreen(ALREADY_SHARED_INSTRUCTION_WARNING_IMG_PATH,grayscale=True,confidence=0.80,region=right_half)
+            print('hi')
+            status_dict['Status'] = 'Already Admitted via SIAD'
+            return status_dict
+        except pyautogui.ImageNotFoundException:
+            # type the current date as MMDDYY
+            current_date = time.strftime("%m%d%y")
+            pyautogui.write(current_date)
+            ## type '000' for the official class
+            pyautogui.write("000")
+            ## type f2 to save
+            pyautogui.press("f2")
+
+            status_dict['Status'] = 'Admitted via SIAD'
         return status_dict
     except pyautogui.ImageNotFoundException:
         pass
@@ -95,8 +115,16 @@ def traf_atsum(StudentID):
         return status_dict
     except pyautogui.ImageNotFoundException:
         pass
-
-
+    ## check if pending discharge
+    try:
+        PENDING_DISCHARGE_IMG_PATH = "app/scripts/summer/testing/exam_only_admits/images/PENDING_DISCHARGE.png"
+        pyautogui.locateOnScreen(PENDING_DISCHARGE_IMG_PATH,grayscale=True,confidence=0.80,region=right_half)
+        # pyautogui.type("5")
+        # pyautogui.press("enter")
+        status_dict['Status'] = 'Pending Discharge'
+        return status_dict
+    except pyautogui.ImageNotFoundException:
+        pass
 
     # Once student is found, able to be admitted, and not already transferred, proceed to admit student
     ## determine number of fields to tab through

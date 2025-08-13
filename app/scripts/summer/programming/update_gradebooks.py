@@ -42,6 +42,7 @@ def main(form, request):
         files_df, "1_01", year_and_semester
     )
     cr_1_01_df = utils.return_file_as_df(filename)
+    cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"].str.startswith(("E", "M", "S", "H", "P"))]
     cr_1_01_df = cr_1_01_df.merge(
         master_schedule_df, on=["Course", "Section"], how="left"
     )

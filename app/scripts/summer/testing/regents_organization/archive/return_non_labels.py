@@ -68,44 +68,8 @@ def main(form, request):
     if term == 7:
         month = "August"
 
-    filename = utils.return_most_recent_report(files_df, "1_08")
-    cr_1_08_df = utils.return_file_as_df(filename)
-    cr_1_08_df = cr_1_08_df[cr_1_08_df["Status"] == True]
-    cr_1_08_df = cr_1_08_df[cr_1_08_df["Section"] > 1]
 
-    cr_1_08_df = cr_1_08_df.merge(photos_df, on=["StudentID"], how="left")
-
-    cr_1_08_df["ExamAdministration"] = f"{month} {school_year+1}"
-
-    path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
-    regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    regents_calendar_df["exam_num"] = (
-        regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
-    )
-    section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
-
-    ## attach Exam Info
-    cr_1_08_df = cr_1_08_df.merge(
-        regents_calendar_df, left_on=["Course"], right_on=["CourseCode"], how="left"
-    )
-    cr_1_08_df["Day"] = cr_1_08_df["Day"].dt.strftime("%A, %B %e")
-    ## attach section properties
-    cr_1_08_df = cr_1_08_df.merge(
-        section_properties_df[["Section", "Type"]], on=["Section"], how="left"
-    )
-
-    cr_1_08_df["HubLocation"] = cr_1_08_df.apply(
-        regents_organization_utils.return_hub_location, axis=1
-    )
-
-    ## attach DBN
-    filename = utils.return_most_recent_report_by_semester(
-        files_df, "s_01", year_and_semester
-    )
-    cr_s_01_df = utils.return_file_as_df(filename)
-    cr_s_01_df = cr_s_01_df[["StudentID", "Sending school"]]
-
-    cr_1_08_df = cr_1_08_df.merge(cr_s_01_df, on=["StudentID"], how="left")
+    cr_1_08_df = regents_organization_utils.return_processed_registrations()
 
     if form.exam_title.data == "ALL":
         filename = f"{month}_{school_year+1}_Exam_NonLabels.pdf"
@@ -116,7 +80,7 @@ def main(form, request):
 
     flowables = []
 
-    cr_1_08_df = cr_1_08_df.drop_duplicates(subset=["StudentID", "Course"])
+    
     for (hub, day), students_by_hub_df in cr_1_08_df.groupby(["HubLocation", "Day"]):
 
         paragraph = Paragraph(

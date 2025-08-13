@@ -24,134 +24,76 @@ from app.scripts.summer.testing.regents_organization.forms import *
 def return_summer_school_regents_organization():
     forms = [
         (
-            "scripts.return_summer_school_regents_organization_labels",
-            "Return Mailing Labels by Exam",
+            "scripts.return_summer_school_regents_organization_bathroom_log",
+            "Return Bathroom Logs by Exam",
+            RegentsOrganizationAllExamsForm(),
+        ),
+        (
+            "scripts.return_summer_school_regents_organization_folder_labels",
+            "Return Folder Labels by Exam",
+            RegentsOrganizationExamSelectForm(),
+        ), 
+        (
+            "scripts.return_summer_school_regents_organization_folder_pages",
+            "Return Folder Pages by Exam Organized by Room",
             RegentsOrganizationExamSelectForm(),
         ),
         (
-            "scripts.return_summer_school_regents_organization_non_labels",
-            "Return Rosters by Exam",
+            "scripts.return_summer_school_regents_organization_exam_labels",
+            "Return Student Exam Labels by Exam organized by Room",
             RegentsOrganizationExamSelectForm(),
-        ),
-        (
-            "scripts.return_summer_school_proctor_directions",
-            "Return Proctor Directions by Hub",
-            RegentsOrganizationExamSelectForm(),
-        ),
-        (
-            "scripts.return_summer_school_student_exam_grid",
-            "Return Student Exam Grid by Day + HomeSchool",
-            RegentsOrganizationExamSelectForm(),
-        ),
+        ),         
     ]
     return render_template(
         "summer/templates/summer/testing/regents/organization_index.html", forms=forms
     )
 
 
-import app.scripts.summer.testing.regents_organization.return_exam_labels as return_exam_labels
+import app.scripts.summer.testing.regents_organization.scripts.return_bathroom_log as return_bathroom_log
+@scripts.route(
+    "/summer/testing/regents/organization/bathroom_log", methods=["GET", "POST"]
+)
+def return_summer_school_regents_organization_bathroom_log():
+    if request.method == "GET":
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
+    else:
+        form = RegentsOrganizationExamSelectForm(request.form)
+        f, download_name = return_bathroom_log.main(form, request)
+        return send_file(f, as_attachment=True, download_name=download_name)
+    
+import app.scripts.summer.testing.regents_organization.scripts.return_folder_labels as return_folder_labels
+@scripts.route(
+    "/summer/testing/regents/organization/folder_labels", methods=["GET", "POST"]
+)
+def return_summer_school_regents_organization_folder_labels():
+    if request.method == "GET":
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
+    else:
+        form = RegentsOrganizationExamSelectForm(request.form)
+        f, download_name = return_folder_labels.main(form, request)
+        return send_file(f, as_attachment=True, download_name=download_name)    
 
+import app.scripts.summer.testing.regents_organization.scripts.return_folder_pages as return_folder_pages
+@scripts.route(
+    "/summer/testing/regents/organization/folder_pages", methods=["GET", "POST"]
+)
+def return_summer_school_regents_organization_folder_pages():
+    if request.method == "GET":
+        return redirect(url_for("scripts.return_summer_school_regents_organization"))
+    else:
+        form = RegentsOrganizationExamSelectForm(request.form)
+        f, download_name = return_folder_pages.main(form, request)
+        return send_file(f, as_attachment=True, download_name=download_name)        
+    
 
-@scripts.route("/summer/testing/regents/organization/labels", methods=["GET", "POST"])
-def return_summer_school_regents_organization_labels():
+import app.scripts.summer.testing.regents_organization.scripts.return_exam_labels as return_exam_labels
+@scripts.route(
+    "/summer/testing/regents/organization/exam_labels", methods=["GET", "POST"]
+)
+def return_summer_school_regents_organization_exam_labels():
     if request.method == "GET":
         return redirect(url_for("scripts.return_summer_school_regents_organization"))
     else:
         form = RegentsOrganizationExamSelectForm(request.form)
         f, download_name = return_exam_labels.main(form, request)
-        return send_file(f, as_attachment=True, download_name=download_name)
-
-
-import app.scripts.summer.testing.regents_organization.return_non_labels as return_non_labels
-
-
-@scripts.route(
-    "/summer/testing/regents/organization/non_labels", methods=["GET", "POST"]
-)
-def return_summer_school_regents_organization_non_labels():
-    if request.method == "GET":
-        return redirect(url_for("scripts.return_summer_school_regents_organization"))
-    else:
-        form = RegentsOrganizationExamSelectForm(request.form)
-        f, download_name = return_non_labels.main(form, request)
-        return send_file(f, as_attachment=True, download_name=download_name)
-
-
-import app.scripts.summer.testing.regents_organization.return_student_exam_grid as return_student_exam_grid
-
-
-@scripts.route(
-    "/summer/testing/regents/organization/student_grid", methods=["GET", "POST"]
-)
-def return_summer_school_student_exam_grid():
-    if request.method == "GET":
-        return redirect(url_for("scripts.return_summer_school_regents_organization"))
-    else:
-        form = RegentsOrganizationExamSelectForm(request.form)
-        f, download_name = return_student_exam_grid.main(form, request)
-        return send_file(f, as_attachment=True, download_name=download_name)
-
-
-import app.scripts.summer.testing.proctor_directions.return_proctor_directions as return_proctor_directions
-
-
-@scripts.route(
-    "/summer/testing/regents/organization/proctor_directions", methods=["GET", "POST"]
-)
-def return_summer_school_proctor_directions():
-    if request.method == "GET":
-        return redirect(url_for("scripts.return_summer_school_regents_organization"))
-    else:
-        form = RegentsOrganizationExamSelectForm(request.form)
-        f, download_name = return_proctor_directions.main(form, request)
-        return send_file(f, as_attachment=True, download_name=download_name)
-
-
-import app.scripts.summer.testing.regents_organization.organize_es_practical as organize_es_practical
-
-
-@scripts.route(
-    "/summer/testing/regents/organization/es_practical", methods=["GET", "POST"]
-)
-def return_summer_school_earth_science_practical():
-    if request.method == "GET":
-        form = EarthSciencePracticalForm()
-        return render_template(
-            "/summer/templates/summer/testing/regents/es_practical_organization.html",
-            form=form,
-        )
-    else:
-        form = EarthSciencePracticalForm(request.form)
-        f, download_name = organize_es_practical.main(form, request)
-
-        return send_file(f, as_attachment=True, download_name=download_name)
-
-
-import app.scripts.summer.testing.regents_organization.proctor_roster as proctor_roster
-import app.scripts.summer.testing.regents_organization.proctor_timecard_stickers as proctor_timecard_stickers
-
-
-@scripts.route("/summer/testing/regents/organization/proctors", methods=["GET", "POST"])
-def return_summer_regents_proctor_documents():
-    if request.method == "GET":
-        form = ProctorOrganizationForm()
-        return render_template(
-            "/summer/templates/summer/testing/regents/proctor_organization.html",
-            form=form,
-        )
-    else:
-        form = ProctorOrganizationForm(request.form)
-        if form.report.data == "checkin_roster":
-            f, download_name = proctor_roster.main(form, request)
-        if form.report.data == "timecard_labels":
-            f, download_name = proctor_timecard_stickers.main(form, request)
-
-        return send_file(f, as_attachment=True, download_name=download_name)
-
-
-from app.scripts.summer.testing.regents_organization import exam_box_labels as regents_exam_box_labels
-@scripts.route("/summer/testing/regents/organization/box_labels", methods=["GET", "POST"])
-def return_summer_regents_box_labels():
-    form = ''
-    f, download_name = regents_exam_box_labels.main(form, request)
-    return send_file(f, as_attachment=True, download_name=download_name)
+        return send_file(f, as_attachment=True, download_name=download_name)      
