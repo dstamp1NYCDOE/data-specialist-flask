@@ -4,6 +4,7 @@ import app.scripts.programming.master_schedule.spreadsheet_ids as spreadsheet_id
 from flask import current_app, session
 
 import pandas as pd
+import numpy as np
 
 def main(dept_name):
     
@@ -26,16 +27,25 @@ def main(dept_name):
     df['course_str'] = df['course_str'].apply(lambda x: x + '|' * (3 - x.count('|')) if x.count('|') < 3 else x)
     # Split by | and expand into columns
     df[['course_code', 'TeacherID', 'Room', 'ReducedClassSize']] = df['course_str'].str.split('|', expand=True)
-    # Fill missing values in Capacity column with -1
+    ## if a particular course has a different class size number, update the capacity column. If the reducedclasssize column isn't there, keep what is in the capacity column (where it's a value from the spreadsheet or blank)
+    # Convert the reduced class size string to an integer unless it's not there, then leave as it is
+    df['ClassSize'] = df['ReducedClassSize'].str.extract('(\d+)').astype(float)
     df['ReducedClassSize'] = df['ReducedClassSize'].fillna(False)
     df['ReducedClassSize'] = df['ReducedClassSize'].apply(lambda x: True if x == '25' or x == '40' else False)
-    print(df)
-    ## use Default Room unless Speciic Room is provided
+    
+    ## use Default Room unless Specific Room is provided
     df['Room'] = df.apply(lambda x: x['Room'] if pd.notna(x['Room']) and x['Room'] != '' else x['DefaultRoom'], axis=1)
 
     ## attach course_info
+    courses_in_spreadsheet = course_info_df['course_code'].unique()
+    courses_not_in_spreadsheet = df[~df['course_code'].isin(courses_in_spreadsheet)]['course_code']
+
+
     df = df.merge(course_info_df, how='left', on='course_code')
+    
+    ### capacity reconcile
     df['Capacity'] = df['Capacity'].fillna('')
+    
 
 
     school_year = session["school_year"]
@@ -70,14 +80,45 @@ def main(dept_name):
     mapped_df['Mapped Section'] = ''
 
 
+
+
     ## duplicate for double period courses
     double_period_df = df[df['DoublePeriodFlag'] == True].copy()
     double_period_df['PeriodID'] = double_period_df['PeriodID'] +1
 
+    ## duplicate for QP sections
+    courses_to_not_add_QP = ['ESS81']
+    qp_sections = df[df['course_code'].str.len() == 5]
+    qp_sections = qp_sections[~qp_sections['course_code'].isin(courses_to_not_add_QP)]
+    qp_sections = qp_sections[qp_sections['course_code'].str[0].isin(['M','S','H','E'])]
+    qp_sections = qp_sections[qp_sections['department'].isin(['ela','math','science','ss'])]
+    qp_sections['Mapped Course'] = qp_sections['CourseCode']
+    qp_sections['Mapped Section'] = qp_sections['SectionID']
+    qp_sections['CourseCode'] = qp_sections['Mapped Course'] + 'QP'
+    qp_sections = qp_sections.drop(columns=['Capacity'])
+
+    qp_course_info_df = course_info_df[course_info_df['course_code'].str.endswith('QP')]
+    qp_course_info_df['Capacity'] = qp_course_info_df['Capacity'].apply(lambda x: 2 if x=='' else x)
+    qp_course_info_df = qp_course_info_df.rename(columns={'course_code':'CourseCode'})
+    qp_course_info_df = qp_course_info_df[['CourseCode','Capacity']] 
+    
+    qp_sections = qp_sections.merge(qp_course_info_df, how='left', on='CourseCode')
+    qp_sections['Remaining Capacity'] = qp_sections['Capacity']
+
+    ## special QP section
+    qp_sections_2 = df[df['course_code']=='EES81QQE']
+    qp_sections_2['Mapped Course'] = qp_sections_2['CourseCode']
+    qp_sections_2['Mapped Section'] = qp_sections_2['SectionID']
+    qp_sections_2['CourseCode'] = 'EES81QP'
+    qp_sections_2['Capacity'] = 10
+    qp_sections_2['Remaining Capacity'] = qp_sections_2['Capacity']
+
+    if len(qp_sections_2) > 0:
+        qp_sections = pd.concat([qp_sections, qp_sections_2], ignore_index=True)
 
     ## process_half_credit_courses
     half_credit_df = df[df['HalfCreditFlag'] == True].copy()
-    half_credit_mappings = ["10101","01010","00101"]
+    half_credit_mappings = ["10101","01010","00101",'11110','11111']
     half_credit_dfs = []
     for half_credit_mapping in half_credit_mappings:
         half_credit_temp_df = half_credit_df[half_credit_df['HalfCreditMapping'].str.contains(half_credit_mapping)].copy()
@@ -89,17 +130,20 @@ def main(dept_name):
         half_credit_df = pd.concat(half_credit_dfs, ignore_index=True)
     else:
         half_credit_df = pd.DataFrame(columns=df.columns)
-    
-    
-    df = pd.concat([df[df['HalfCreditFlag'] == False], mapped_df,double_period_df,half_credit_df], ignore_index=True)
 
-        
 
+    ## EE YL Sections
+    ee_yl_df = half_credit_df[half_credit_df['CourseCode'].isin(['GSS81'])].copy()
+    ee_yl_df['CourseCode'] = 'GLS11'
+    ee_yl_df['Cycle Day'] = ee_yl_df['Cycle Day'].apply(lambda x: '1' + x[1:])
+    ee_yl_df['Capacity'] = ee_yl_df['Remaining Capacity']= 5
+
+
+    df = pd.concat([df[df['HalfCreditFlag'] == False], mapped_df,double_period_df,half_credit_df,ee_yl_df,qp_sections], ignore_index=True)
 
     output_cols = [
         'SchoolDBN', 'SchoolYear', 'TermID', 'CourseCode', 'SectionID','Course Name',
         'PeriodID', 'Cycle Day', 'Capacity', 'Remaining Capacity','Gender','Teacher Name','Room','Mapped Course','Mapped Section',"Bell Schedule"]
-
 
     return df[output_cols].to_dict(orient='records')
 
@@ -108,8 +152,12 @@ def return_half_credit_section_number(course_row):
     TeacherID = course_row['TeacherID']
     period = course_row['period']
     cycle_day = course_row['Cycle Day']
-    
-    if course_row['CourseCode'][0] == 'P':
+    course_code = course_row['CourseCode']
+
+    if course_code[0:4] == "RQS4":
+        return 1
+
+    if course_code == 'P':
         section = int(period) * 10 + (2*int(TeacherID)-1) + int(cycle_day[-1])
         return int(str(section)[::-1])
     else:
@@ -135,24 +183,40 @@ def return_cycle(course_row):
 
 def return_course_code(course_row):
     course_code = course_row['course_code']
+    
     if course_code[0] in ["P", "G", "A", "B", "T", "Z"]:
         return course_code
     if len(course_code) == 7:
         if course_code[5] != 5 and course_code[-2:] == "QA":
             return course_code[0:5]
+    if course_code[-1] == 'A':
+        return course_code[0:-1]
     return course_code
 
 def return_section_number(course_row):
     TeacherID = course_row['TeacherID']
     period = course_row['period']
     course_code = course_row['course_code']
-    section = int(TeacherID) * 10 + int(period)
+
+    if course_code[0:4] == "RQS4":
+        return 1
+
+    try:
+        section = int(TeacherID) * 10 + int(period)
+    except ValueError:
+        print(f"Invalid TeacherID '{TeacherID}' for course '{course_code}'")
+        return ''
     return section
 
 
 def return_capacity(course_row):
     capacity = course_row['Capacity']
     reduced_class_size_flag = course_row['ReducedClassSize']
+    class_size = course_row['ClassSize']
+
+    if class_size > 0 and not reduced_class_size_flag:
+        return int(class_size)
+
     if capacity != '' and not reduced_class_size_flag:
         return int(capacity)
     course_code = course_row['course_code']
@@ -171,7 +235,7 @@ def return_capacity(course_row):
         if course_code[0:2] == 'PP':
             GENED = 40
     else:
-        GENED = 34
+        GENED = 32
         ICT_SWD = 12
         ICT_GENED = 22
         SC = 15
@@ -184,5 +248,5 @@ def return_capacity(course_row):
         return ICT_GENED
     if course_code[-2:] == "QM":
         return SC
-
+    
     return GENED

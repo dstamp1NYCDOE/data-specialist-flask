@@ -116,7 +116,12 @@ def return_organization_reports():
             "report_title": "Return Student Staff Assignment",
             "report_function": "scripts.return_student_staff_assignment",
             "report_description": "",
-        },                        
+        },  
+        {
+            "report_title": "Return Fall Semester First Day Groups",
+            "report_function": "scripts.return_fall_semester_first_day_groups",
+            "report_description": "Run this report to generate groups for the first day of school. Organizes students by year in high school, whether they are new to the high school of fashion industries, their credit accumulation, and their age.",
+        },
         {
             "report_title": "iLog Automation Form",
             "report_function": "scripts.return_ilog_automation",
@@ -370,6 +375,19 @@ from app.scripts.organization.student_staff_assignment import main as student_st
 def return_student_staff_assignment():
 
     f, download_name = student_staff_assignment.main()
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )
+
+
+from app.scripts.organization.fall_semester_first_day_groups import main as fall_semester_first_day_groups
+@scripts.route("/organization/fall_semester_first_day_groups", methods=["GET", "POST"])
+def return_fall_semester_first_day_groups():
+
+    f, download_name = fall_semester_first_day_groups.main()
 
     return send_file(
         f,

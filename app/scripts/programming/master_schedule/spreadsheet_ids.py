@@ -1,7 +1,7 @@
 year = 2023
 
 SchoolDBN = '02M600'
-SchoolYear = '2024-2025'
+SchoolYear = '2025-2026'
 TermID = '1'
 
 

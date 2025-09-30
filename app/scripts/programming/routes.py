@@ -7,6 +7,7 @@ from flask import render_template, request, send_file, session, url_for, redirec
 from app.scripts import scripts, files_df
 import app.scripts.utils as utils
 
+from flask_wtf import FlaskForm
 from app.scripts.programming.forms import (
     StudentVettingForm,
     InitialRequestForm,
@@ -28,6 +29,7 @@ def return_programming_reports():
     upload_advanced_coursework_surveys = UploadAdvancedCourseSurveyForm()
     ap_offer_letter_form = AP_offers_Letter_Form()
     jupiter_master_schedule_form = JupiterMasterScheduleForm()
+    generic_form = FlaskForm()
     form_cards = [
         {
             "Title": "Student Vetting",
@@ -106,7 +108,13 @@ def return_programming_reports():
             "Description": "Return Spring Programming Scripts",
             "form": jupiter_master_schedule_form,
             "route": "scripts.return_programming_spring_scripts",
-        },        
+        },   
+        {
+            "Title": "Update Request Post Summer",
+            "Description": "Run this script after summer school grades + regents to update student requests. Will generate requests for students without any (may exclude CTE) and update based on progress towards graduation based on Spring and Summer terms.",
+            "form": generic_form,
+            "route": "scripts.return_updated_requests_post_summer",
+        },
     ]
 
 

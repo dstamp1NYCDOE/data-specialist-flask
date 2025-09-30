@@ -119,20 +119,22 @@ def return_capacity(course_code, period):
         return 30
     if course_code == "ZLYL":
         ZLYL_dict = {
-            4: 13 * 4,
-            5: 13 * 2,
-            6: 13 * 2,
-            7: 13 * 2,
+            4: 20,
+            5: 20,
+            6: 20,
+            7: 20,
         }
         return ZLYL_dict.get(period)
+    if course_code == "ZL9":
+        return 55
     if course_code[0:2] == "ZL":
         return 10
     if course_code == "ZA":
         return 999
     if course_code == "ZM1":
-        return 800
+        return 999
     if course_code == "ZM18":
-        return 500
+        return 999
     if course_code == "ZM29":
         return 1200
     else:
@@ -173,8 +175,8 @@ def return_hard_coded():
             "SectionID": "1",
             "PeriodID": "0",
             "Cycle Day": "11111",
-            "Capacity": 8,
-            "Remaining Capacity": 8,
+            "Capacity": 0,
+            "Remaining Capacity": 0,
             "Teacher Name": "MCGUINNESS B",
             "Room": "329",
         },

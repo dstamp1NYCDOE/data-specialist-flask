@@ -64,7 +64,7 @@ def return_processed_registrations():
 
     home_lang_codes_df = utils.return_home_lang_code_table(files_df)
     cr_1_08_df = cr_1_08_df.merge(home_lang_codes_df[['HomeLang','HomeLangCode']], on=["HomeLangCode"], how="left")
-    print(cr_1_08_df)
+    
 
     ## attach DBN
     filename = utils.return_most_recent_report_by_semester(
@@ -83,7 +83,7 @@ def return_processed_registrations():
 
 def return_exam_book():
     cr_1_08_df = return_processed_registrations()
-    cols = ['Course','Section','Day','Date','Time','Exam Title','ExamTitle','hub_location','Type','Room']
+    cols = ['Course','Section','Day','Date','Time','Exam Title','exam_num','ExamTitle','hub_location','Type','Room']
     exam_book_df = pd.pivot_table(
         cr_1_08_df,
         index=cols,
@@ -92,8 +92,203 @@ def return_exam_book():
     )
     exam_book_df.columns = ['NumOfStudents']
     exam_book_df = exam_book_df.reset_index()
-
+    exam_book_df['accommodations_bubbles'] = exam_book_df['Type'].apply(return_accommodations_bubbles)
     return exam_book_df
+
+def return_proctor_df():
+    exam_book_df = return_exam_book()
+ ## keep relevant columns
+    cols = [
+        "Day",
+        "Time",
+        "ExamTitle",
+        "exam_num",
+        "Course",
+        "Section",
+        "Type",
+        "Room",
+        "NumOfStudents",
+        "hub_location",
+    ]
+    exam_book_df = exam_book_df[cols]
+    TESTING_TIME_COL_NAME = "TestingTime (hours)"
+    exam_book_df[TESTING_TIME_COL_NAME] = exam_book_df["Type"].apply(
+        return_max_section_time
+    )
+
+    ## determine_proctor_needs
+    PROCTOR_NUM = 0
+    PROCTOR_LST = []
+    for (day, room), sections_in_room_df in exam_book_df[
+        exam_book_df["Section"] > 1
+    ].groupby(["Day", "Room"]):
+        section_type_lst = sections_in_room_df["Type"].to_list()
+        time_lst = sections_in_room_df["Time"].unique().tolist()
+
+        is_conflict_room = return_is_conflict_room(section_type_lst)
+
+        is_am_room = return_if_am_room(time_lst)
+        is_pm_room = return_if_pm_room(time_lst)
+        is_am_pm_room = return_if_am_pm_room(time_lst)
+
+        testing_sessions_df = sections_in_room_df.drop_duplicates(
+            subset=["Time", "ExamTitle", TESTING_TIME_COL_NAME]
+        )
+
+        hours_in_room = testing_sessions_df[TESTING_TIME_COL_NAME].sum()
+
+        if hours_in_room < 8:
+            PROCTOR_NUM += 1
+            proctor_type = "_".join(time_lst)
+            proctor_dict = {
+                "Day": day,
+                "ProctorAssignment": PROCTOR_NUM,
+                "Room": room,
+                "proctor_type": proctor_type,
+                "HoursOfAssignment": hours_in_room,
+            }
+            PROCTOR_LST.append(proctor_dict)
+        else:
+            for proctor_type in ["AM", "PM"]:
+                PROCTOR_NUM += 1
+                if hours_in_room < 6:
+                    hours_in_room = 4.5
+                else:
+                    hours_in_room = 6
+
+                proctor_dict = {
+                    "Day": day,
+                    "ProctorAssignment": PROCTOR_NUM,
+                    "Room": room,
+                    "proctor_type": proctor_type,
+                    "HoursOfAssignment": hours_in_room,
+                }
+                PROCTOR_LST.append(proctor_dict)
+
+    proctor_df = pd.DataFrame(PROCTOR_LST)
+
+
+    proctor_df = exam_book_df.merge(
+        proctor_df, on=["Day", "Room"], how="left"
+    ).sort_values(by=["Day", "ExamTitle", "Room"])
+
+    proctors_pvt_tbl = (
+        pd.pivot_table(
+            proctor_df,
+            index=["Day", "Time", "Room", "ExamTitle", "hub_location"],
+            values=["NumOfStudents", "Type", "Section"],
+            aggfunc={
+                "Section": combine_lst_of_section_properties,
+                "Type": combine_lst_of_section_properties,
+                "NumOfStudents": "sum",
+            },
+        )
+        .reset_index()
+        .sort_values(by=["Day", "Room", "Time"])
+    )    
+
+ ## generate hub pvt
+    hub_pvt = pd.pivot_table(
+        exam_book_df,
+        index=["Day", "Time", "hub_location", "ExamTitle"],
+        # columns=["ExamTitle"],
+        values="NumOfStudents",
+        aggfunc="sum",
+    ).fillna(0)
+
+    f = BytesIO()
+    writer = pd.ExcelWriter(f)
+    proctors_pvt_tbl.to_excel(writer, sheet_name="ProctorNumbers")
+    hub_pvt.to_excel(writer, sheet_name="HubNumbers")
+    ##folders_to_prep_per_hub
+    for hub_location, hub_sections_list in exam_book_df.groupby(["hub_location"]):
+        sheet_name = f"Hub{hub_location[0]}"
+        hub_rooms_pvt = pd.pivot_table(
+            hub_sections_list,
+            index=["Day", "Time", "Room", "ExamTitle"],
+            values=["NumOfStudents", "Type", "Section"],
+            aggfunc={
+                "Section": combine_lst_of_section_properties,
+                "Type": combine_lst_of_section_properties,
+                "NumOfStudents": "sum",
+            },
+        )
+        hub_rooms_pvt.to_excel(writer, sheet_name=sheet_name)
+
+    ## day/time/hub sections_list
+    for (day, time, hub_location), hub_sections_list in exam_book_df.groupby(
+        ["Day", "Time", "hub_location"]
+    ):
+        sheet_name = f"{day}_{time}_Hub{hub_location}".replace("/", "-")
+        hub_rooms_pvt = pd.pivot_table(
+            hub_sections_list,
+            index=["Room", "ExamTitle"],
+            values=["NumOfStudents", "Type", "Section"],
+            aggfunc={
+                "Section": combine_lst_of_section_properties,
+                "Type": combine_lst_of_section_properties,
+                "NumOfStudents": "sum",
+            },
+        )
+        hub_rooms_pvt.to_excel(writer, sheet_name=sheet_name)
+
+    writer.close()
+    f.seek(0)
+
+    filename = f"Proctors_and_Exambook.xlsx"
+    return f, filename
+
+def return_max_section_time(section_type):
+    default_time = 3
+    if "enl" in section_type:
+        default_time = 4.5
+    if "2x" in section_type:
+        default_time = 6
+    if "1.5x" in section_type:
+        default_time = 4.5
+    return default_time    
+
+def return_if_am_room(time_lst):
+    if "AM" in time_lst:
+        return True
+    return False
+
+
+def return_if_pm_room(time_lst):
+    if "PM" in time_lst:
+        return True
+    return False
+
+
+def return_if_am_pm_room(time_lst):
+    return return_if_am_room(time_lst) and return_if_pm_room(time_lst)
+
+
+def return_is_conflict_room(section_type_lst):
+    for section_type in section_type_lst:
+        if "conflict" in section_type:
+            return True
+    return False
+
+def combine_lst_of_section_properties(x):
+    x = x.unique()
+    output = "\n".join(str(v) for v in x)
+    return output
+
+def return_accommodations_bubbles(section_type):
+    bubbles = []
+    if '1.5x' in section_type or '2x' in section_type:
+        bubbles.append('1')
+    if 'scribe' in section_type:
+        bubbles.append('4')        
+    if 'QR' in section_type:
+        bubbles.append('10')
+    if 'enl' in section_type:
+        bubbles.append('12')
+        bubbles.append('13')
+        bubbles.append('14')
+
+    return ', '.join(bubbles)
 
 def return_full_exam_title(ExamTitle):
 

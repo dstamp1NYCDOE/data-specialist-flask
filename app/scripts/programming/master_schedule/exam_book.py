@@ -23,14 +23,13 @@ def main():
 
     path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
     regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    regents_calendar_df["exam_num"] = (
-        regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
-    )
 
     section_properties_df = pd.read_excel(
         path, sheet_name="SectionProperties"
     ).dropna(subset='Type')
+
     section_properties_df = section_properties_df.fillna(202)
+
 
     output_lst = []
     for _,exam in regents_calendar_df.iterrows():
@@ -44,7 +43,7 @@ def main():
                 output_lst.append(course_row)
 
     
-    return output_lst
+    return pd.DataFrame(output_lst)
 
 
 
@@ -56,8 +55,9 @@ def return_course_row(exam, section, school_year_str,TermID):
 
     exam_num =  exam['exam_num']
     exam_time =  exam['Time']
-    room_col = f'{exam_time}-Exam{exam_num}'
+    room_col = f'{exam_time}{int(exam_num)}_ROOM'
 
+    exam_room = '202'
     exam_room = f"{int(section[room_col])}"
 
     cycle_day = "'00000"
@@ -65,6 +65,7 @@ def return_course_row(exam, section, school_year_str,TermID):
     exam_type = section['Type']
     if exam_type == 'LAB INELIGIBLE':
         teacher_name = 'LAB INELIGIBLE'
+        exam_room = '619'
     else:
         teacher_name = 'EXAM'
 

@@ -170,7 +170,7 @@ def main(section_row, exam_book_df):
                 styles["Normal"],
             ),
             Paragraph(
-                f"Return testing materials and bag to Room {hub_location}. If no one is at the hub, return materials to room 202 (testing office).",
+                f"Return testing materials and bag to the Testing Office (Room 202) to have your materials reviewed. Return to the testing hub for further instruction.",
                 styles["Normal"],
             ),
         ],

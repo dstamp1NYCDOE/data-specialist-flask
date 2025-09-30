@@ -8,7 +8,7 @@ from flask import current_app, session
 
 from app.scripts.summer.testing.regents_organization import utils as regents_organization_utils
 
-def main(form, request):
+def main():
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
@@ -28,11 +28,12 @@ def main(form, request):
 
     for day, registrations_by_day in cr_1_08_df.groupby('Day'):
         day_pvt = pd.pivot_table(registrations_by_day,index=['LastName','FirstName','StudentID','Sending school'], columns=['Time','ExamTitle'],values='Room',aggfunc='max').fillna('').reset_index()
-        day_pvt.to_excel(writer, sheet_name=day.split(',')[1])
+        sheet_name = day.replace('/','-')
+        day_pvt.to_excel(writer, sheet_name=sheet_name)
 
     for (hub_location, day, time), registrations_by_hub_by_day_by_time in cr_1_08_df.groupby(['hub_location','Day','Time']):
         day_pvt = pd.pivot_table(registrations_by_hub_by_day_by_time,index=['LastName','FirstName','StudentID','Sending school'], columns=['Time','ExamTitle'],values='Room',aggfunc='max').fillna('').reset_index()
-        sheet_name = f"{hub_location} - {day.split(',')[1]} - {time}"
+        sheet_name = f"{hub_location} - {day.replace('/','-')} - {time}"
         day_pvt.to_excel(writer, sheet_name=sheet_name)
 
 

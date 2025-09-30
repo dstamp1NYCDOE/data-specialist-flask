@@ -58,3 +58,10 @@ class ProctorOrganizationForm(FlaskForm):
         ],
         validators=[InputRequired()],
     )
+
+
+class ProcessCombinedREDSForm(FlaskForm):
+    reds_filename = FileField(
+        "Upload Combined REDS Spreadsheet",
+        validators=[FileRequired()],
+    )   

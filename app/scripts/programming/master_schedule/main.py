@@ -29,7 +29,7 @@ def main():
     output_list = []
 
     # for academic_dept in ['Spanish','Math','Science','SS','ELA']:
-    for academic_dept in ['PE','ELA','CTE','Science']:
+    for academic_dept in ['PE','ELA','CTE','Science','Math','Spanish','SS','EE']:
         output_list.extend(process_course_list.main(academic_dept))
         # output_list.extend(process_half_credit.main(academic_dept))
 
@@ -49,6 +49,14 @@ def main():
     output_df = pd.DataFrame(output_list)
     output_df = output_df.sort_values(by=['CourseCode','SectionID'])
 
+    ## hard coded in spreadsheet
+    just_append_df = utils.return_master_schedule_by_sheet('JustAppend')
+    just_append_df['Cycle Day'] = just_append_df['Cycle Day'].apply(lambda x: '01010' if x==1010 else x)
+    just_append_df['Cycle Day'] = just_append_df['Cycle Day'].apply(lambda x: '00101' if x==101 else x)
+    just_append_df['Cycle Day'] = just_append_df['Cycle Day'].apply(lambda x: f"'{x}")
+
+    
+    
     ## Combine Teacher Names
     output_df['Teacher Name'] = output_df.apply(utils.return_combined_teacher_names, args=(output_df,), axis=1)
     output_df['Course name'] = ''
@@ -56,10 +64,15 @@ def main():
     ## convert Cycle Day to string with a leading '
     output_df['Cycle Day'] = output_df['Cycle Day'].apply(lambda x: f"'{x}")
 
+    ## combine output with just append
+    output_df = pd.concat([output_df[output_cols], just_append_df], ignore_index=True, sort=False)
+
+    ## Append Exam Book
+    output_df = pd.concat([output_df, exam_book.main()], ignore_index=True)
+
     spreadsheet_id = return_gsheet_url_by_title(gsheets_df, 'master_schedule_planning', year_and_semester=year_and_semester)
     gsheet_utils.set_df_to_dataframe(
         output_df[output_cols], spreadsheet_id, sheet="Output")
 
     return output_df[output_cols].to_html()
 
-    

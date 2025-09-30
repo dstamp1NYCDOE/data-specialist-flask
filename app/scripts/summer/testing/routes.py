@@ -90,6 +90,16 @@ def return_summer_school_testing_routes():
             "report_function": "scripts.return_summer_exam_only_spreadsheet",
             "report_description": "Upload last year's exam only spreadsheet, combined 3_07, and the latest 4_01 to generate exam only signup spreadsheet",
         },
+        {
+            "report_title": "Analyse REDS for Errors",
+            "report_function": "scripts.return_reds_error_check",
+            "report_description": "Upload a REDS file and identify errors and steps on how to correct them",
+        }, 
+        {
+            "report_title": "Return REDS by School",
+            "report_function": "scripts.return_summer_school_reds_by_school",
+            "report_description": "Upload a REDS file and identify errors and steps on how to correct them",
+        },                
     ]
     return render_template(
         "summer/templates/summer/testing/index.html", reports=reports
@@ -382,3 +392,17 @@ def return_summer_exam_only_spreadsheet():
         download_name = f"RegentsRegistration_Summer_{school_year+1}.xlsx"
 
         return send_file(f, as_attachment=True, download_name=download_name)
+
+from app.scripts.summer.testing.regents_organization.scripts.return_reds_by_school import main as return_reds_by_school
+from app.scripts.summer.testing.regents_organization.forms import ProcessCombinedREDSForm
+@scripts.route(
+    "/summer/testing/regents/organization/return_reds_by_school", methods=["GET", "POST"]
+)
+def return_summer_school_reds_by_school():
+    if request.method == "GET":
+        form = ProcessCombinedREDSForm()
+        return render_template('summer/templates/summer/testing/regents/reds_by_school_form.html', form=form)
+    else:
+        form = ProcessCombinedREDSForm(request.form)
+        f, download_name = return_reds_by_school(form,request)
+        return send_file(f, as_attachment=True, download_name=download_name)  

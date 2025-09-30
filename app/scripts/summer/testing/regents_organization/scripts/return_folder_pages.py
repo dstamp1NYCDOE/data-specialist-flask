@@ -212,6 +212,7 @@ def return_balanced_grid_of_class_list(class_list_df,header_info):
         
         # Add continuation header for subsequent chunks
         if chunk_start > 0 and header_info:
+            flowables.append(PageBreak())
             cont_header = Paragraph(
                 f"{header_info['exam_title']} | {header_info['course']} | Room {header_info['room']} | {header_info['day']} - {header_info['time']} (continued)",
                 styles["Heading2"]

@@ -488,3 +488,4 @@ def return_special_appeal_candidates():
 
 
 from app.scripts.testing.regents.day_of_org import routes
+from app.scripts.testing.regents.scoring import routes

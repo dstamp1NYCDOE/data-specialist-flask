@@ -50,12 +50,12 @@ def return_combined_teacher_names(master_row, output_df):
     Teacher_Name = master_row["Teacher Name"]
 
     mask = (
-        (output_df["PeriodID"] == PeriodID)
-        & (output_df["SectionID"] == SectionID)
-        & (output_df["Room"] == Room)
+        (output_df["PeriodID"].astype(str) == str(PeriodID))
+        & (output_df["SectionID"].astype(str) == str(SectionID))
+        & (output_df["Room"].astype(str) == str(Room))
     )
-
     list_of_teachers = output_df[mask]["Teacher Name"].unique()
+    
     if len(list_of_teachers) == 2:
         return convert_list_of_names_to_coteachers(list_of_teachers)
     return Teacher_Name

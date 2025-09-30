@@ -6,54 +6,26 @@ import os
 from io import BytesIO
 from flask import current_app, session
 
+import app.scripts.summer.testing.regents_organization.utils as regents_organization_utils
 
 def main():
     school_year = session["school_year"]
     term = session["term"]
     year_and_semester = f"{school_year}-{term}"
 
-    filename = utils.return_most_recent_report(files_df, "MasterSchedule")
-    master_schedule_df = utils.return_file_as_df(filename)
-    master_schedule_df = master_schedule_df.rename(
-        columns={"Course Code": "CourseCode"}
-    )
-    master_schedule_df = master_schedule_df[master_schedule_df["Active"] > 0]
-
-    path = os.path.join(current_app.root_path, f"data/RegentsCalendar.xlsx")
-    regents_calendar_df = pd.read_excel(path, sheet_name=f"{school_year}-{term}")
-    regents_calendar_df["exam_num"] = (
-        regents_calendar_df.groupby(["Day", "Time"])["CourseCode"].cumcount() + 1
-    )
-    section_properties_df = pd.read_excel(path, sheet_name="SummerSectionProperties")
-
-    ## keep only regemts exams offered
-    exams_offered = regents_calendar_df["CourseCode"]
-    exam_book_df = master_schedule_df[
-        master_schedule_df["CourseCode"].isin(exams_offered)
-    ]
-
-    ## attach Exam Info
-    exam_book_df = exam_book_df.merge(
-        regents_calendar_df, on=["CourseCode"], how="left"
-    )
-    ## attach section properties
-    exam_book_df = exam_book_df.merge(
-        section_properties_df[["Section", "Type"]], on=["Section"], how="left"
-    )
-    ## insert hub location
-    exam_book_df["HubLocation"] = exam_book_df.apply(return_hub_location, axis=1)
+    exam_book_df = regents_organization_utils.return_exam_book()
     ## keep relevant columns
     cols = [
         "Day",
         "Time",
         "ExamTitle",
         "exam_num",
-        "CourseCode",
+        "Course",
         "Section",
         "Type",
         "Room",
-        "Active",
-        "HubLocation",
+        "NumOfStudents",
+        "hub_location",
     ]
     exam_book_df = exam_book_df[cols]
     TESTING_TIME_COL_NAME = "TestingTime (hours)"
@@ -112,6 +84,9 @@ def main():
 
     proctor_df = pd.DataFrame(PROCTOR_LST)
 
+    print(proctor_df)
+    print(exam_book_df)
+
     proctor_df = exam_book_df.merge(
         proctor_df, on=["Day", "Room"], how="left"
     ).sort_values(by=["Day", "ExamTitle", "Room"])
@@ -119,12 +94,12 @@ def main():
     proctors_pvt_tbl = (
         pd.pivot_table(
             proctor_df,
-            index=["Day", "Time", "Room", "ExamTitle", "HubLocation"],
-            values=["Active", "Type", "Section"],
+            index=["Day", "Time", "Room", "ExamTitle", "hub_location"],
+            values=["NumOfStudents", "Type", "Section"],
             aggfunc={
                 "Section": combine_lst_of_section_properties,
                 "Type": combine_lst_of_section_properties,
-                "Active": "sum",
+                "NumOfStudents": "sum",
             },
         )
         .reset_index()
@@ -134,45 +109,47 @@ def main():
     ## generate hub pvt
     hub_pvt = pd.pivot_table(
         exam_book_df,
-        index=["Day", "Time", "HubLocation", "ExamTitle"],
+        index=["Day", "Time", "hub_location", "ExamTitle"],
         # columns=["ExamTitle"],
-        values="Active",
+        values="NumOfStudents",
         aggfunc="sum",
     ).fillna(0)
 
     f = BytesIO()
     writer = pd.ExcelWriter(f)
+    exam_book_df.to_excel(writer, sheet_name="ExamBook", index=False)
+    
     proctors_pvt_tbl.to_excel(writer, sheet_name="ProctorNumbers")
     hub_pvt.to_excel(writer, sheet_name="HubNumbers")
     ##folders_to_prep_per_hub
-    for hub_location, hub_sections_list in exam_book_df.groupby(["HubLocation"]):
+    for hub_location, hub_sections_list in exam_book_df.groupby(["hub_location"]):
         sheet_name = f"Hub{hub_location[0]}"
         hub_rooms_pvt = pd.pivot_table(
             hub_sections_list,
             index=["Day", "Time", "Room", "ExamTitle"],
-            values=["Active", "Type", "Section"],
+            values=["NumOfStudents", "Type", "Section"],
             aggfunc={
                 "Section": combine_lst_of_section_properties,
                 "Type": combine_lst_of_section_properties,
-                "Active": "sum",
+                "NumOfStudents": "sum",
             },
         )
         hub_rooms_pvt.to_excel(writer, sheet_name=sheet_name)
 
     ## day/time/hub sections_list
     for (day, time, hub_location), hub_sections_list in exam_book_df.groupby(
-        ["Day", "Time", "HubLocation"]
+        ["Day", "Time", "hub_location"]
     ):
-        day_str = day.strftime("%m-%d")
+        day_str = day.replace("/", "-")
         sheet_name = f"{day_str}_{time}_Hub{hub_location}"
         hub_rooms_pvt = pd.pivot_table(
             hub_sections_list,
             index=["Room", "ExamTitle"],
-            values=["Active", "Type", "Section"],
+            values=["NumOfStudents", "Type", "Section"],
             aggfunc={
                 "Section": combine_lst_of_section_properties,
                 "Type": combine_lst_of_section_properties,
-                "Active": "sum",
+                "NumOfStudents": "sum",
             },
         )
         hub_rooms_pvt.to_excel(writer, sheet_name=sheet_name)

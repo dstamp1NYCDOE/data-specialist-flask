@@ -11,6 +11,7 @@ import math
 ## 1_01
 ## MasterSchedule
 ## 6_42
+## 4_23
 
 
 def main(request, form):
@@ -24,7 +25,7 @@ def main(request, form):
         course_row = course_rows.iloc[0]
         temp_dict = {
             "JupiterCourse": course_row["JupiterCourse"],
-            "JupiterCourseName": course_row["Course name"],
+            "JupiterCourseName": course_row["Course Name"],
             "JupiterSection": course_row["JupiterSection"],
             "JupiterPeriods": ",".join(course_rows["JupiterPeriod"].unique().tolist()),
             "JupiterTab": return_jupiter_tab(
@@ -44,9 +45,9 @@ def main(request, form):
 
 def return_student_jupiter(request, form):
     jupiter_df = return_jupiter_schedule(request, form)
-    jupiter_df = jupiter_df.drop_duplicates(subset=["CourseCode", "SectionID"])
+    jupiter_df = jupiter_df.drop_duplicates(subset=["Course Code", "Section"])
     jupiter_df = jupiter_df[
-        ["CourseCode", "SectionID", "JupiterCourse", "JupiterSection"]
+        ["Course Code", "Section", "JupiterCourse", "JupiterSection"]
     ]
 
     school_year = session["school_year"]
@@ -62,7 +63,7 @@ def return_student_jupiter(request, form):
     jupiter_output_df = student_schedules_df.merge(
         jupiter_df,
         left_on=["Course", "Section"],
-        right_on=["CourseCode", "SectionID"],
+        right_on=["Course Code", "Section"],
         how="inner",
     )
     jupiter_output_df = jupiter_output_df[
@@ -95,10 +96,10 @@ def return_jupiter_schedule(request=None, form=None):
 
     master_schedule_df = master_schedule_df.merge(
         co_teachers_df,
-        left_on=["CourseCode", "SectionID"],
+        left_on=["Course Code", "Section"],
         right_on=["Course", "Section"],
     ).fillna("")
-    print(master_schedule_df)
+
 
     filename = utils.return_most_recent_report_by_semester(
         files_df, "6_42", year_and_semester=year_and_semester
@@ -118,14 +119,17 @@ def return_jupiter_schedule(request=None, form=None):
     )
 
     # drop classes with no students
-    df = df[df["Capacity"] != df["Remaining Capacity"]]
-    df = df[df["Capacity"] != 0]
+    # df = df[df["Capacity"] != df["Remaining Capacity"]]
+    df = df[df["Active"] != 0]
     # drop classes with no meeting days
-    df = df[df["Cycle Day"] != 0]
+    df = df[df["Days"] != '-----']
     # drop classes attached to "staff"
     df = df[df["Teacher Name"] != "STAFF"]
     # drop classes outside of 1-10
-    df = df[df["PeriodID"] < 11]
+    df = df[df["PD"] < 11]
+    ## drop bussing dummy code
+    df = df[df["Course Code"] != "ZMBUS"]
+    
     # attach period
     df["JupiterPeriod"] = df.apply(return_jupiter_period, axis=1)
     # return jupiter_course
@@ -144,16 +148,16 @@ def return_jupiter_tab(jupiter_periods):
 
 
 def return_jupiter_course(row):
-    course_code = row["CourseCode"]
+    course_code = row["Course Code"]
     if len(course_code) <= 5:
         return course_code
     if course_code[0] in ["A", "T", "B", "Z"]:
         return course_code
     if course_code[5] in ["T", "X", "H"]:
         return course_code
-    if course_code[0:7] in ["EES87QC", "EES87QD", "EES87QF", "EES87QG"]:
+    if course_code[0:7] in ["EES87QC", "EES87QD", "EES87QF", "EES87QG","EES87QW"]:
         return course_code[0:7]
-    if course_code[0:7] in ["EES88QC", "EES88QD", "EES88QF", "EES88QG"]:
+    if course_code[0:7] in ["EES88QC", "EES88QD", "EES88QF", "EES88QG","EES88QW"]:
         return course_code[0:7]
     if course_code[0:7] in [
         "MQS11QF",
@@ -161,18 +165,8 @@ def return_jupiter_course(row):
     ]:
         return course_code[0:7]
 
-    if course_code[0:5] in ["PPS85", "PPS87", "PPS86", "PPS88"]:
-        days = row["Cycle Day"]
-        pe_dict_by_cycle = {
-            1010: "PPS85",
-            1010: "PPS86",
-            10101: "PPS87",
-            10101: "PPS88",
-        }
-        return pe_dict_by_cycle.get(days)
-
-    if "QQ" in course_code:
-        return course_code
+    # if "QQ" in course_code:
+    #     return course_code
     if course_code[5] == "Q":
         return course_code[0:5]
 
@@ -180,8 +174,8 @@ def return_jupiter_course(row):
 
 
 def return_jupiter_section(row):
-    course_code = row["CourseCode"]
-    section_id = row["SectionID"]
+    course_code = row["Course Code"]
+    section_id = row["Section"]
 
     if "QM" in course_code:
         return f"{int(section_id)}-QM"
@@ -190,23 +184,12 @@ def return_jupiter_section(row):
 
 
 def return_jupiter_period(row):
-    period = row["PeriodID"]
-    days = row["Cycle Day"]
+    period = row["PD"]
+    days = row["Days"]
 
-    if days == 11111:
+    if days == 'MTWRF':
         return str(period)
 
-    cycle_dict = {
-        1010: ["T", "R"],
-        101: ["W", "F"],
-        10000: ["M"],
-        10101: ["M", "W", "F"],
-        10100: [
-            "M",
-            "W",
-        ],
-    }
-
-    period_lst = [f"{day}{period}" for day in cycle_dict.get(days, [])]
+    period_lst = [f"{day}{period}" for day in days if day !='-']
 
     return ", ".join(period_lst)

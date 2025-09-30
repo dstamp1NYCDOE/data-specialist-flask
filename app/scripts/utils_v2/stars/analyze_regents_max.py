@@ -14,6 +14,8 @@ def main(cr_1_42_df):
         utils.return_year_in_hs, args=(school_year,)
     )
 
+    # cr_1_42_df = cr_1_42_df[cr_1_42_df['StudentID']==237191515]
+
     df = cr_1_42_df.set_index("StudentID")
     df1 = pd.DataFrame(
         {
@@ -26,10 +28,13 @@ def main(cr_1_42_df):
     df1 = df1.dropna()
     df1["Mark"] = df1["Score"].str[6:]
 
+    
+
     cr_1_30_filename = utils.return_most_recent_report(files_df, "1_30")
     cr_1_30_df = utils.return_file_as_df(cr_1_30_filename)
     df1 = df1.merge(cr_1_30_df[["Mark", "NumericEquivalent"]], on=["Mark"], how="left")
 
+    
     df1["passed?"] = df1.apply(determine_if_passed, axis=1)
     df1["CourseCode"] = df1["Score"].str[0:4]
     df1["ContentArea"] = df1["CourseCode"].str[0]
@@ -45,6 +50,8 @@ def main(cr_1_42_df):
     passed_pivot.columns = [f"{col} Passed?" for col in passed_pivot.columns]
     passed_pivot = passed_pivot.reset_index()
 
+    print(passed_pivot)
+
     ## pivot df1 on StudentID and Exam column returning the NumericEquivalent column as the value. Append "NumericEquivalent" to each of the columns in the pivot table before resetting the index
     numeric_equiv_pivot = df1.pivot_table(
         index="StudentID",
@@ -54,7 +61,7 @@ def main(cr_1_42_df):
     )
     numeric_equiv_pivot.columns = [f"{col} NumericEquivalent" for col in numeric_equiv_pivot.columns]
     numeric_equiv_pivot = numeric_equiv_pivot.reset_index()
-    print(numeric_equiv_pivot)
+    
 
     ## for each content area, determine how many passing exam scores (passed? == True). The content area is the first character in the CourseCode column
     content_area_passed_pivot = df1[df1['passed?']].pivot_table(
@@ -64,8 +71,19 @@ def main(cr_1_42_df):
 
         aggfunc="sum",
     ).fillna(0)
+    print(content_area_passed_pivot)
+
+    content_area_passed_pivot = df1.pivot_table(
+        index="StudentID",
+        columns="ContentArea",
+        values="passed?",
+        aggfunc="sum",
+    ).fillna(0)
+    print(content_area_passed_pivot)
+
     content_area_passed_pivot.columns = [f"{col} Passed Count" for col in content_area_passed_pivot.columns]
     content_area_passed_pivot = content_area_passed_pivot.reset_index()
+
     content_area_passed_pivot['met_regents_grad_requirements'] = content_area_passed_pivot.apply(
         determine_if_met_regents_grad_requirements, axis=1
     )
@@ -78,6 +96,7 @@ def main(cr_1_42_df):
     dataframes = [passed_pivot, numeric_equiv_pivot, content_area_passed_pivot]  # your list of dataframes
     merged_df = reduce(lambda left, right: pd.merge(left, right, on='StudentID'), dataframes)
 
+    
     return merged_df
 
 def determine_if_met_regents_grad_requirements(content_area_passed_pivot_row):

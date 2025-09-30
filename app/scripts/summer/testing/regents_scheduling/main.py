@@ -299,6 +299,8 @@ def main(form, request):
     ).to_excel(writer, sheet_name="IEP_CHECK", index=False)
 
     students_df.to_excel(writer, sheet_name="StudentsDataDump", index=False)
+
+    testing_accommodations_df.to_excel(writer, sheet_name="All", index=False)
     writer.close()
     f.seek(0)
 
@@ -511,13 +513,13 @@ def return_student_accommodations(request, form):
     df = df.drop_duplicates(subset=["StudentID"])
 
     ## what has exams registered for
-    exam_cols = ["Alg1", "ELA", "Alg2", "Global", "Chem", "ES", "USH", "Geo", "LE"]
+    # exam_cols = ["Alg1", "ELA", "Alg2", "Global", "Chem", "ES", "USH", "Geo", "LE"]
 
-    df = df[df[exam_cols].any(axis=1)]
+    # df = df[df[exam_cols].any(axis=1)]
 
-    pvt_tbl = pd.pivot_table(
-        df, index="school_name", values="StudentID", aggfunc="count"
-    ).reset_index()
+    # pvt_tbl = pd.pivot_table(
+    #     df, index="school_name", values="StudentID", aggfunc="count"
+    # ).reset_index()
 
     cols = [
         "StudentID",
@@ -543,7 +545,7 @@ def return_student_accommodations(request, form):
 
     df[boolean_cols] = df[boolean_cols].astype(bool)
     df["SWD?"] = df.apply(check_SWD_flag, axis=1)
-
+    df = df[df["SWD?"] == True]
     return df[cols]
 
 
