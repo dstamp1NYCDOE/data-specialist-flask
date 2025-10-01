@@ -94,16 +94,18 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     teachers_df = student_schedules_df[
         ["Course", "Section", "Teacher1", "Teacher2"]
     ].drop_duplicates()
+    print(master_schedule_df)
+    print(teachers_df)
     df = master_schedule_df.merge(
         teachers_df,
-        left_on=["CourseCode", "SectionID"],
+        left_on=["Course Code", "Section"],
         right_on=["Course", "Section"],
         how="left",
     )
     # drop classes with no students
-    df = df[df["Capacity"] > 0]
+    df = df[df["Active"] > 0]
     # drop classes with no meeting days
-    df = df[df["Cycle Day"] != 0]
+    df = df[df["Days"] != '-----']
     # drop classes attached to "staff"
     df = df[df["Teacher Name"] != "STAFF"]
     ## attach delegated nickname
@@ -117,7 +119,7 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     df_cols = [
         "Course",
         "Section",
-        "Course name",
+        "Course Name",
         "DelegatedNickName1",
         "DelegatedNickName2",
     ]
@@ -136,7 +138,7 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
     attd_teacher_dict = {
         "3": "OVALLES P",
         "2": "GUILLOT T",
-        "1": "AMEH M",
+        "5": "AMEH M",
         "4": "CABRERA A",
     }
     RETAINED_ATTD_TEACHER = "AMEH M"
@@ -172,6 +174,25 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
         cr_1_49_df, on=["StudentID"], how="left"
     ).fillna("")
 
+    def sub_in_attendance_teacher(row):
+        if row["attd_teacher"] != "GUILLOT T":
+            return row["attd_teacher"]
+        elif row["Counselor"] == "WEISS JESSICA":
+            return "OVALLES P"
+        elif row["Counselor"] == "MARIN BETH":
+            return "CABRERA A"        
+        elif row["Counselor"] == "SAN JORGE AMELIA":
+            if row['StudentID'] % 2 == 0:
+                return "CABRERA A"             
+            else:
+                return "OVALLES P"
+        else:
+            return row["attd_teacher"]
+        
+    student_schedules_df["attd_teacher"] = student_schedules_df.apply(
+        lambda x: sub_in_attendance_teacher(x), axis=1
+    )
+
     student_schedules_df = student_schedules_df[
         student_schedules_df["DelegatedNickName1"] != ""
     ]
@@ -183,7 +204,7 @@ def return_rdal_report(consecutive_absences_df, rdal_df, class_date):
         "ParentLN",
         "ParentFN",
         "Phone",
-        "Course name",
+        "Course Name",
         "Course",
         "Section",
         "Period",

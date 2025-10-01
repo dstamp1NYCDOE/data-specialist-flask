@@ -42,11 +42,11 @@ def return_attendance_reports():
         #     "report_function": "scripts.return_confirmation_sheets_cover_page",
         #     "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
         # },
-        # {
-        #     "report_title": "RDAL Analysis",
-        #     "report_function": "scripts.return_rdal_analysis_spreadsheet",
-        #     "report_description": "Analysis daily RDAL file and return file to upload",
-        # },
+        {
+            "report_title": "RDAL Analysis",
+            "report_function": "scripts.return_rdal_analysis_spreadsheet",
+            "report_description": "Analysis daily RDAL file and return file to upload",
+        },
         {
             "report_title": "Student Attendance Tiers",
             "report_function": "scripts.return_attd_tiers_from_RATR",
