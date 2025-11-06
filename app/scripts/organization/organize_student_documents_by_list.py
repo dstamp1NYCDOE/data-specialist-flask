@@ -79,7 +79,7 @@ def main(form, request):
         sort_by_df = sort_by_df.astype(str)
         group_by = ["TeacherName", "Room"]
         sort_by_df["sort_by_col"] = (
-            sort_by_df["TeacherName"] + " - Room" + sort_by_df["Room"]
+            sort_by_df["TeacherName"] + " - " + sort_by_df["Room"]
         )
 
         student_sort_by_cols = ["LastName", "FirstName"]

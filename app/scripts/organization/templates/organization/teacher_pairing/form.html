@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+    <li class="breadcrumb-item active"><a href="#">Return Labels</a></li>
+  </ol>
+</nav>
+
+<form action="{{url_for('scripts.family_engagement_pd_pairings')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
+    <label for="teacher_emails">Teacher Emails (one per line):</label>
+    <textarea name="teacher_emails" rows="10" cols="50"></textarea>
+    <button type="submit">Generate Pairings</button>
+</form>
+
+</div>
+{% endblock %}

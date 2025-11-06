@@ -21,7 +21,6 @@ def return_rdal_analysis_spreadsheet():
             form=form,
         )
     else:
-        print(request.form)
         form = RDALUploadForm(request.form)
         f, download_name = rdal_analysis.main(form, request)
 

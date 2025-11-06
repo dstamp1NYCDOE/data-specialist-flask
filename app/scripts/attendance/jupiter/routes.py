@@ -17,6 +17,11 @@ from app.scripts.attendance.jupiter import process as process_jupiter_data
 def return_jupiter2_attd_reports():
     reports = [
         {
+            "report_title": "Return Enhanced Jupiter Analysis",
+            "report_function": "scripts.return_enhanced_jupiter_analysis",
+            "report_description": "Return Enhanced Jupiter Analysis",
+        },
+        {
             "report_title": "Return Processed Jupiter File",
             "report_function": "scripts.return_jupiter2_processed_data",
             "report_description": "Return processed Jupiter file",
@@ -51,7 +56,12 @@ def return_jupiter2_attd_reports():
             "report_title": "Return Potential Cut Notifications for Teacher By Day",
             "report_function": "scripts.return_potential_cut_notifications_in_jupiter",
             "report_description": "Send a Teams message to teachers with which students may have cut their class on a particular day",
-        },                
+        },     
+         {
+            "report_title": "Most Improved Attendance Awards",
+            "report_function": "scripts.return_most_improved_attendance_awards",
+            "report_description": "Generate awards for most improved students by course section based on attendance and punctuality trends",
+        },           
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -191,3 +201,56 @@ def return_potential_cut_notifications_in_jupiter():
         form = AttendanceDayOfForm(request.form)
         return jupiter_attd_cuts_by_day.main(form, request)    
 
+from app.scripts.attendance.jupiter.main import main as enhanced_jupiter_analysis 
+@scripts.route("/attendance/enhanced_jupiter_analysis")
+def return_enhanced_jupiter_analysis():
+    f, download_name = enhanced_jupiter_analysis()
+
+    return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )    
+
+from app.scripts.attendance.jupiter.forms import MostImprovedAttendanceForm
+from app.scripts.attendance.jupiter import most_improved_analysis
+@scripts.route("/attendance/jupiter2/most_improved_awards", methods=["GET", "POST"])
+def return_most_improved_attendance_awards():
+    """Generate Most Improved Attendance Awards for selected month"""
+    if request.method == "GET":
+        form = MostImprovedAttendanceForm()
+        return render_template(
+            "attendance/templates/attendance/most_improved/form.html",
+            form=form,
+        )
+    else:
+        form = MostImprovedAttendanceForm(request.form)
+        
+        if form.validate_on_submit():
+            award_month = form.award_month.data
+            f, download_name = most_improved_analysis.main(award_month)
+            return send_file(
+                f,
+                as_attachment=True,
+                download_name=download_name,
+            )            
+            try:
+                f, download_name = most_improved_analysis.main(award_month)
+                return send_file(
+                    f,
+                    as_attachment=True,
+                    download_name=download_name,
+                )
+            except Exception as e:
+                print(e)
+                # If there's an error, render the form again with an error message
+                form.award_month.errors.append(f"Error generating report: {str(e)}")
+                return render_template(
+                    "attendance/templates/attendance/most_improved/form.html",
+                    form=form,
+                )
+        else:
+            return render_template(
+                "attendance/templates/attendance/most_improved/form.html",
+                form=form,
+            )

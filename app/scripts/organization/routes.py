@@ -126,7 +126,12 @@ def return_organization_reports():
             "report_title": "iLog Automation Form",
             "report_function": "scripts.return_ilog_automation",
             "report_description": "",
-        },         
+        },  
+        {
+            "report_title": "Teacher Pairings for Family Engagement PD",
+            "report_function": "scripts.family_engagement_pd_pairings",
+            "report_description": "",
+        },                 
     ]
     return render_template(
         "organization/templates/organization/index.html", reports=reports
@@ -394,3 +399,20 @@ def return_fall_semester_first_day_groups():
         as_attachment=True,
         download_name=download_name,
     )
+
+from app.scripts.organization.teacher_pairing.main import main as teacher_pairing_main
+from flask import Response
+@scripts.route('organization/family_engagement_pd_pairings', methods=['GET', 'POST'])
+def family_engagement_pd_pairings():
+    if request.method == 'POST':
+        csv_data = teacher_pairing_main(request, request.form)
+        
+        # Return as downloadable CSV
+        return Response(
+            csv_data,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={'Content-Disposition': 'attachment;filename=teacher_pairings.xlsx'}
+        )
+    
+    # GET request - show the form
+    return render_template('organization/templates/organization/teacher_pairing/form.html')

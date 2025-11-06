@@ -37,11 +37,16 @@ def return_attendance_reports():
         #     "report_function": "scripts.return_RATR_analysis",
         #     "report_description": "Analyze student daily attendance using ATS report RATR",
         # },
-        # {
-        #     "report_title": "Confirmation Sheets Cover Page Generator",
-        #     "report_function": "scripts.return_confirmation_sheets_cover_page",
-        #     "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
-        # },
+        {
+            "report_title": "Confirmation Sheets Cover Page Generator",
+            "report_function": "scripts.return_confirmation_sheets_cover_page",
+            "report_description": "Upload RDSC files and connects to Jupiter to generate Confirmation Sheet Cover Pages",
+        },
+        {
+            "report_title": "Daily Attendance Analysis Jupiter",
+            "report_function": "scripts.return_jupiter_daily_attd_report",
+            "report_description": "Analysis daily Jupiter file and return file to upload",
+        },
         {
             "report_title": "RDAL Analysis",
             "report_function": "scripts.return_rdal_analysis_spreadsheet",
@@ -87,16 +92,16 @@ def return_attendance_reports():
         #     "report_function": "scripts.return_cut_analysis",
         #     "report_description": "Return Cut Analysis",
         # },
-        # {
-        #     "report_title": "Cut Analysis reports",
-        #     "report_function": "scripts.return_jupiter_cut_analysis_reports",
-        #     "report_description": "Return Cut Analysis reports based on Jupiter",
-        # },
-        # {
-        #     "report_title": "Late Analysis Reports",
-        #     "report_function": "scripts.return_jupiter_late_analysis_reports",
-        #     "report_description": "Return Late Analysis reports based on Jupiter",
-        # },
+        {
+            "report_title": "Cut Analysis reports",
+            "report_function": "scripts.return_jupiter_cut_analysis_reports",
+            "report_description": "Return Cut Analysis reports based on Jupiter",
+        },
+        {
+            "report_title": "Late Analysis Reports",
+            "report_function": "scripts.return_jupiter_late_analysis_reports",
+            "report_description": "Return Late Analysis reports based on Jupiter",
+        },
         {
             "report_title": "Historical Jupiter Attd Reports",
             "report_function": "scripts.return_historical_jupiter_attd_reports",
@@ -397,6 +402,26 @@ def return_cut_analysis():
     f, download_name = cut_analysis.main()
 
     return send_file(
+        f,
+        as_attachment=True,
+        download_name=download_name,
+    )
+
+
+from app.scripts.attendance.daily_attd_report.forms import DailyAttendanceReportForm
+from app.scripts.attendance.daily_attd_report import main as process_daily_attd_report
+@scripts.route("/attendance/jupiter/daily_attd_report", methods=["GET", "POST"])
+def return_jupiter_daily_attd_report():
+    if request.method == 'GET':
+        form = DailyAttendanceReportForm()
+        return render_template(
+            "attendance/templates/attendance/daily_attd_report/daily_attd_report_form.html",
+            form=form,
+        )
+    else:
+        form = DailyAttendanceReportForm(request.form)
+        f, download_name = process_daily_attd_report.main(form, request)
+        return send_file(
         f,
         as_attachment=True,
         download_name=download_name,

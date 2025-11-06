@@ -29,7 +29,7 @@ def main():
     section_properties_df = pd.read_excel(path, sheet_name="SectionProperties").fillna('')
     regents_courses = regents_calendar_df['CourseCode']
 
-    filename = utils.return_most_recent_report_by_semester(files_df, "1_01", year_and_semester=year_and_semester)
+    filename = utils.return_most_recent_report_by_semester(files_df, "1_08", year_and_semester=year_and_semester)
     cr_1_01_df = utils.return_file_as_df(filename)
     cr_1_08_df = cr_1_01_df[['StudentID', 'LastName', 'FirstName', 'Section', 'Course','Room']]
     current_registrations_df = cr_1_08_df[cr_1_08_df['Course'].isin(regents_courses)]

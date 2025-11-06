@@ -112,11 +112,13 @@ def return_jupiter_schedule(request=None, form=None):
     )
 
     df = master_schedule_df.merge(
-        teacher_reference_df[["Teacher", f"TeacherName"]],
+        teacher_reference_df[["Teacher", f"TeacherName",'Mail']],
         left_on=[f"Teacher Name"],
         right_on=[f"Teacher"],
         how="left",
     )
+
+    print(df[df['Course']=='MRS21'])
 
     # drop classes with no students
     # df = df[df["Capacity"] != df["Remaining Capacity"]]
@@ -164,6 +166,9 @@ def return_jupiter_course(row):
         "MQS11QG",
     ]:
         return course_code[0:7]
+    
+    if  course_code in ['EQS11QQI']:
+        return course_code
 
     # if "QQ" in course_code:
     #     return course_code

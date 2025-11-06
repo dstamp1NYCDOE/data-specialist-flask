@@ -157,7 +157,6 @@ def upload_files():
         else:
             report_name = filename.split(".")[0]
             extension = filename.split(".")[1]
-        print(report_name)
         if "CustomReport" in report_name:
             report_name = report_name[13:-5]
             filename = f"{report_name}.{extension}"

@@ -20,7 +20,7 @@ def main(request, form):
     student_schedules_df = utils.return_file_as_df(filename).fillna("")
     student_schedules_df = student_schedules_df[student_schedules_df['Course'].str[0].isin(['E','M','H','S'])]
     student_schedules_df = student_schedules_df[student_schedules_df['Course'].str[-2:] != 'QL']
-    course_to_exclude = ['EQS11QQI','EQS11']
+    course_to_exclude = ['EQS11QQI','EQS11','EES81QQE']
     student_schedules_df = student_schedules_df[~student_schedules_df['Course'].isin(course_to_exclude)]
     student_schedules_df['CourseCode'] = student_schedules_df.apply(return_jupiter_course, axis=1)
 
@@ -54,10 +54,12 @@ def return_jupiter_course(row):
         return course_code
     if course_code[5] in ["T", "X", "H"]:
         return course_code
-    if course_code[0:7] in ["EES87QC", "EES87QD", "EES87QF", "EES87QG","EES81QE","EES83QE","EES85QE","EES88QC", "EES88QD", "EES88QF", "EES88QG","EES82QE","EES84QE","EES86QE"]:
+    if course_code[0:7] in ["EES87QC", "EES87QD","EES87QW", "EES87QF", "EES87QG","EES81QE","EES83QE","EES85QE","EES88QC", "EES88QD", "EES88QF", "EES88QG","EES88QW","EES82QE","EES84QE","EES86QE"]:
         return course_code[0:7]
     if course_code[0:7] in ["MQS11QF", "MQS11QG", "EES87QF", "EES87QG", "EES88QF", "EES88QG"]:
         return course_code[0:7]
+    if course_code in ['HGS41QQ','MES43QQ','SJS21QQ','HGS43QQ','EES83QQ','EES81QQ']:
+        return course_code
     if course_code[-2:] == 'QM':
         return course_code
     try:

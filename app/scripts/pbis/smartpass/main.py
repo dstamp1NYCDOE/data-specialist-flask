@@ -29,6 +29,10 @@ def main(form, request):
 
 
 def process_smartpass_data(smartpass_df):
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
     ## rename ID columns
     smartpass_df = smartpass_df.rename(columns={"ID": "StudentID"})
     ## drop no StudentID
@@ -37,6 +41,17 @@ def process_smartpass_data(smartpass_df):
     smartpass_df = smartpass_df[smartpass_df["Duration (sec)"] > 30]
     ## drop passes that originate from cafeteria
     smartpass_df = smartpass_df[smartpass_df["Origin"] != "Cafeteria"]
+    ## drop students no longer at HSFI
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "3_07", year_and_semester=year_and_semester
+    )
+    students_df = utils.return_file_as_df(filename)
+    students_df = students_df[
+        ["StudentID", "LastName", "FirstName", "Student DOE Email"]
+    ]
+    enrolled_students = students_df["StudentID"].unique().tolist()
+    smartpass_df = smartpass_df[smartpass_df["StudentID"].isin(enrolled_students)]
+    
 
     ## keep bathroom passes only
     bathroom_passes_destinations = [

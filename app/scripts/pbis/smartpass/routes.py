@@ -23,6 +23,11 @@ def return_smartpass_reports():
             "report_description": "Analyze passes written in SmartPass",
         },
         {
+            "report_title": "SmartPass Top 27 Students Overtime by Period",
+            "report_function": "scripts.return_smartpass_analysis_top_27",
+            "report_description": "Analyze for top 27 students going into overtime by period",
+        },        
+        {
             "report_title": "SmartPass Parent Letter",
             "report_function": "scripts.return_smartpass_analysis_parent_letter",
             "report_description": "Return parent letter with SmartPass usage and sign up information",
@@ -49,6 +54,26 @@ def return_smartpass_analysis_spreadsheet():
         
         form = SmartPassDataUploadForm(request.form)
         f, download_name = smartpass.main(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )
+
+from . import return_top_27_students_overtime_by_period as smartpass_top_27
+@scripts.route("/pbis/smartpass/overtime/top_27", methods=["GET", "POST"])
+def return_smartpass_analysis_top_27():
+    if request.method == "GET":
+        form = SmartPassDataUploadForm()
+        return render_template(
+            "pbis/templates/smartpass/smartpass_top_27_form.html",
+            form=form,
+        )
+    else:
+        
+        form = SmartPassDataUploadForm(request.form)
+        f, download_name = smartpass_top_27.main(form, request)
 
         return send_file(
             f,

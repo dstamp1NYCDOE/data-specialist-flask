@@ -22,7 +22,7 @@ marking_period_dates = {
         ('S2-MP2',dt.datetime(2026, 3, 16)),
         ('S2-MP1',dt.datetime(2026, 1, 27)),
         ('S1-MP3',dt.datetime(2025, 12, 1)),
-        ('S1-MP2',dt.datetime(2025, 10, 15)),
+        ('S1-MP2',dt.datetime(2025, 10, 17)),
         ('S1-MP1',dt.datetime(2025, 9, 5)),
     ]
 }

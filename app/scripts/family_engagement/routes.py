@@ -16,6 +16,11 @@ def return_family_engagement_reports():
             "report_title": "Weekly Family Engagement Assignment",
             "report_function": "scripts.return_family_engagement_weekly_assignment",
             "report_description": "Return weekly family engagement assignment based on Jupiter data",
+        },      
+        {
+            "report_title": "Jupiter Logins Analysis",
+            "report_function": "scripts.return_family_engagement_jupiter_logins_analysis",
+            "report_description": "Analyze Jupiter login data for family engagement",
         },
     ]
     title = "Family Engagement"

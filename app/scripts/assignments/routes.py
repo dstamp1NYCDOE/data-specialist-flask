@@ -1,7 +1,7 @@
 import datetime as dt
 from io import BytesIO
 
-from flask import render_template, request, send_file
+from flask import render_template, request, send_file, flash, redirect, url_for
 
 
 from app.scripts import scripts, files_df
@@ -23,8 +23,8 @@ def return_jupiter_assignments_analysis_reports():
         },
         {
             "report_title": "Teacher Gradebook Analysis",
-            "report_function": "scripts.return_jupiter_assignments_teacher_gradebook_setup",
-            "report_description": "s",
+            "report_function": "scripts.teacher_gradebook_analysis",
+            "report_description": "New script to analyze teacher gradebooks with visualizations and tables",
         },        
     ]
     return render_template(
@@ -62,3 +62,39 @@ def return_jupiter_assignments_teacher_gradebook_setup():
             as_attachment=True,
             download_name=download_name,
         )
+
+
+from app.scripts.assignments.teacher_analysis.main import generate_gradebook_report
+
+
+@scripts.route("/assignments/teacher-analysis", methods=["GET", "POST"])
+def teacher_gradebook_analysis():
+    """Route for teacher gradebook analysis report"""
+    if request.method == "POST":
+        try:
+            output_format = request.form.get("output_format", "excel")
+            report_scope = request.form.get("report_scope", "school")
+            
+            file_obj, filename = generate_gradebook_report(
+                output_format=output_format,
+                report_scope=report_scope
+            )
+            
+            mimetype = (
+                "application/pdf" if output_format == "pdf" 
+                else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            
+            return send_file(
+                file_obj,
+                as_attachment=True,
+                download_name=filename,
+                mimetype=mimetype
+            )
+        except Exception as e:
+            flash(f"Error generating report: {str(e)}", "danger")
+            return redirect(url_for("scripts.teacher_gradebook_analysis"))
+    
+    return render_template(
+        "assignments/templates/assignments/teacher_analysis_form.html"
+    )

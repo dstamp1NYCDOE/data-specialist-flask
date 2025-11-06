@@ -23,6 +23,7 @@ from app.scripts.college_and_career import routes
 
 from app.scripts.family_engagement import routes
 from app.scripts.family_engagement.weekly_assignment import routes
+from app.scripts.family_engagement.jupiter_logins_analysis import routes
 
 from app.scripts.dataspecialist import routes
 from app.scripts.dataspecialist.sy2425 import routes
@@ -69,4 +70,8 @@ from app.scripts.summer.programming import routes
 from app.scripts.summer.testing import routes
 from app.scripts.summer.testing.regents_organization import routes
 from app.scripts.summer.testing.exam_only_admits import routes
+
+from app.scripts.surveys import routes
+
+
 from app.scripts.testing import routes

@@ -5,6 +5,7 @@ import app.scripts.utils as utils
 
 from flask import session
 
+from app.scripts import scripts, files_df
 
 def main():
     filename = utils.return_most_recent_report(files_df, "1_42")

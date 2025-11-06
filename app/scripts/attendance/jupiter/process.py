@@ -71,6 +71,10 @@ def main(jupiter_attd_df, week_number=None, day_of=None):
     ]
 
     jupiter_attd_df["Pd"] = jupiter_attd_df["Period"].apply(period_to_pd)
+    jupiter_attd_df['present_in_period_3'] = jupiter_attd_df.apply(
+    lambda row: (row['Period'] == 3) and (row['Type'] in ['present', 'tardy']),
+    axis=1
+)
 
     jupiter_attd_df = jupiter_attd_df.sort_values(by=["StudentID", "Date", "Pd"])
 
@@ -85,12 +89,21 @@ def main(jupiter_attd_df, week_number=None, day_of=None):
 
     attd_by_date_by_student = pd.pivot_table(
         jupiter_attd_df,
-        values="Period",
+        values=["Period", "present_in_period_3"],  # Add the flag here
         index=["StudentID", "Date"],
         columns=["Type"],
-        aggfunc="count",
+        aggfunc={"Period": "count", "present_in_period_3": "max"}  # max will return True if any record is True
     ).fillna(0)
 
+    attd_by_date_by_student.columns = ['_'.join(map(str, col)).strip() for col in attd_by_date_by_student.columns.values]
+    # Then rename to match expected names
+    attd_by_date_by_student = attd_by_date_by_student.rename(columns={
+        'Period_present': 'present',
+        'Period_tardy': 'tardy',
+        'Period_excused': 'excused',
+        'Period_unexcused': 'unexcused',
+        'present_in_period_3_present': 'p3_flag'  # or similar
+    })
     
 
     attd_by_date_by_student["in_school?"] = attd_by_date_by_student.apply(
@@ -300,8 +313,12 @@ def in_school(row):
     present = row["present"]
     tardy = row["tardy"]
     unexcused = row["unexcused"]
-
+    present_in_p3 = row['p3_flag']
+    # Check other Type columns for p3 flag too
+    
     if present + tardy >= 2:
+        return True
+    elif present_in_p3:  # If they were present/tardy in period 3
         return True
     else:
         return False

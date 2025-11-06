@@ -277,12 +277,12 @@ def return_student_grades():
 
     jupiter_master_schedule_df = return_jupiter_schedule()
     jupiter_master_schedule_df = jupiter_master_schedule_df[
-        ["CourseCode", "SectionID", "JupiterCourse", "JupiterSection"]
+        ["Course Code", "Section", "JupiterCourse", "JupiterSection"]
     ]
 
     cr_1_01_df = cr_1_01_df.merge(
         jupiter_master_schedule_df,
-        right_on=["CourseCode", "SectionID"],
+        right_on=["Course Code", "Section"],
         left_on=["Course", "Section"],
         how="left",
     )
@@ -333,6 +333,7 @@ def return_counselors_df():
         "DE LEON ANGELINA": 'Ms. De Leon - Room 504<br/>(212)-255-1235 x5047 - <a href="adeleon23@schools.nyc.gov">adeleon23@schools.nyc.gov</a>',
         "MARIN BETH": 'Ms. Marin - Room 423<br/>(212)-255-1235 x4236 - <a href="bmarin5@schools.nyc.gov">bmarin5@schools.nyc.gov</a>',
         "DUKE JOSHUA": 'Mr. Duke - Room 643<br/>(212)-255-1235 x6430 - <a href="jduke@schools.nyc.gov">jduke@schools.nyc.gov</a>',
+        "GUILLOT THEKISHA": 'Ms. Guillot - Room 643<br/>(212)-255-1235 x6430 - <a href="tguillot@schools.nyc.gov">tguillot@schools.nyc.gov</a>',
         "JONES ALEX": "",
         "WEISS JESSICA": 'Ms. Weiss - Room 423<br/>(212)-255-1235 x4235 - <a href="jweiss4@schools.nyc.gov">jweiss4@schools.nyc.gov</a>',
         "SAN JORGE AMELIA": 'Ms. San Jorge - Room 329<br/>(212)-255-1235 x3291 - <a href="asanjorge@schools.nyc.gov">asanjorge@schools.nyc.gov</a>',

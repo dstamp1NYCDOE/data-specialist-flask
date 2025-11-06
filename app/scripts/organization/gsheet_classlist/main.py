@@ -62,14 +62,15 @@ def main(form, request):
     ].drop_duplicates()
     df = master_schedule_df.merge(
         teachers_df,
-        left_on=["CourseCode", "SectionID"],
+        left_on=["Course Code", "Section"],
         right_on=["Course", "Section"],
         how="left",
     )
+    print(df)
     # drop classes with no students
-    df = df[df["Capacity"] > 0]
+    df = df[df["Active"] > 0]
     # drop classes with no meeting days
-    df = df[df["Cycle Day"] != 0]
+    df = df[df["Days"] != '-----']
     # drop classes attached to "staff"
     df = df[df["Teacher Name"] != "STAFF"]
     ## attach delegated nickname
@@ -83,7 +84,7 @@ def main(form, request):
     df_cols = [
         "Course",
         "Section",
-        "Course name",
+        "Course Name",
         "DelegatedNickName1",
         "DelegatedNickName2",
     ]
@@ -126,7 +127,7 @@ def main(form, request):
         "ParentLN",
         "ParentFN",
         "Phone",
-        "Course name",
+        "Course Name",
         "Course",
         "Section",
         "Period",

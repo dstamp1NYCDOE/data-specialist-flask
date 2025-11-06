@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{url_for('scripts.return_jupiter2_attd_reports')}}">Jupiter Attendance</a></li>
+            <li class="breadcrumb-item active"><a href="#">Most Improved Attendance Awards</a></li>
+        </ol>
+    </nav>
+
+    <h1>Most Improved Attendance Awards</h1>
+    
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">About This Report</h4>
+        <p>
+            This tool identifies the most improved student in each course section based on attendance and punctuality trends 
+            from September through the selected award month.
+        </p>
+        <hr>
+        <ul class="mb-0">
+            <li>Uses <strong>3-week rolling averages</strong> to smooth out weekly variations</li>
+            <li>Applies <strong>70% recency weighting</strong> to emphasize recent improvement</li>
+            <li>Compares recent performance (last 3 weeks) to baseline (first 4 weeks)</li>
+            <li>Each student can only receive <strong>one award</strong> (earliest period if eligible in multiple courses)</li>
+            <li>Students must show actual improvement and have at least 50% recent attendance</li>
+        </ul>
+    </div>
+
+    <form action="{{url_for('scripts.return_most_improved_attendance_awards')}}" class="grid gap-3" method="post">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group p-1 g-col-12">
+            {{ form.award_month.label(class_="form-label") }}
+            {{ form.award_month(class_="form-select") }}
+            <div class="form-text">
+                Select the month for which to generate awards. Awards should typically be run about 1 week into 
+                the new month to capture the previous month's complete attendance data.
+            </div>
+        </div>
+
+        <div class="form-group p-1 g-col-12 d-grid">
+            {{ form.submit(class_="btn btn-primary btn-lg") }}
+        </div>
+    </form>
+
+    <div class="mt-4">
+        <h5>Expected Output</h5>
+        <p>
+            An Excel file with two sheets:
+        </p>
+        <ul>
+            <li><strong>Awards Sheet:</strong> StudentID, LastName, FirstName, CourseCode, TeacherName, Period - 
+                sorted by Teacher and Period for easy mail merge</li>
+            <li><strong>Detailed Analysis Sheet:</strong> Full improvement metrics for all awarded students including 
+                baseline/recent attendance rates and improvement scores</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

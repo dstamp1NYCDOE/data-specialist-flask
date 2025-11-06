@@ -30,14 +30,15 @@ def main(form, request):
 
 
     jupiter_master_schedule_df = return_jupiter_schedule()
+    print(jupiter_master_schedule_df)
     jupiter_master_schedule_df = jupiter_master_schedule_df[
-        ["CourseCode", "SectionID", "JupiterCourse", "JupiterSection"]
+        ["Course Code", "Section", "JupiterCourse", "JupiterSection"]
     ]
 
     dff = egg_file_df.merge(
         jupiter_master_schedule_df,
         left_on=["Course", "Sec"],
-        right_on=["CourseCode", "SectionID"],
+        right_on=["Course Code", "Section"],
         how="left",
     )
 
@@ -64,7 +65,6 @@ def main(form, request):
         subset=["StudentID", "Course", "Sec"],
     )
 
-    print(dfff)
 
     download_name = f"Egg.xlsx"
     
