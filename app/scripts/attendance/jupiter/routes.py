@@ -62,6 +62,11 @@ def return_jupiter2_attd_reports():
             "report_function": "scripts.return_most_improved_attendance_awards",
             "report_description": "Generate awards for most improved students by course section based on attendance and punctuality trends",
         },           
+         {
+            "report_title": "Return Weekly Period Attendance Analysis by Teacher",
+            "report_function": "scripts.return_weekly_period_attendance_analysis",
+            "report_description": "Generate a weekly attendance analysis report by teacher",
+        },          
     ]
     return render_template(
         "attendance/templates/attendance/index.html", reports=reports
@@ -254,3 +259,25 @@ def return_most_improved_attendance_awards():
                 "attendance/templates/attendance/most_improved/form.html",
                 form=form,
             )
+        
+
+from app.scripts.attendance.jupiter.weekly_attd_report import weekly_period_attendance_analysis_report_by_teacher as weekly_report        
+from app.scripts.attendance.cut_analysis.forms import AttendanceWeekOfForm
+
+@scripts.route("/attendance/jupiter/weekly_analysis_by_teacher", methods=["GET", "POST"])
+def return_weekly_period_attendance_analysis():
+    if request.method == "GET":
+        form = AttendanceWeekOfForm()
+        return render_template(
+            "attendance/jupiter/templates/weekly_analysis/form.html",
+            form=form,
+        )
+    else:
+        form = AttendanceWeekOfForm(request.form)
+        f, download_name = weekly_report.main(form, request)
+
+        return send_file(
+            f,
+            as_attachment=True,
+            download_name=download_name,
+        )

@@ -9,6 +9,39 @@ from app.scripts import scripts, files_df, photos_df, gsheets_df
 
 from flask import current_app, session, redirect, url_for
 
+# Define class period schedules as module-level constants
+# Monday: All periods are 35 minutes
+MONDAY_SCHEDULE = [
+    (1, dt.time(9, 45), dt.time(10, 20)),   # Period 1: 9:45 - 10:20 (35 min)
+    (2, dt.time(10, 20), dt.time(11, 0)),   # Period 2: 10:20 - 11:00 (40 min - includes 5 min passing)
+    (3, dt.time(11, 0), dt.time(11, 40)),   # Period 3: 11:00 - 11:40 (40 min)
+    (4, dt.time(11, 40), dt.time(12, 20)),  # Period 4: 11:40 - 12:20 (40 min)
+    (5, dt.time(12, 20), dt.time(13, 0)),   # Period 5: 12:20 - 13:00 (40 min)
+    (6, dt.time(13, 0), dt.time(13, 40)),   # Period 6: 13:00 - 13:40 (40 min)
+    (7, dt.time(13, 40), dt.time(14, 20)),  # Period 7: 13:40 - 14:20 (40 min)
+    (8, dt.time(14, 20), dt.time(15, 0)),   # Period 8: 14:20 - 15:00 (40 min)
+    (9, dt.time(15, 0), dt.time(15, 40)),   # Period 9: 15:00 - 15:40 (40 min)
+]
+
+# Tuesday-Friday: Periods 1,2,4,5,6,7,8,9 are 45 minutes; Period 3 is 50 minutes
+REGULAR_SCHEDULE = [
+    (1, dt.time(8, 5), dt.time(8, 55)),     # Period 1: 8:05 - 8:55 (50 min - includes 5 min passing)
+    (2, dt.time(8, 55), dt.time(9, 45)),    # Period 2: 8:55 - 9:45 (50 min)
+    (3, dt.time(9, 45), dt.time(10, 40)),   # Period 3: 9:45 - 10:40 (55 min)
+    (4, dt.time(10, 40), dt.time(11, 30)),  # Period 4: 10:40 - 11:30 (50 min)
+    (5, dt.time(11, 30), dt.time(12, 20)),  # Period 5: 11:30 - 12:20 (50 min)
+    (6, dt.time(12, 20), dt.time(13, 10)),  # Period 6: 12:20 - 13:10 (50 min)
+    (7, dt.time(13, 10), dt.time(14, 0)),   # Period 7: 13:10 - 14:00 (50 min)
+    (8, dt.time(14, 0), dt.time(14, 50)),   # Period 8: 14:00 - 14:50 (50 min)
+    (9, dt.time(14, 50), dt.time(15, 40)),  # Period 9: 14:50 - 15:40 (50 min)
+]
+
+SUMMER_SCHEDULE = [
+    (1, dt.time(8, 0), dt.time(9, 48)),     # Assuming 108 min periods
+    (2, dt.time(9, 48), dt.time(11, 52)),
+    (3, dt.time(11, 52), dt.time(14, 27)),
+]
+
 
 def main(form, request):
 
@@ -79,18 +112,81 @@ def process_smartpass_data(smartpass_df):
     smartpass_df["endtime"] = smartpass_df["datetime"] + pd.to_timedelta(
         smartpass_df["Duration (sec)"], unit="S"
     )
-    print(session['term'])
+    
     if session['term'] == 7:
         smartpass_df["class_period"] = smartpass_df.apply(
             return_summer_class_period, axis=1
+        )
+        smartpass_df["FirstTenMinutesFlag"] = smartpass_df.apply(
+            lambda row: is_in_first_ten_minutes(row, SUMMER_SCHEDULE), axis=1
         )
     else:
         ## return class period based on the time of the pass
         ## if it is a Monday, then the first period is at 10:20
         ## otherwise, the first period is at 8:55
         smartpass_df["class_period"] = smartpass_df.apply(return_class_period, axis=1)
+        smartpass_df["FirstTenMinutesFlag"] = smartpass_df.apply(
+            lambda row: is_in_first_ten_minutes(
+                row, MONDAY_SCHEDULE if row["datetime"].weekday() == 0 else REGULAR_SCHEDULE
+            ), axis=1
+        )
 
     return smartpass_df
+
+
+def is_in_first_ten_minutes(pass_row, schedule):
+    """
+    Check if a pass was started in the first 10 minutes of the class period.
+    
+    Args:
+        pass_row: DataFrame row containing 'datetime' and 'class_period'
+        schedule: List of tuples (period, start_time, end_time)
+    
+    Returns:
+        bool: True if pass started in first 10 minutes, False otherwise
+    """
+    pass_time = pass_row["datetime"].time()
+    class_period = pass_row["class_period"]
+    
+    if pd.isna(class_period):
+        return False
+    
+    # Find the start time for this period
+    for period, start_time, end_time in schedule:
+        if period == class_period:
+            # Calculate 10 minutes after period start
+            start_datetime = dt.datetime.combine(dt.date.today(), start_time)
+            ten_min_mark = (start_datetime + dt.timedelta(minutes=10)).time()
+            
+            # Check if pass time is between start and 10 minutes after
+            return start_time <= pass_time <= ten_min_mark
+    
+    return False
+
+
+def return_summer_class_period(pass_row):
+    pass_datetime = pass_row["datetime"]
+    pass_time = pass_datetime.time()
+
+    for period, start_time, end_time in SUMMER_SCHEDULE:
+        if pass_time <= end_time:
+            return period
+    
+    return None
+
+
+def return_class_period(pass_row):
+    pass_datetime = pass_row["datetime"]
+    pass_time = pass_datetime.time()
+    is_monday = pass_datetime.weekday() == 0
+    
+    schedule = MONDAY_SCHEDULE if is_monday else REGULAR_SCHEDULE
+    
+    for period, start_time, end_time in schedule:
+        if pass_time <= end_time:
+            return period
+    
+    return None
 
 
 def return_possible_encounters(smartpass_df):
@@ -352,58 +448,50 @@ def return_total_time_out_of_class_by_origin_by_period(smartpass_df):
 
     return pvt
 
-def return_summer_class_period(pass_row):
-    pass_datetime = pass_row["datetime"]
-    pass_time = pass_datetime.time()
 
-    period_endtimes = [
-        (1, dt.time(9, 48)),
-        (2, dt.time(11, 52)),
-        (3, dt.time(14, 27)),
-    ]
-    for period, period_endtime in period_endtimes:
-        if pass_time <= period_endtime:
-            return period        
+def return_first_ten_minutes_by_student(smartpass_df):
+    """
+    Report on students who take bathroom passes in the first 10 minutes of class.
+    """
+    # Filter to only first 10 minutes passes
+    first_ten_df = smartpass_df[smartpass_df["FirstTenMinutesFlag"] == True]
+    
+    pvt = pd.pivot_table(
+        first_ten_df,
+        index=["StudentID", "Student Name"],
+        values="Grade",
+        aggfunc="count",
+    ).fillna(0)
+    pvt = pvt.reset_index()
+    pvt.columns = ["StudentID", "Student Name", "First 10 Min Bathroom Passes"]
+    
+    pvt = pvt.sort_values(by=["First 10 Min Bathroom Passes"], ascending=[False])
+    
+    return pvt
 
-def return_class_period(pass_row):
-    pass_datetime = pass_row["datetime"]
-    pass_time = pass_datetime.time()
 
-    P1_Monday = dt.time(10, 20)
-    P1 = dt.time(8, 55)
-
-    is_monday = pass_datetime.weekday() == 0
-
-    if is_monday:
-        period_endtimes = [
-            (1, dt.time(10, 20)),
-            (2, dt.time(11, 00)),
-            (3, dt.time(11, 40)),
-            (4, dt.time(12, 20)),
-            (5, dt.time(13, 00)),
-            (6, dt.time(13, 40)),
-            (7, dt.time(14, 20)),
-            (8, dt.time(15, 00)),
-            (9, dt.time(15, 40)),
-        ]
-    else:
-        period_endtimes = [
-            (1, dt.time(8, 55)),
-            (2, dt.time(9, 45)),
-            (3, dt.time(10, 40)),
-            (4, dt.time(11, 30)),
-            (5, dt.time(12, 20)),
-            (6, dt.time(13, 10)),
-            (7, dt.time(14, 00)),
-            (8, dt.time(15, 50)),
-            (9, dt.time(15, 40)),
-        ]
-
-    for period, period_endtime in period_endtimes:
-        if pass_time <= period_endtime:
-            return period
-
-    pass
+def return_first_ten_minutes_by_origin_by_period(smartpass_df):
+    """
+    Report on which classrooms (Origins) have the most bathroom passes 
+    in the first 10 minutes, broken down by period.
+    """
+    # Filter to only first 10 minutes passes
+    first_ten_df = smartpass_df[smartpass_df["FirstTenMinutesFlag"] == True]
+    
+    pvt = pd.pivot_table(
+        first_ten_df,
+        index=["Origin"],
+        columns=["class_period"],
+        values="Grade",
+        aggfunc="count",
+        margins=True,
+        margins_name="Total",
+    ).fillna(0)
+    pvt = pvt.reset_index()
+    
+    pvt = pvt.sort_values(by=["Total"], ascending=[False])
+    
+    return pvt
 
 
 def return_smartpass_report(smartpass_df, date_of_interest):
@@ -439,6 +527,14 @@ def return_smartpass_report(smartpass_df, date_of_interest):
         (
             "total_passes_by_dest_by_student",
             return_number_of_passes_by_student_by_destination(smartpass_df),
+        ),
+        (
+            "first_10min_by_student",
+            return_first_ten_minutes_by_student(smartpass_df),
+        ),
+        (
+            "first_10min_by_origin_by_period",
+            return_first_ten_minutes_by_origin_by_period(smartpass_df),
         ),
     ]
 

@@ -56,6 +56,7 @@ def main(jupiter_attd_df, week_number=None, day_of=None):
     jupiter_attd_df["week_number"] = (
         jupiter_attd_df["week_number"].dt.isocalendar().week
     )
+    jupiter_attd_df['week_id'] = jupiter_attd_df["week_number"] 
 
     if week_number:
         jupiter_attd_df = jupiter_attd_df[

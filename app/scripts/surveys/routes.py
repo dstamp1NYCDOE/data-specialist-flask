@@ -33,69 +33,82 @@ def analyze_belongingness_survey():
     if request.method == 'GET':
         form = SurveyUploadForm()
         return render_template('surveys/templates/form.html', form=form)    
-    try:
-        # Option 1: Receive uploaded file
-        if 'file' in request.files:
-            file = request.files['file']
-            
-            # Read file into dataframe
-            if file.filename.endswith('.csv'):
-                df = pd.read_csv(file)
-            elif file.filename.endswith(('.xlsx', '.xls')):
-                df = pd.read_excel(file)
-            else:
-                return jsonify({'error': 'Unsupported file format'}), 400
+# try:
+    # Option 1: Receive uploaded file
+    if 'file' in request.files:
+        file = request.files['file']
         
-        # Option 2: Receive JSON data
-        elif request.is_json:
-            data = request.get_json()
-            df = pd.DataFrame(data['survey_data'])
-        
+        # Read file into dataframe
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
+        elif file.filename.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(file)
         else:
-            return jsonify({'error': 'No data provided'}), 400
-        
-        # Get optional parameters from request
-        handle_missing = request.form.get('handle_missing', 'flag')
-        additional_bio_columns = request.form.getlist('bio_columns')
-
-        ## attach student info
-
-        school_year = session["school_year"]
-        term = session["term"]
-        year_and_semester = f"{school_year}-{term}"
-
-        filename = utils.return_most_recent_report_by_semester(
-            files_df, "3_07", year_and_semester=year_and_semester
-        )
-        register_df = utils.return_file_as_df(filename)
-        register_df["year_in_hs"] = register_df["GEC"].apply(utils.return_year_in_hs, args=(school_year,))
-        register_df = register_df[['StudentID','LastName','FirstName','year_in_hs']]
-        df = register_df.merge(df, on=['StudentID'], how='left')
-        
-        filename = utils.return_most_recent_report_by_semester(
-            files_df, "1_49", year_and_semester=year_and_semester
-        )
-        counselors_df = utils.return_file_as_df(filename)
-        counselors_df = counselors_df[['StudentID','Counselor']]
-        df = counselors_df.merge(df, on=['StudentID'], how='left')
-
-        
-        # Run analysis
-        output_file = analyze_survey(
-            df=df,
-            config=BelongingnessConfig(),
-            biographical_columns=additional_bio_columns,
-            handle_missing=handle_missing,
-            question_text_map=BelongingnessConfig().get_question_text_map()
-        )
-        
-        # Send file back to client
-        return send_file(
-            output_file,
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            as_attachment=True,
-            download_name='belongingness_analysis.xlsx'
-        )
+            return jsonify({'error': 'Unsupported file format'}), 400
     
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Option 2: Receive JSON data
+    elif request.is_json:
+        data = request.get_json()
+        df = pd.DataFrame(data['survey_data'])
+    
+    else:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    # Get optional parameters from request
+    handle_missing = request.form.get('handle_missing', 'flag')
+    additional_bio_columns = request.form.getlist('bio_columns')
+
+    ## attach student info
+
+    school_year = session["school_year"]
+    term = session["term"]
+    year_and_semester = f"{school_year}-{term}"
+
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "3_07", year_and_semester=year_and_semester
+    )
+    register_df = utils.return_file_as_df(filename)
+    register_df["year_in_hs"] = register_df["GEC"].apply(utils.return_year_in_hs, args=(school_year,))
+    register_df = register_df[['StudentID','LastName','FirstName','year_in_hs']]
+    df = register_df.merge(df, on=['StudentID'], how='left')
+    
+    filename = utils.return_most_recent_report_by_semester(
+        files_df, "1_49", year_and_semester=year_and_semester
+    )
+    counselors_df = utils.return_file_as_df(filename)
+    counselors_df = counselors_df[['StudentID','Counselor']]
+    df = counselors_df.merge(df, on=['StudentID'], how='left')
+
+
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
+    rosters_df = utils.return_file_as_df(filename)
+    rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
+
+    filename = utils.return_most_recent_report_by_semester(files_df, "jupiter_master_schedule", year_and_semester=year_and_semester)
+    master_schedule_df = utils.return_file_as_df(filename).fillna('')
+    master_schedule_df = master_schedule_df[["Course", "Section", "Room", "Teacher1","Teacher2", "Period"]]
+    master_schedule_df = master_schedule_df[master_schedule_df['Period']!='']
+
+    # Then pass them to analyze_survey
+    output_file = analyze_survey(
+        df=df,
+        config=BelongingnessConfig(),
+        rosters_df=rosters_df,  # Add this
+        master_schedule_df=master_schedule_df,  # Add this
+        biographical_columns=additional_bio_columns,
+        handle_missing='flag',
+        question_text_map=BelongingnessConfig().get_question_text_map()
+    )
+
+    
+    # Send file back to client
+    return send_file(
+        output_file,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='belongingness_analysis.xlsx'
+    )
+
+# except Exception as e:
+#     return jsonify({'error': str(e)}), 500

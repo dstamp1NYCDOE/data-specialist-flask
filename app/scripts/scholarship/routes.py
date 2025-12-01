@@ -84,6 +84,13 @@ def return_jupiter_analysis_reports():
             "report_function": "scripts.return_jupiter_grades_students_checkup_by_dept",
             "report_description": "Analyze jupiter grades by Department",
         },
+
+        {
+            "report_title": "Jupiter Grades Historical Analysis",
+            "report_function": "scripts.return_jupiter_grades_historical_analysis",
+            "report_description": "Analyze historical jupiter grades trends",
+        },
+
     ]
     return render_template(
         "scholarship/templates/scholarship/index_transcript_analysis.html",
@@ -284,4 +291,12 @@ from app.scripts.scholarship.jupiter.student_checkup_by_dept import (
 @scripts.route("/scholarship/jupiter/student_checkup_by_dept")
 def return_jupiter_grades_students_checkup_by_dept():
     f, download_name = jupiter_grades_student_checkup_by_dept()
+    return send_file(f, as_attachment=True, download_name=download_name)
+
+
+@scripts.route("/scholarship/jupiter/historical")
+def return_jupiter_grades_historical_analysis():
+    from app.scripts.scholarship.jupiter.historical import main as historical_main
+
+    f, download_name = historical_main.create()
     return send_file(f, as_attachment=True, download_name=download_name)

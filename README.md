@@ -1,0 +1,1 @@
+flask run --host '10.70.238.136' --port 5000 --debug

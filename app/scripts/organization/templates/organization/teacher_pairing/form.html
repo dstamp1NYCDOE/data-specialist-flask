@@ -3,18 +3,54 @@
 {% block content %}
 <div class="container">
     <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
-    <li class="breadcrumb-item "><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
-    <li class="breadcrumb-item active"><a href="#">Return Labels</a></li>
-  </ol>
-</nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{url_for('main.return_index')}}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{url_for('scripts.return_organization_reports')}}">Organization</a></li>
+            <li class="breadcrumb-item active"><a href="#">Teacher PD Groupings</a></li>
+        </ol>
+    </nav>
 
-<form action="{{url_for('scripts.family_engagement_pd_pairings')}}" class="grid gap-3" method="post" enctype="multipart/form-data">
-    <label for="teacher_emails">Teacher Emails (one per line):</label>
-    <textarea name="teacher_emails" rows="10" cols="50"></textarea>
-    <button type="submit">Generate Pairings</button>
-</form>
+    <h2>Generate Teacher PD Groupings</h2>
+    <p class="text-muted">Create teacher groups based on shared students for professional development sessions.</p>
 
+    <form action="{{url_for('scripts.family_engagement_pd_pairings')}}" class="mt-4" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="group_size" class="form-label">Desired Group Size</label>
+            <select name="group_size" id="group_size" class="form-select" required>
+                <option value="2" selected>2 (Pairs)</option>
+                <option value="3">3 (Triads)</option>
+                <option value="4">4 (Quads)</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="18">18</option>
+            </select>
+            <div class="form-text">
+                Select the ideal number of teachers per group. The algorithm will try to create groups of this size, 
+                but may create smaller groups to ensure everyone is matched.
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="teacher_emails" class="form-label">Teacher Emails (one per line)</label>
+            <textarea name="teacher_emails" id="teacher_emails" rows="15" class="form-control" 
+                      placeholder="teacher1@example.com&#10;teacher2@example.com&#10;teacher3@example.com" required></textarea>
+            <div class="form-text">
+                Enter one email address per line. Teachers will be grouped based on shared students.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Generate Groupings</button>
+    </form>
+
+    <div class="mt-5">
+        <h4>How it works:</h4>
+        <ul>
+            <li>Teachers are grouped based on students they share</li>
+            <li>The algorithm prioritizes teachers with fewer pairing options first</li>
+            <li>Co-teachers (who teach the same course/section) are avoided in the same group when possible</li>
+            <li><strong>All teachers will be assigned to a group</strong> - no one is left unpaired</li>
+            <li>If needed, the algorithm will create groups smaller than your desired size to ensure everyone is included</li>
+        </ul>
+    </div>
 </div>
 {% endblock %}
