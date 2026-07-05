@@ -19,9 +19,11 @@ from reportlab.platypus import SimpleDocTemplate
 
 import pandas as pd
 import numpy as np
-import plotly.express as px
-import plotly.io as pio
-import plotly.graph_objects as go
+
+# Replace Plotly with Matplotlib
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend - no pop-up windows!
 
 from io import BytesIO
 
@@ -722,7 +724,6 @@ def return_left_flowables(student_row, dfs_dict, marking_period):
 
     return flowables
 
-
 def return_out_to_lunch_paragraph(attd_benchmark, minimum_grade):
     try:
         if int(minimum_grade) >= 65:
@@ -875,7 +876,7 @@ def return_daily_attd_summary_graph(RATR_Summary_df):
     )
 
     buffer = BytesIO()
-    pio.write_image(fig, buffer)
+    pio.write_image(fig, buffer,engine='kaleido')
 
     I = Image(buffer)
     width = 4 * inch
@@ -939,7 +940,7 @@ def return_jupiter_attd_summary_graph(df):
     )
 
     buffer = BytesIO()
-    pio.write_image(fig, buffer)
+    pio.write_image(fig, buffer,engine='kaleido')
 
     I = Image(buffer)
     width = 2.1 * inch
@@ -1008,7 +1009,7 @@ def smartpass_usage_by_period(student_row):
     )
 
     buffer = BytesIO()
-    pio.write_image(fig, buffer)
+    pio.write_image(fig, buffer,engine='kaleido')
     I = Image(buffer)
     I.drawHeight = y_aspect / x_aspect * 4 * inch
     I.drawWidth = x_aspect / x_aspect * 4 * inch

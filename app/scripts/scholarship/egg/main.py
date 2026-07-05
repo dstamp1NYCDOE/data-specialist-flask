@@ -30,7 +30,7 @@ def main(form, request):
 
 
     jupiter_master_schedule_df = return_jupiter_schedule()
-    print(jupiter_master_schedule_df)
+    
     jupiter_master_schedule_df = jupiter_master_schedule_df[
         ["Course Code", "Section", "JupiterCourse", "JupiterSection"]
     ]

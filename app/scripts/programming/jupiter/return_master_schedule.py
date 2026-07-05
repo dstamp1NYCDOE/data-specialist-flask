@@ -87,6 +87,7 @@ def return_jupiter_schedule(request=None, form=None):
         files_df, "MasterSchedule", year_and_semester=year_and_semester
     )
     master_schedule_df = utils.return_file_as_df(filename)
+    
 
     filename = utils.return_most_recent_report_by_semester(
         files_df, "4_23", year_and_semester=year_and_semester
@@ -118,7 +119,6 @@ def return_jupiter_schedule(request=None, form=None):
         how="left",
     )
 
-    print(df[df['Course']=='MRS21'])
 
     # drop classes with no students
     # df = df[df["Capacity"] != df["Remaining Capacity"]]
@@ -138,7 +138,7 @@ def return_jupiter_schedule(request=None, form=None):
     df["JupiterCourse"] = df.apply(return_jupiter_course, axis=1)
     # return jupiter_section
     df["JupiterSection"] = df.apply(return_jupiter_section, axis=1)
-
+    
     return df
 
 
@@ -166,6 +166,8 @@ def return_jupiter_course(row):
         "MQS11QG",
     ]:
         return course_code[0:7]
+    if course_code in ['SWS21QQ8','SWS22QQ8']:
+        return course_code
     
     if  course_code in ['EQS11QQI']:
         return course_code
