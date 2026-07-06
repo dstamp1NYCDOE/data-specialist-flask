@@ -41,18 +41,19 @@ def return_dataframe_of_photos():
     file_lst = glob.glob("app/data/StudentPhotos/**/*.*")
     for filename in file_lst:
         mo = StudentIDRegex.search(filename)
-        StudentID = mo.group()
+        if mo:
+            StudentID = mo.group()
 
-        mo = DBN_Regex.search(filename)
-        DBN = mo.group()
+            mo = DBN_Regex.search(filename)
+            DBN = mo.group()
 
-        file_dict = {
-            "photo_filename": filename,
-            "StudentID": int(StudentID),
-            "DBN": DBN,
-        }
+            file_dict = {
+                "photo_filename": filename,
+                "StudentID": int(StudentID),
+                "DBN": DBN,
+            }
 
-        lst.append(file_dict)
+            lst.append(file_dict)
 
     files_df = pd.DataFrame(lst)
     return files_df
@@ -61,7 +62,8 @@ def return_dataframe_of_photos():
 def return_dataframe_of_files():
     lst = []
     file_lst = glob.glob("app/data/**/**/*.*")
-    file_lst = [file for file in file_lst if not file.endswith(".jpg")]
+    file_lst = [file for file in file_lst if not file.endswith((".jpg",'.JPG'))]
+
     for filename in file_lst:
 
         # file = filename.split("/")[4]s

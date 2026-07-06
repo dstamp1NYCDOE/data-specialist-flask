@@ -100,7 +100,10 @@ def main(form, request):
     regents_signups_df = regents_signups_pvt.merge(
         students_df, on="StudentID", how="outer"
     )
-    
+
+    for exam in exams_in_order:
+        if exam not in regents_signups_df.columns:
+            regents_signups_df[exam] = False
 
     cols = (
         [
@@ -125,8 +128,22 @@ def main(form, request):
     )
 
     all_students_df = regents_signups_df[cols]
+
+    flag_cols = ["ENL?",
+            "SWD?",
+            "time_and_a_half?",
+            "double_time?",
+            "read_aloud?",
+            "scribe?",
+            "large_print?",]
+
+    for col in flag_cols:
+        all_students_df[col] = all_students_df[col].fillna(False).astype(bool)
+
     all_students_df[exams_in_order] = all_students_df[exams_in_order].fillna(False)
     all_students_df = all_students_df.sort_values(by=["LastName","FirstName"])
+
+
 
     f = BytesIO()
     writer = pd.ExcelWriter(f)
@@ -146,7 +163,7 @@ def main(form, request):
         worksheet.freeze_panes(1, 5)
         worksheet.autofit()
         worksheet.data_validation(
-            "R2:R2000",
+            "Q2:Q2000",
             {
                 "validate": "list",
                 "source": "=HomeLangDropdown!$A$2:$A$209",

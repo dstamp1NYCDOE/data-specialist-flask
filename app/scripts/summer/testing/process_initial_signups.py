@@ -105,6 +105,10 @@ def main():
         by=["Sending school", "LastName", "FirstName"]
     )
 
+    for exam in exams_in_order:
+        if exam not in all_students_df.columns:
+            all_students_df[exam] = False
+
     cols = (
         [
             "Sending school",

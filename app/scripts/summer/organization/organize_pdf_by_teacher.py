@@ -104,12 +104,11 @@ def main(form, request):
     sort_by_df = cr_1_01_df[cr_1_01_df["sort_by_col"]]
 
     sort_by_df['sort_by_col'] = sort_by_df['Teacher1'] + ' - Period' + sort_by_df['Period'].astype(str)
-
-
-    print(sort_by_df)
+    sort_by_df['sort_by_col'] = sort_by_df['sort_by_col'].astype(str)
 
     
     sort_by_list = sort_by_df['sort_by_col'].unique().tolist()
+
     
 
     sort_by_landscape_dict = generate_sortby_dict_landscape(sort_by_list)
