@@ -92,6 +92,7 @@ def main(form, request):
     cr_1_01_df = utils.return_file_as_df(filename)
     cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"].str[0] != "Z"] #remove dummy codes
     cr_1_01_df = cr_1_01_df[cr_1_01_df["Course"].str[1:3] != "XR"] #remove regents exams
+    cr_1_01_df = cr_1_01_df[ (cr_1_01_df['Period']>0) & (cr_1_01_df['Period']<4) ] #Keep Periods 1-3 only
 
     cr_1_01_df = cr_1_01_df.merge(
         master_schedule_df, on=["Course", "Section"], how="left"
