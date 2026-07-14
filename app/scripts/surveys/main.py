@@ -69,6 +69,7 @@ def analyze_survey(
     
     # Validate required columns
     required_cols = ['StudentID', 'FirstName', 'LastName'] + core_bio_columns + ['FormID']
+    required_cols = ['StudentID', 'FirstName', 'LastName'] + core_bio_columns
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
         raise ValueError(f"Missing required columns: {missing_cols}")

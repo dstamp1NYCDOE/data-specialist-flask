@@ -26,22 +26,42 @@ def handle_multiple_responses(value):
     # If already numeric, return as is
     if isinstance(value, (int, float)):
         return float(value)
-    
-    # If string with comma, parse and average
+
+    # Map Likert text responses to numbers
+    likert_map = {
+        'strongly disagree': 1.0,
+        'disagree': 2.0,
+        'agree': 3.0,
+        'strongly agree': 4.0
+    }
+
     if isinstance(value, str):
         value = value.strip()
+        # Handle comma-separated values (possibly mixed text/numbers)
         if ',' in value:
             try:
-                values = [float(v.strip()) for v in value.split(',') if v.strip()]
+                values = []
+                for v in value.split(','):
+                    v_clean = v.strip().lower()
+                    if v_clean in likert_map:
+                        values.append(likert_map[v_clean])
+                    else:
+                        try:
+                            values.append(float(v.strip()))
+                        except ValueError:
+                            continue
                 return np.mean(values) if values else np.nan
-            except ValueError:
+            except Exception:
                 return np.nan
         else:
+            v_clean = value.lower()
+            if v_clean in likert_map:
+                return likert_map[v_clean]
             try:
                 return float(value)
             except ValueError:
                 return np.nan
-    
+
     return np.nan
 
 

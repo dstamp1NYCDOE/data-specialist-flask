@@ -81,21 +81,21 @@ def analyze_belongingness_survey():
 
 
 
-    filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
-    rosters_df = utils.return_file_as_df(filename)
-    rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
+    # filename = utils.return_most_recent_report_by_semester(files_df, "rosters_and_grades", year_and_semester=year_and_semester)
+    # rosters_df = utils.return_file_as_df(filename)
+    # rosters_df = rosters_df[["StudentID", "Course", "Section"]].drop_duplicates()
 
-    filename = utils.return_most_recent_report_by_semester(files_df, "jupiter_master_schedule", year_and_semester=year_and_semester)
-    master_schedule_df = utils.return_file_as_df(filename).fillna('')
-    master_schedule_df = master_schedule_df[["Course", "Section", "Room", "Teacher1","Teacher2", "Period"]]
-    master_schedule_df = master_schedule_df[master_schedule_df['Period']!='']
+    # filename = utils.return_most_recent_report_by_semester(files_df, "jupiter_master_schedule", year_and_semester=year_and_semester)
+    # master_schedule_df = utils.return_file_as_df(filename).fillna('')
+    # master_schedule_df = master_schedule_df[["Course", "Section", "Room", "Teacher1","Teacher2", "Period"]]
+    # master_schedule_df = master_schedule_df[master_schedule_df['Period']!='']
 
     # Then pass them to analyze_survey
     output_file = analyze_survey(
         df=df,
         config=BelongingnessConfig(),
-        rosters_df=rosters_df,  # Add this
-        master_schedule_df=master_schedule_df,  # Add this
+        # rosters_df=rosters_df,  # Add this
+        # master_schedule_df=master_schedule_df,  # Add this
         biographical_columns=additional_bio_columns,
         handle_missing='flag',
         question_text_map=BelongingnessConfig().get_question_text_map()
