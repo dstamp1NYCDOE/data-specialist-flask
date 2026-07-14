@@ -14,6 +14,7 @@ from reportlab.lib.units import inch, mm
 from reportlab.platypus import Paragraph, PageBreak, Spacer, Image, Table, TableStyle
 from reportlab.platypus import SimpleDocTemplate
 
+from pypdf import PdfWriter
 
 import app.scripts.utils as utils
 import labels
@@ -39,6 +40,7 @@ specs = labels.Specification(
     bottom_padding=PADDING,
     row_gap=0,
 )
+
 
 def main():
     school_year = session["school_year"]
@@ -74,46 +76,96 @@ def main():
         )
     )
 
-    f = BytesIO()
-    my_doc = SimpleDocTemplate(
-        f,
-        pagesize=landscape(letter),
-        topMargin=0.50 * inch,
-        leftMargin=1.25 * inch,
-        rightMargin=1.25 * inch,
-        bottomMargin=0.25 * inch,
-    )
-
     filename = utils.return_most_recent_report_by_semester(
         files_df, "MasterSchedule", year_and_semester
     )
     master_schedule_df = utils.return_file_as_df(filename)
 
     master_schedule_df = master_schedule_df[master_schedule_df["PD"].isin([1, 2, 3])]
+    print(master_schedule_df)
     master_schedule_df = master_schedule_df[
         master_schedule_df["Course Code"].str[0] != "Z"
     ]
 
     master_schedule_df["Room"] = master_schedule_df["Room"].astype(int)
 
-    labels_to_make = master_schedule_df.drop_duplicates(subset=['Teacher Name']).sort_values(by=['Teacher Name']).to_dict('records')
+    # --- Sheet 1: one label per teacher ---
+    teacher_labels_to_make = (
+        master_schedule_df.drop_duplicates(subset=["Teacher Name"])
+        .sort_values(by=["Teacher Name"])
+        .to_dict("records")
+    )
 
+    teacher_buffer = BytesIO()
+    teacher_sheet = labels.Sheet(specs, draw_teacher_label, border=True)
+    teacher_sheet.add_labels(teacher_labels_to_make)
+    teacher_sheet.save(teacher_buffer)
+    teacher_buffer.seek(0)
+
+    # --- Sheet 2: one label per class section ---
+    section_labels_to_make = (
+        master_schedule_df.drop_duplicates(
+            subset=["Teacher Name", "Course Code", "PD"]
+        )
+        .sort_values(by=["Teacher Name", "Course Code", "PD"])
+        .to_dict("records")
+    )
+
+    section_buffer = BytesIO()
+    section_sheet = labels.Sheet(specs, draw_section_label, border=True)
+    section_sheet.add_labels(section_labels_to_make)
+    section_sheet.save(section_buffer)
+    section_buffer.seek(0)
+
+    # --- Merge both sheets into a single PDF ---
     f = BytesIO()
-    sheet = labels.Sheet(specs, draw_label, border=True)
-    sheet.add_labels(labels_to_make)
-    sheet.save(f)
+    merger = PdfWriter()
+    merger.append(teacher_buffer)
+    merger.append(section_buffer)
+    merger.write(f)
+    merger.close()
 
     f.seek(0)
     return f
 
 
-def draw_label(label, width, height, obj):
+def draw_teacher_label(label, width, height, obj):
     if obj:
-        TeacherName = obj['Teacher Name']
-        Room = obj['Room']
+        TeacherName = obj["Teacher Name"]
+        Room = obj["Room"]
         label.add(
             shapes.String(5, 46, f"{TeacherName}", fontName="Helvetica", fontSize=16)
         )
         label.add(
             shapes.String(5, 10, f"{Room}", fontName="Helvetica", fontSize=18)
+        )
+
+
+def draw_section_label(label, width, height, obj):
+    if obj:
+        TeacherName = obj["Teacher Name"]
+        CourseName = obj["Course Name"]
+        CourseCode = obj["Course Code"]
+        CourseSection = obj["Section"]
+        PD = obj["PD"]
+        Days = obj["Days"]
+        if Days == "MTWR-":
+            Days = ""
+        else:
+            Days = f" ({Days})"
+
+        label.add(
+            shapes.String(5, 46, f"{TeacherName}", fontName="Helvetica", fontSize=14)
+        )
+        label.add(
+            shapes.String(5, 28, f"{CourseName}{Days}", fontName="Helvetica", fontSize=12)
+        )
+        label.add(
+            shapes.String(
+                5,
+                10,
+                f"{CourseCode}/{CourseSection} (P{PD})",
+                fontName="Helvetica",
+                fontSize=12,
+            )
         )
