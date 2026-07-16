@@ -310,6 +310,8 @@ def return_full_exam_title(ExamTitle):
         "LE": "Living Environment",
         "ES": "Earth Science",
         "Chem": "Chemistry",
+        "Chem (old)": "Chemistry",
+        "Chem (new)": "Chemistry",
         "Phys": "Physics",
         "ESS": "Earth and Space Science",
         "Bio": "Biology",

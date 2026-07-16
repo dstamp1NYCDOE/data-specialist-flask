@@ -114,8 +114,11 @@ def main():
         df = cr_1_01_df[cr_1_01_df["Teacher1"] == teacher_name]
         df = df[teacher_cols]
         df = df.sort_values(by=["Period", "Cycle", "LastName", "FirstName"])
-
-        sh = gc.open_by_url(gradebook_url)
+        try:
+            sh = gc.open_by_url(gradebook_url)
+        except:
+            print(f"Error occurred while opening Google Sheet: {teacher_name}")
+            continue
         try:
             wks = sh.worksheet_by_title("AugustRegentsRegistrations")
         except:

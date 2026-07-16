@@ -83,15 +83,17 @@ def main(form, request):
 def replace_exam_code_with_title(exam_code):
     exam_code_dict = {
         'EXRC':'ELA',
+        'EXRD':'ELA',
         'HXRC':'Global',
         'HXRK':'USH',
         'MXRF':'Alg1',
         'MXRJ':'Geo',
-        'MXRN':'Alg2',
+        'MXRV':'Alg2',
         'SXRK':'LE',
         'SXR3':'Bio',
         'SXR2':'ESS',
         'SXRU':'ES',
-        'SXRX':'Chem'
+        'SXRX':'Chem (old)',
+        'SXR4':'Chem (new)'
     }
     return exam_code_dict.get(exam_code, exam_code)

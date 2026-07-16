@@ -43,15 +43,14 @@ def main(form, request):
     walkins_df["Section"] = 1
 
     exams = [
-        ("ELA", "EXRCG"),
+        ("ELA", "EXRDG"),
         ("Alg1", "MXRFG"),
         ("Global", "HXRCG"),
-        ("Alg2", "MXRNG"),
+        ("Alg2", "MXRVG"),
         ("USH", "HXRKG"),
-        ("ES", "SXRUG"),
-        ("Chem", "SXRXG"),
+        ("Chem (old)", "SXRXG"),
+        ("Chem (new)", "SXR4G"),
         ("Geo", "MXRJG"),
-        ("LE", "SXRKG"),
         ("Bio", "SXR3G"),
         ("ESS", "SXR2G"),
     ]
@@ -522,7 +521,7 @@ def return_student_accommodations(request, form):
     df = df.drop_duplicates(subset=["StudentID"])
 
     ## what has exams registered for
-    exam_cols = ["Alg1", "ELA", "Alg2", "Global", "Chem", "ES", "USH", "Geo", "LE"]
+    exam_cols = ["Alg1", "ELA", "Alg2", "Global", "Chem (old)", "Chem (new)", "ESS", "USH", "Geo", "Bio"]
 
     df = df[df[exam_cols].any(axis=1)]
 

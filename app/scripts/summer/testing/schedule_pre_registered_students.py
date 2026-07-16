@@ -45,15 +45,14 @@ def main(form, request):
     walkins_df["Section"] = 1
 
     exams = [
-        ("ELA", "EXRCG"),
+        ("ELA", "EXRDG"),
         ("Alg1", "MXRFG"),
         ("Global", "HXRCG"),
-        ("Alg2", "MXRNG"),
+        ("Alg2", "MXRVG"),
         ("USH", "HXRKG"),
-        ("ES", "SXRUG"),
-        ("Chem", "SXRXG"),
+        ("Chem (old)", "SXRXG"),
+        ("Chem (new)", "SXR4G"),
         ("Geo", "MXRJG"),
-        ("LE", "SXRKG"),
         ("Bio", "SXR3G"),
         ("ESS", "SXR2G"),
     ]

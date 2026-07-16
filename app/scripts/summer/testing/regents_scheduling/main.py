@@ -338,9 +338,9 @@ def set_final_section(student_row):
             return section
     if section == 2:
         extra_space = 10
-        if exam_code in ["EXRCG", "HXRKG"]:
+        if exam_code in ["EXRDG", "HXRKG"]:
             extra_space = 15
-        if exam_code in ["EXRCG"]:
+        if exam_code in ["EXRDG"]:
             extra_space = 25            
         if exam_code in ["HXRCG"]:
             extra_space = 10
