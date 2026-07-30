@@ -9,6 +9,8 @@ from app.scripts import scripts, files_df
 
 from flask import current_app, session
 
+import app.scripts.summer.testing.regents_scheduling.return_exambook as return_exambook
+
 def main(form, request):
     school_year = session["school_year"]
     term = session["term"]
@@ -263,6 +265,7 @@ def main(form, request):
         "Action",
     ]
 
+    exambook_df, room_check_df = return_exambook.main(students_df)
 
     ## flag students with more than >2 exams on one day or 2+ exams in PM
     overenrolled_df = students_df[
@@ -299,6 +302,8 @@ def main(form, request):
     f = BytesIO()
     writer = pd.ExcelWriter(f)
 
+    exambook_df.to_excel(writer, sheet_name="ExamBook", index=False)
+    room_check_df.to_excel(writer, sheet_name="RoomCheck")
     students_df[students_df["FinalSection"] == 1].to_excel(
         writer, sheet_name="Check", index=False
     )
