@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h4>Missing report: {{ report }} ({{ year_and_semester }})</h4>
+  <p>This report hasn't been uploaded for this semester yet. Upload it below to continue.</p>
+  <form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    {% for field in form if field.name not in ('csrf_token', 'submit') %}
+    <div class="form-group">
+      {{ field.label }}
+      {{ field(class_="form-control", size=32) }}
+    </div>
+    {% endfor %}
+    <div class="col-12">
+      {{ form.submit(class_="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+{% endblock %}

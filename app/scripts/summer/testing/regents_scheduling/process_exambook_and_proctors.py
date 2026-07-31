@@ -82,7 +82,8 @@ def main():
                 }
                 PROCTOR_LST.append(proctor_dict)
 
-    proctor_df = pd.DataFrame(PROCTOR_LST)
+    PROCTOR_COLUMNS = ["Day", "ProctorAssignment", "Room", "proctor_type", "HoursOfAssignment"]
+    proctor_df = pd.DataFrame(PROCTOR_LST, columns=PROCTOR_COLUMNS)
 
     print(proctor_df)
     print(exam_book_df)

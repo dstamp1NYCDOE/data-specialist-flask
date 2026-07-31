@@ -88,6 +88,37 @@ def return_dataframe_of_files():
     return files_df
 
 
+class MissingResourceError(Exception):
+    """Base class for 'a required resource isn't available yet' errors.
+
+    Deliberately NOT a subclass of the builtin LookupError/KeyError, so that
+    genuine programming bugs (e.g. a real KeyError from a bad column name)
+    still surface as a normal 500 instead of being masked by a friendly flash.
+    """
+
+
+class MissingReportError(MissingResourceError):
+    """Raised when a script needs a report/file that hasn't been uploaded yet."""
+
+    def __init__(self, report, year_and_semester=None):
+        self.report = report
+        self.year_and_semester = year_and_semester
+        if year_and_semester:
+            message = f"No '{report}' report has been uploaded for {year_and_semester}."
+        else:
+            message = f"No '{report}' report has been uploaded yet."
+        super().__init__(message)
+
+
+def report_exists(report, year_and_semester):
+    files_df = return_dataframe_of_files()
+    matches = files_df[
+        (files_df["report"] == report)
+        & (files_df["year_and_semester"] == year_and_semester)
+    ]
+    return not matches.empty
+
+
 def return_most_recent_report_per_semester(files_df, report):
     files_df = return_dataframe_of_files()
     files_df = files_df[files_df["report"] == report]
@@ -100,6 +131,8 @@ def return_most_recent_report(files_df, report):
     files_df = return_dataframe_of_files()
     files_df = files_df[files_df["report"] == report]
     files_df = files_df.sort_values(by=["download_date"])
+    if files_df.empty:
+        raise MissingReportError(report)
     filename = files_df.iloc[-1, :]["filename"]
     return filename
 
@@ -109,6 +142,8 @@ def return_most_recent_report_by_semester(files_df, report, year_and_semester):
     files_df = files_df[files_df["year_and_semester"] == year_and_semester]
     files_df = files_df[files_df["report"] == report]
     files_df = files_df.sort_values(by=["download_date"])
+    if files_df.empty:
+        raise MissingReportError(report, year_and_semester)
     filename = files_df.iloc[-1, :]["filename"]
     return filename
 
@@ -116,6 +151,10 @@ def return_most_recent_report_by_semester(files_df, report, year_and_semester):
 def return_gsheet_url_by_title(gsheet_df, title, year_and_semester=None):
     gsheet_df = gsheet_df[gsheet_df["year_and_semester"] == year_and_semester]
     gsheet_df = gsheet_df[gsheet_df["gsheet_category"] == title]
+    if gsheet_df.empty:
+        raise MissingResourceError(
+            f"No Google Sheet URL configured for '{title}' in {year_and_semester}."
+        )
     gsheet_url = gsheet_df.iloc[-1, :]["gsheet_url"]
     return gsheet_url
 
