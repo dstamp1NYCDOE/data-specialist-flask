@@ -39,6 +39,7 @@ def return_index():
         "Classwork": "scripts.return_classwork_reports",
         "Assignments": "scripts.return_jupiter_assignments_analysis_reports",
         "Progress Towards Graduation": "scripts.return_progress_towards_graduation_reports",
+        "CTE Endorsement Progress": "scripts.return_progress_towards_cte_endorsement_reports",
         "Official Class": "scripts.return_officialclass_reports",
         "Summer School": "scripts.return_summer_school_routes",
         "Graduation Certification": "graduation.return_graduation_routes",

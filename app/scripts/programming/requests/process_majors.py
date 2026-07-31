@@ -1,41 +1,11 @@
 import pandas as pd
 import numpy as np
 
+import app.scripts.cte_data as cte_data
+
 
 def main(programs_df):
-    cte_courses_dict = {
-        "ACS11TD": "A&D",
-        "AES11TE": "A&D",
-        "ANS11": "A&D",
-        "AGS11": "A&D",
-        "ALS22": "A&D",
-        "APS11T": "A&D",
-        "AUS11TA": "A&D",
-        "AFS62TF": "FD",
-        "AFS64TD": "FD",
-        "AFS64TDA": "FD",
-        "AFS64TDB": "FD",
-        "AFS64TDC": "FD",
-        "AFS66QC": "FD",
-        "AFS66QCH": "FD",
-        "AUS11": "FD",
-        "AWS11": "FD",
-        "AYS11": "FMM",
-        "ABS11": "FMM",
-        "BKS11TE": "FMM",
-        "BNS22QV": "FMM",
-        "BQS11QQI": "FMM",
-        "BRS11TF": "FMM",
-        "BQS11T": "FMM",
-        "ACS21TD": "Photo",
-        "ACS22TD": "Photo",
-        "ALS22QP": "Photo",
-        "BMS62TD": "VP",
-        "BMS64TP": "VP",
-        "BMS66QW": "VP",
-        "SKS22X": "WD",
-        "TQS22TQW": "WD",
-    }
+    cte_courses_dict = cte_data.CTE_COURSE_TO_MAJOR
 
     programs_df = programs_df[programs_df["Course"].isin(cte_courses_dict.keys())]
 

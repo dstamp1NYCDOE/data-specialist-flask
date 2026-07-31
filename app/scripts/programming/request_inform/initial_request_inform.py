@@ -1,6 +1,7 @@
 from io import BytesIO
 
 import app.scripts.utils as utils
+import app.scripts.cte_data as cte_data
 from app.scripts import files_df
 
 from flask import session
@@ -218,29 +219,7 @@ def return_year_in_hs(gec):
     return utils.return_year_in_hs(gec, school_year) + 1
 
 def return_CTE_major(list_of_courses):
-
-    for fd_course in ['AFS61TF', 'AFS63TD', 'AFS63TDB', 'AFS63TDC',"AFS63TDA", 'AFS65TC', 'AFS65TCH','AFS65TCT']:
-        if fd_course in list_of_courses:
-            return 'Fashion Design'
-    
-    for vp_course in ['BMS61TV', 'BMS63TT', 'BMS65TW']:
-        if vp_course in list_of_courses:
-            return 'Visual Presentation'
-
-    for fmm_course in ['BQS11T','TUS21TA', 'BRS11TF', 'BNS21TV']:
-        if fmm_course in list_of_courses:
-            return 'Fashion Marketing & Management'
-
-    for wd_course in ['SKS21X', 'TQS21TQW', 'TQS21TQS']:
-        if wd_course in list_of_courses:
-            return 'Software Development'
-
-    for photo_course in ['ACS21T', 'ACS21TD', 'ACS22T', 'ALS21TP']:
-        if photo_course in list_of_courses:
-            return 'Photography'
-
-    for a_and_d_course in ['AUS11TA', 'APS11T', 'ACS11TD', 'AES11TE', 'ALS21T']:
-        if a_and_d_course in list_of_courses:
-            return 'Art and Design'      
+    major = cte_data.major_for_courses(list_of_courses)
+    return cte_data.CTE_MAJOR_DISPLAY_NAMES.get(major)
 
 

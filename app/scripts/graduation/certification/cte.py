@@ -1,6 +1,7 @@
 import pandas as pd  #
 
 import app.scripts.utils as utils
+import app.scripts.cte_data as cte_data
 from app.scripts import scripts, files_df
 
 from flask import current_app, session
@@ -12,7 +13,7 @@ def main():
 
     filename = utils.return_most_recent_report(files_df, "1_14")
     cr_1_14_df = utils.return_file_as_df(filename)
-    cr_1_14_df["is_CTE?"] = cr_1_14_df["Course"].apply(return_if_CTE)
+    cr_1_14_df["is_CTE?"] = cr_1_14_df["Course"].apply(cte_data.is_cte_course)
 
     cr_1_30_filename = utils.return_most_recent_report(files_df, "1_30")
     cr_1_30_df = utils.return_file_as_df(cr_1_30_filename)
@@ -42,7 +43,7 @@ def main():
     WBL_df.columns = ["StudentID", "WBLHR"]
 
     CTE_majors_df = fall_courses_df[fall_courses_df["is_CTE?"]]
-    CTE_majors_df["Major"] = CTE_majors_df["Course"].apply(return_CTE_major)
+    CTE_majors_df["Major"] = CTE_majors_df["Course"].apply(cte_data.CTE_COURSE_TO_MAJOR.get)
     CTE_majors_df = CTE_majors_df[["StudentID", "LastName", "FirstName", "Major"]]
 
     CTE_majors_df = CTE_majors_df.merge(WBL_df, on="StudentID", how="left").fillna(
@@ -84,32 +85,3 @@ def main():
     art_credits_pvt["Arts Endorsed?"] = art_credits_pvt["Credits"] >= 10
 
     return CTE_majors_df
-
-
-def return_CTE_major(course):
-    curriculum = course[0:2]
-    if curriculum == "AF":
-        return "FD"
-    if course == "ALS21T":
-        return "AD"
-    if course == "ALS21TP":
-        return "Photo"
-    if curriculum == "BN":
-        return "FMM"
-    if curriculum == "BN":
-        return "FMM"
-    if curriculum == "BM":
-        return "VP"
-    if curriculum == "TQ":
-        return "SD"
-
-
-def return_if_CTE(course):
-    if len(course) <= 5:
-        return False
-    if course in ["SKS21X", "SKS22X"]:
-        return True
-    elif course[5] == "T":
-        return True
-    else:
-        return False

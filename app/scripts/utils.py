@@ -158,13 +158,6 @@ def return_hs_graduation_month(GEC):
     return f"June {return_hs_graduation_year(GEC)}"
 
 
-def return_CTE_major_by_course(course):
-    major = ""
-    if course[0:2] == "AF":
-        return "FD"
-    return major
-
-
 def return_pd(period):
     mo = period_regex.search(period)
     return int(mo.group())

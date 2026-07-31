@@ -1,0 +1,51 @@
+{% macro render_progress_towards_cte_endorsement_form(report) -%}
+    {% if report.report_form.meta.type == 'marking_period_dropdown' %}
+        {{render_form_with_marking_period_dropdown(report)}}
+    {% else %}
+        {{render_placeholder_form(report)}}
+    {% endif %}
+
+{%- endmacro %}
+
+
+{% macro render_form_with_marking_period_dropdown(report) -%}
+    <form method="POST" action="{{url_for('scripts.return_progress_towards_cte_endorsement_report', report_function=report.report_function)}}">
+        {{ report.report_form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ report.report_form.marking_period.label }}
+            {{ report.report_form.marking_period(class_="form-select ") }}
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{%- endmacro %}
+
+{% macro render_placeholder_form(report) -%}
+    <form method="POST" enctype="multipart/form-data" action="{{url_for('scripts.return_progress_towards_cte_endorsement_report', report_function=report.report_function)}}">
+        {{ report.report_form.hidden_tag() }}
+
+        <div class="form-group mb-2">
+            {{ report.report_form.cr_1_14.label(class_="form-label") }}
+            {{ report.report_form.cr_1_14(class_="form-control") }}
+        </div>
+        <div class="form-group mb-2">
+            {{ report.report_form.cr_1_30.label(class_="form-label") }}
+            {{ report.report_form.cr_1_30(class_="form-control") }}
+        </div>
+        <div class="form-group mb-2">
+            {{ report.report_form.cr_3_07.label(class_="form-label") }}
+            {{ report.report_form.cr_3_07(class_="form-control") }}
+        </div>
+        <div class="form-group mb-2">
+            {{ report.report_form.cr_1_49.label(class_="form-label") }}
+            {{ report.report_form.cr_1_49(class_="form-control") }}
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+{%- endmacro %}

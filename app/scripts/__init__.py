@@ -56,6 +56,7 @@ from app.scripts.programming.spring_scheduling import routes
 from app.scripts.programming.ICT_sections import routes
 from app.scripts.programming.jupiter import routes
 from app.scripts.programming.post_summer import routes
+from app.scripts.progress_towards_cte_endorsement import routes
 from app.scripts.progress_towards_graduation import routes
 from app.scripts.scholarship import routes
 from app.scripts.scholarship.reportcards import routes
