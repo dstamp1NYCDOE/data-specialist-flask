@@ -178,19 +178,6 @@ def return_max_section_time(section_type):
     return default_time
 
 
-def return_hub_location(section_row):
-    Room = section_row["Room"]
-    Time = section_row["Time"]
-    exam_num = section_row["exam_num"]
-    Section = section_row["Section"]
-
-    if Room == 329:
-        return 329
-    if Room > 800:
-        return {1: 919, 2: 823}.get(exam_num, 823)
-    return {1: 727, 2: 519}.get(exam_num, 519)
-
-
 def return_if_am_room(time_lst):
     if "AM" in time_lst:
         return True

@@ -6,19 +6,6 @@ import pandas as pd
 import os
 from io import BytesIO
 
-def return_hub_location(section_row):
-    Room = int(section_row["Room"])
-    Time = section_row["Time"]
-    exam_num = section_row["exam_num"]
-    Section = section_row["Section"]
-
-    if Room == 329:
-        return 329
-    if Room > 800:
-        return {1: 919, 2: 823}.get(exam_num, 823)
-    return {1: 727, 2: 519}.get(exam_num, 519)
-
-
 def return_processed_registrations():
     school_year = session["school_year"]
     term = session["term"]
@@ -56,7 +43,7 @@ def return_processed_registrations():
     cr_1_08_df["Day"] = cr_1_08_df["Day"].dt.strftime("%m/%d")
     
     cr_1_08_df["Exam Title"] = cr_1_08_df["ExamTitle"].apply(return_full_exam_title)
-    cr_1_08_df['hub_location'] = cr_1_08_df.apply(return_hub_location, axis=1)
+    cr_1_08_df["hub_location"] = cr_1_08_df["hub"]
     cr_1_08_df["Flag"] = "Student"
 
     ## attach home lang from 3.07

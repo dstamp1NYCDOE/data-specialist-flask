@@ -359,7 +359,7 @@ def set_final_section(student_row):
         if exam_code in ["HXRCG"]:
             extra_space = 10
 
-        if student_row["index"] < extra_space * NumberOfSections:
+        if NumberOfSections > 2 and student_row["index"] < extra_space * NumberOfSections:
             offset = (index) % (NumberOfSections - 1)
             return section + offset + 1
 
